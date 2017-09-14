@@ -1,0 +1,22 @@
+Package: echoIBM
+Title: Simulation of multibeam sonar data
+Version: 1.1
+Authors@R: c(
+  person("Arne Johannes", "Holmin", role = c("aut","cre"), email = "arnejh@imr.no"))
+Author: Arne Johannes Holmin [aut, cre],
+Maintainer: Arne Johannes Holmin <arnejh@imr.no>
+Description: This R package provides utilities for simulating multibeam sonar data (echosounder, fishery sonar, 3D-sonar). Writes simulated data in the TSD format
+Depends: R (>= 3.3.3)
+BugReports: https://github.com/arnejohannesholmin/echoIBM/issues
+License: LGPL-3
+LazyData: true
+RoxygenNote: 6.0.1
+Imports:
+		akima,
+		fBasics,
+		gdata,
+		gsl,
+		pbapply,
+		TSD,
+		SimradRaw,
+		sonR
