@@ -1,0 +1,10 @@
+########## Version 1.0 ##########
+
+Providing utilities for simulating multibeam sonar data (echosounder, fishery sonar, 3D-sonar). Writes simulated data in the TSD format
+
+
+########## Version 1.1 ##########
+
+Stable version simplifying simulation for the user is under construction. 
+
+Moved development to GitHub
