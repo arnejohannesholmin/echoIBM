@@ -11,13 +11,14 @@ Installation
 
 ``` r
 # Install the packages that echoIBM depends on. Note that this updates all the specified packages to the latest (binary) version. To skip installing already installed packages, run install.packages(setdiff(dep.pck, installed.packages()[,"Package"]), repos="http://cran.us.r-project.org") instead:
-dep.pck <- c("akima", "fBasics", "gdata", "gsl", "pbapply")
+dep.pck <- c("akima", "ccaPP", "data.table", "fBasics", "fpc", "gdata", "gsl", "pbapply", "XML")
 install.packages(dep.pck, repos="http://cran.us.r-project.org")
 
 # Install echoIBM and also the packages that echoIBM depends on which are on GitHub (by Holmin):
 # On Windows you will need Rtools to complete the installations. Check if you have this by running Sys.getenv('PATH'), and go to https://cran.r-project.org/bin/windows/Rtools/ to install Rtools if not.
 
 dep.pck.git <- c("arnejohannesholmin/TSD", "arnejohannesholmin/SimradRaw", "arnejohannesholmin/sonR", "arnejohannesholmin/echoIBM")
+# If you want to install the lastest development versions, run devtools::install_github(dep.pck.git, ref="develop") instead:
 devtools::install_github(dep.pck.git)
 
 ```
