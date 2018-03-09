@@ -59,11 +59,11 @@ echoIBM.calibrate<-function(directory=NULL, cruise="S2009116", event=1, esnm="MS
 	data$rres = soundbeam_range(data, "rres")
 	if(j-2>min(data$lenb)){
 		stop(paste("The sampling interval index 'j' chosen too large for the minimum beam length ",min(data$lenb),sep=""))
-		}
+	}
 	# Get name of the acoustical instrument:
 	if(is.null(esnm)){
 		esnm=data$esnm
-		}
+	}
 	esnm=toupper(esnm)
 	
 	# Get the number of beams:
@@ -77,43 +77,44 @@ echoIBM.calibrate<-function(directory=NULL, cruise="S2009116", event=1, esnm="MS
 		### (1) Create the directory of the calibration simulation: ###
 		#if(length(directory)>0 && !identical(directory,FALSE)){
 			calname=paste("Calibration",esnm,"Cruise",cruise,"sv",sep="_")
-		#	}
+		#}
 		#else{
 		#	calname=paste("Calibration",esnm,"Cruise",cruise,"sv_TEST",sep="_")
-		#	}
+		#}
 		
 		
-		caldir = file.path(echoIBM_datasets_directory(), "Calibration", "Events", calname, esnm, "tsd")
+		caldir = file.path(tempdir(), "Calibration", "Events", calname, esnm, "tsd")
 		#caldir = paste("~/Data/echoIBM/Calibration/Events/",calname,"/",esnm,"/tsd",sep="")
 		
-		if(isTRUE(file.info(caldir)$isdir)){
-			ans=readline(paste("The calibration case (",caldir,") alreaddy exists. Replace? (y/n)"))
-			if(!identical(ans,"y")){
-				stop("Calibration terminated")
-				}
-			else{
-				unlink(caldir, recursive = TRUE)
-				warning("The existing calibration case replaced")
-				}
-			}
-		suppressWarnings(dir.create(caldir,recursive=TRUE))	
+		### if(isTRUE(file.info(caldir)$isdir)){
+		### 	ans=readline(paste("The calibration case (",caldir,") alreaddy exists. Replace? (y/n)"))
+		### 	if(!identical(ans,"y")){
+		### 		stop("Calibration terminated")
+		### 	}
+		### 	else{
+		### 		unlink(caldir, recursive = TRUE)
+		### 		warning("The existing calibration case replaced")
+		### 	}
+		### }
+		unlink(caldir, recursive=TRUE, force=TRUE)
+		dir.create(caldir,recursive=TRUE)
 			
 		#if(is.na(file.info(caldir)$isdir)){
 		#	dir.create(caldir,recursive=TRUE)
-		#	}
+		#}
 		#else{
 		#	ans=readline(paste("The calibration case (",caldir,") alreaddy exists. Replace? (y/n)"))
 		#	if(!identical(ans,"y")){
 		#		stop("Calibration terminated")
-		#		}
+		#	}
 		#	else{
 		#		tempdir=paste("~/Data/echoIBM/Calibration/Events/",calname,"/",esnm,"/temp",sep="")
 		#		if(isTRUE(file.info(tempdir)$isdir)){
 		#			unlink(tempdir, recursive = TRUE)
-		#			}
-		#		warning("The existing calibration case replaced")
 		#		}
+		#		warning("The existing calibration case replaced")
 		#	}
+		#}
 		
 		
 		### (2) Write the beam-configuration data: ###
@@ -176,11 +177,11 @@ echoIBM.calibrate<-function(directory=NULL, cruise="S2009116", event=1, esnm="MS
 					# Write the dynamic school data to file:
 					if(i==1){
 						write.TSD(schooldynamic, schooldynamicFile, reserve=runs-1, numt=1)
-						}
+					}
 					else{
 						write.TSD(schooldynamic, schooldynamicFile, numt=1, append=TRUE)
-						}
 					}
+				}
 				
 				### (6) Run the simulation: ###
 				echoIBM(caldir, adds=thisdire, t="all", TVG.exp=2, calibrate=FALSE, noise="", max.memory=max.memory, max.radius=max.radius, method=method, esnm=esnm, parlist=list(seed=seed), keep.temp=FALSE)
@@ -191,12 +192,12 @@ echoIBM.calibrate<-function(directory=NULL, cruise="S2009116", event=1, esnm="MS
 				for(i in seq_len(runs)){
 					thissv=read.event(event=caldir,t=i,var="vbsc")$vbsc
 					sv=sv+thissv
-					}	
+				}	
 						
 				
 				### (8) Store the calibration factors of the current tilt: ###
 				cali[,k]=truesv/sv[j,]*runs
-				}
+			}
 			
 			### (9) Write and return the calibration data: ###
 			# Apply the mean of all beams if usemean==TRUE (omnidirectional sonars such as Simrad SX90):
@@ -207,15 +208,15 @@ echoIBM.calibrate<-function(directory=NULL, cruise="S2009116", event=1, esnm="MS
 			else{
 				#out=c(list(cali=cali, grde=dire, ctim=unclass(Sys.time())), data[setdiff(names(data),c("dire","ftim","mtim","utim"))])
 				out=c(list(cali=cali, grde=dire, ctim=unclass(Sys.time())))
-				}
+			}
 			# Write the calibration data:
 			if(length(directory)>0 && !identical(directory,FALSE)){
 				con = file.path(directory, paste("CalibrationTable_", toupper(esnm), "_Cruise_", cruise, if(nchar(nameadd)>0) "_", nameadd, "_sv.beams", sep=""))
 				write.TSD(out, con=con, numt=1)
-				}
+			}
 			# Return the calibration data:
 			c(out, list(truesv=truesv, caldir=caldir))
-			}
+		}
 		else{
 			### (5) Generate the target positions and write the school file: ###
 			region=get.specs.esnm(data, esnm=esnm, add=add)$region
@@ -250,11 +251,11 @@ echoIBM.calibrate<-function(directory=NULL, cruise="S2009116", event=1, esnm="MS
 				# Write the dynamic school data to file:
 				if(i==1){
 					write.TSD(schooldynamic, schooldynamicFile, reserve=runs-1, numt=1)
-					}
+				}
 				else{
 					write.TSD(schooldynamic, schooldynamicFile, numt=1, append=TRUE)
-					}
 				}
+			}
 			
 			### (6) Run the simulation: ###
 			echoIBM(caldir, t="all", TVG.exp=2, calibrate=FALSE, noise="", max.memory=max.memory, max.radius=max.radius, method=method, esnm=esnm, parlist=list(seed=seed), keep.temp=FALSE)
@@ -265,7 +266,7 @@ echoIBM.calibrate<-function(directory=NULL, cruise="S2009116", event=1, esnm="MS
 			for(i in seq_len(runs)){
 				thissv=read.event(event=caldir,t=i,var="vbsc")$vbsc
 				sv=sv+thissv
-				}	
+			}	
 					
 			
 			### (8) Write the calibration data if required: ###
@@ -276,20 +277,20 @@ echoIBM.calibrate<-function(directory=NULL, cruise="S2009116", event=1, esnm="MS
 			if(usemean){
 				#out=c(list(cali=rep(mean(calfact),length(calfact)), cal0=calfact, ctim=unclass(Sys.time())), data[setdiff(names(data),c("ftim","mtim","utim"))])
 				out=c(list(cali=rep(mean(calfact),length(calfact)), cal0=calfact, ctim=unclass(Sys.time())))
-				}
+			}
 			else{
 				#out=c(list(cali=calfact, ctim=unclass(Sys.time())), data[setdiff(names(data),c("ftim","mtim","utim"))])
 				out=c(list(cali=calfact, ctim=unclass(Sys.time())))
-				}
+			}
 			# Write the calibration data:
 			if(length(directory)>0 && !identical(directory,FALSE)){
 				con=file.path(directory,paste("CalibrationTable_",toupper(esnm),"_Cruise_",cruise,if(nchar(nameadd)>0) "_",nameadd,"_sv.beams",sep=""))
 				write.TSD(out, con=con, numt=1)
-				}
+			}
 			# Return the calibration data:
 			c(out, list(truesv=truesv, caldir=caldir))
-			}
 		}
+	}
 		
 	# The calibration procedure for target strength 'TS' is as follows: Place one target on the acoustic axis of each beam, and simulate the TS using type="ts" in echoIBM(). This includes 40*log*r for the TVG function instead of 20*log*r as for the sv. Compare the simulated 'sigma_bs' to the true 'sigma_bs' by defining calibration factors equal to true 'sigma_bs' / colSums(simulated 'sigma_bs').
 	else if(strff("t",type[1])){
@@ -297,28 +298,28 @@ echoIBM.calibrate<-function(directory=NULL, cruise="S2009116", event=1, esnm="MS
 		### (1) Create the directory of the calibration simulation: ###
 		if(length(directory)>0 && !identical(directory,FALSE)){
 			calname=paste("Calibration",esnm,"Cruise",cruise,"sigma_bs",sep="_")
-			}
+		}
 		else{
 			calname=paste("Calibration",esnm,"Cruise",cruise,"sigma_bs_TEST",sep="_")
-			}
+		}
 		
 		caldir=paste("~/Data/echoIBM/Calibration/Events/",calname,"/",esnm,"/tsd",sep="")
 		if(is.na(file.info(caldir)$isdir)){
 			dir.create(caldir,recursive=TRUE)
-			}
+		}
 		else{
 			ans=readline("The calibration case alreaddy exists. Replace? (y/n)")
 			if(!identical(ans,"y")){
 				stop("Calibration terminated")
-				}
+			}
 			else{
 				tempdir=paste("~/Data/echoIBM/Calibration/Events/",calname,"/",esnm,"/temp",sep="")
 				if(isTRUE(file.info(tempdir)$isdir)){
 					unlink(tempdir, recursive = TRUE)
-					}
-				warning("The existing calibration case replaced")
 				}
+				warning("The existing calibration case replaced")
 			}
+		}
 		
 		
 		### (2) Write the beam-configuration data: ###
@@ -367,31 +368,31 @@ echoIBM.calibrate<-function(directory=NULL, cruise="S2009116", event=1, esnm="MS
 				for(i in seq_len(Ni)){
 					thissv=read.event(event=caldir,t=i,var="vbsc")$vbsc
 					thiscali[i] = sum(thissv[,i])
-					}	
+				}	
 						
 				
 				### (8) Store the calibration factors of the current tilt: ###
 				cali[,k]=sgbs/thiscali
-				}
+			}
 			
 			### (9) Write and return the calibration data: ###
 			# Apply the mean of all beams if usemean==TRUE (omnidirectional sonars such as Simrad SX90):
 			if(usemean){
 				#out=c(list(cali=apply(cali,2,function(xx) rep(mean(xx),length(xx))), cal0=cali, grde=dire, ctim=unclass(Sys.time())), data[setdiff(names(data),c("dire","ftim","mtim","utim"))])
 				out=c(list(cali=apply(cali,2,function(xx) rep(mean(xx),length(xx))), cal0=cali, grde=dire, ctim=unclass(Sys.time())))
-				}
+			}
 			else{
 				#out=c(list(cali=cali, grde=dire, ctim=unclass(Sys.time())), data[setdiff(names(data),c("dire","ftim","mtim","utim"))])
 				out=c(list(cali=cali, grde=dire, ctim=unclass(Sys.time())))
-				}
+			}
 			# Write the calibration data:
 			if(length(directory)>0 && !identical(directory,FALSE)){
 				con=file.path(directory,paste("CalibrationTable_",toupper(esnm),"_Cruise_",cruise,if(nchar(nameadd)>0) "_",nameadd,"_sigma_bs.beams",sep=""))
 				write.TSD(out, con=con, numt=1)
-				}
+			}
 			# Return the calibration data:
 			c(out, list(truesv=truesv, caldir=caldir))
-			}
+		}
 		else{
 			### (5) Generate the target positions and write the school file: ###
 			rthph=cbind((j-1)*data$rres, data$dira, data$dire)
@@ -411,7 +412,7 @@ echoIBM.calibrate<-function(directory=NULL, cruise="S2009116", event=1, esnm="MS
 			for(i in seq_len(Ni)){
 				thissv=read.event(event=caldir,t=i,var="vbsc")$vbsc
 				cali[i] = sum(thissv[,i])
-				}	
+			}	
 			
 			
 			### (8) Write the calibration data if required: ###
@@ -421,26 +422,26 @@ echoIBM.calibrate<-function(directory=NULL, cruise="S2009116", event=1, esnm="MS
 			if(usemean){
 				#out=c(list(cali=rep(mean(calfact),length(calfact)), cal0=calfact, ctim=unclass(Sys.time())), data[setdiff(names(data),c("ftim","mtim","utim"))])
 				out=c(list(cali=rep(mean(calfact),length(calfact)), cal0=calfact, ctim=unclass(Sys.time())))
-				}
+			}
 			else{
 				#out=c(list(cali=calfact, ctim=unclass(Sys.time())), data[setdiff(names(data),c("ftim","mtim","utim"))])
 				#out=c(list(cali=calfact, ctim=unclass(Sys.time())), data[setdiff(names(data),c("ftim","mtim","utim"))])
 				out=c(list(cali=calfact, ctim=unclass(Sys.time())))
-				}
+			}
 			# Write the calibration data:
 			if(length(directory)>0 && !identical(directory,FALSE)){
 				con=file.path(directory,paste("CalibrationTable_",toupper(esnm),"_Cruise_",cruise,if(nchar(nameadd)>0) "_",nameadd,"_sigma_bs.beams",sep=""))
 				write.TSD(out, con=con, numt=1)
-				}
+			}
 			# Return the calibration data:
 			c(out, list(truesv=truesv, caldir=caldir))
-			}
 		}
+	}
 	
 	# Else return an error if the calibration type is not recognized:
 	else{
 		stop("Invalid calibration type (must be one of \"sv\" or \"ts\")")
-		}
-	##################################################
-	##################################################
 	}
+	##################################################
+	##################################################
+}

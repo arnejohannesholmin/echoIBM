@@ -54,99 +54,99 @@ ARschool_manipulate<-function(con, t="all", t_offset=0, par=list(t0=ftim2utim(20
 	##################################################
 	##################################################
 	##### Preparation #####
-	nimpulses=length(par$t0)
+	nimpulses <- length(par$t0)
 	# Function for calculating the radius measure of ellipsoids, meaning the fractional distance out to the periphery in any direction:
-	r_ellipse=function(x,y,z, rx,ry,rz, maxr){
-		xsph=car2sph(x,y,z)
-		a1 = (xsph[,1]^2*cos(xsph[,2])^2*sin(xsph[,3])^2/rx^2)
-		a2 = (xsph[,1]^2*sin(xsph[,2])^2*sin(xsph[,3])^2/ry^2)
-		a3 = (xsph[,1]^2*cos(xsph[,3])^2/rz^2)
+	r_ellipse <- function(x, y, z, rx, ry, rz, maxr){
+		xsph <- car2sph(x,y,z)
+		a1  <-  (xsph[,1]^2*cos(xsph[,2])^2*sin(xsph[,3])^2/rx^2)
+		a2  <-  (xsph[,1]^2*sin(xsph[,2])^2*sin(xsph[,3])^2/ry^2)
+		a3  <-  (xsph[,1]^2*cos(xsph[,3])^2/rz^2)
 		(a1+a2+a3) * maxr
 		}
 	# The mixing factor between the old and the new rotation angle
-	mix=function(data,par,t_offset){
+	mix <- function(data, par, t_offset){
 		if(data$utim>=par$t0 && data$utim<=par$tmax){
 			# Time diference:
-			t=data$utim-par$t0+t_offset
+			t <- data$utim - par$t0 + t_offset
 			# Get the longest axis of the ellipsoid:
-			maxr=max(par$Rx,par$Ry,par$Rz)
-			maxrfromt=max(par$vx*t,par$vy*t,par$vz*t)
+			maxr <- max(par$Rx, par$Ry, par$Rz)
+			maxrfromt <- max(par$vx*t, par$vy*t, par$vz*t)
 			# Get the intensity of the wave and the information at the point of origin of the wave, where intensity of the wave is static in time and only depending on the distance to the point of origin, and the information travels with constant speed outwards:
-			p0r = 1/2 + maxr/par$edger
-			p0t = 1/2 + maxrfromt/par$edget
+			p0r  <-  1/2 + maxr/par$edger
+			p0t  <-  1/2 + maxrfromt/par$edget
 			
 			# Get the current ellipsoid-radius of the fish positions in the range of the wave and in the current propagation of the wave:
-			r=r_ellipse(data$psxf-par$x0,data$psyf-par$y0,data$pszf-par$z0, par$Rx,par$Ry,par$Rz, maxr)
+			r <- r_ellipse(data$psxf-par$x0, data$psyf-par$y0, data$pszf-par$z0, par$Rx, par$Ry, par$Rz, maxr)
 			if(maxrfromt>0){
-				rfromt=r_ellipse(data$psxf-par$x0,data$psyf-par$y0,data$pszf-par$z0, par$vx*t,par$vy*t,par$vz*t, maxrfromt)
+				rfromt <- r_ellipse(data$psxf-par$x0, data$psyf-par$y0, data$pszf-par$z0, par$vx*t, par$vy*t, par$vz*t, maxrfromt)
 				}
 			else{
-				rfromt=rep(Inf,length(r))
+				rfromt <- rep(Inf,length(r))
 				}
 			# Calculate the mixing of the previous and new direction:
-			pr = p0r - r/par$edger
-			pr[pr>1]=1
-			pr[pr<0]=0
-			pt = p0t - rfromt/par$edget
-			pt[pt>1]=1
-			pt[pt<0]=0
-			p = pr*pt
-			list(p=p,r=r,rfromt=rfromt,pr=pr,pt=pt)
+			pr  <-  p0r - r/par$edger
+			pr[pr>1] <- 1
+			pr[pr<0] <- 0
+			pt  <-  p0t - rfromt/par$edget
+			pt[pt>1] <- 1
+			pt[pt<0] <- 0
+			p  <-  pr*pt
+			list(p=p, r=r, rfromt=rfromt, pr=pr, pt=pt)
 			}
 		else{
 			return(NULL)
 			}
 		
 		}
-	maxlengthpar=max(sapply(par,length))
+	maxlengthpar <- max(sapply(par, length))
 	# Repeat to the max length:
-	par=lapply(par,rep,length.out=maxlengthpar)
+	par <- lapply(par, rep, length.out=maxlengthpar)
 	
 	
 	##### Execution and output #####
-	utim=read.TSD(con,t=t,var="utim")$utim
+	utim <- read.TSD(con, t=t, var="utim")$utim
 	# Move through the time steps and manipulate the school:
-	newcon=file.path(dirname(con),sub(".","_mod.",basename(con),fixed=TRUE))
+	newcon <- file.path(dirname(con), sub(".", "_mod.", basename(con), fixed=TRUE))
 	
 	# Define parameters used when plotting the time bar for the generation of bottom points:
-	infostring="Processing, inducing orientation responses on the school:"
+	infostring <- "Processing, inducing orientation responses on the school:"
 	cat(infostring,"\n",sep="")
-	totalsteps=length(utim)
-	stepfact=nchar(infostring)/totalsteps
-	oldvalue=0
+	totalsteps <- length(utim)
+	stepfact <- nchar(infostring)/totalsteps
+	oldvalue <- 0
 	for(i in seq_along(utim)){
 		# Print a dot if the floor of the new value exceeds the old value in:
-		thisvalue=floor(i*stepfact)
+		thisvalue <- floor(i*stepfact)
 		if(thisvalue > oldvalue){
-			cat(rep(".",thisvalue-oldvalue),if(i==totalsteps) "\n", sep="")
-			oldvalue=thisvalue
+			cat(rep(".", thisvalue-oldvalue), if(i==totalsteps) "\n", sep="")
+			oldvalue <- thisvalue
 			}
 		# Read the data:
-		towrite=read.TSD(con,t=i)
-		velxyz=cbind(towrite$vlxf,towrite$vlyf,towrite$vlzf)
+		towrite <- read.TSD(con, t=i)
+		velxyz <- cbind(towrite$vlxf, towrite$vlyf, towrite$vlzf)
 		
 		# Get the mixing values:
-		thisjs=NULL
+		thisjs <- NULL
 		for(j in seq_len(nimpulses)){
-			thispar=lapply(par,"[[",j)
-			m=mix(towrite,thispar)
+			thispar <- lapply(par,"[[",j)
+			m <- mix(towrite,thispar)
 			if(length(m)>0){
-				thisjs=c(thisjs,j)
+				thisjs <- c(thisjs,j)
 				# Get the angle between the inpulse point and the fish positions:
-				angletoimpulse=car2sph(towrite$psxf-thispar$xI,towrite$psyf-thispar$yI,towrite$pszf-thispar$zI)
-				velxyz=rotate3D(velxyz,by="zx",ang=-cbind(angletoimpulse[,2]-dir[1],angletoimpulse[,3]-dir[2])*m$p,paired=TRUE)
+				angletoimpulse <- car2sph(towrite$psxf-thispar$xI, towrite$psyf-thispar$yI, towrite$pszf-thispar$zI)
+				velxyz <- rotate3D(velxyz, by="zx", ang=-cbind(angletoimpulse[,2]-dir[1],angletoimpulse[,3]-dir[2])*m$p, paired=TRUE)
 				}
 			}
-		cat(i,thisjs,"\n",sep=", ")
+		cat(i, thisjs, "\n", sep=", ")
 		# Get the velozity and angle data:
-		velxyzsph=car2sph(velxyz)
-		towrite$vlxf=velxyz[,1]
-		towrite$vlyf=velxyz[,2]
-		towrite$vlzf=velxyz[,3]
-		towrite$rtzf=velxyzsph[,2]-pi/2
-		towrite$rtxf=pi/2-velxyzsph[,3]
+		velxyzsph <- car2sph(velxyz)
+		towrite$vlxf <- velxyz[,1]
+		towrite$vlyf <- velxyz[,2]
+		towrite$vlzf <- velxyz[,3]
+		towrite$rtzf <- velxyzsph[,2]-pi/2
+		towrite$rtxf <- pi/2-velxyzsph[,3]
 		
-		write.TSD(towrite,newcon,append=i>1)
+		write.TSD(towrite, newcon, append=i>1)
 		}
 	newcon
 	##################################################

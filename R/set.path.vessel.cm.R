@@ -188,7 +188,7 @@ set.path.vessel.cm<-function(schooldirs,dynschoolfiles,recycle,t,tvessel,numt,sm
 	vessel=vessel[setdiff(names(vessel),c("lon0","lat0"))]
 	
 	rm(schoolt)
-	gc()
+	#gc()
 	
 	# Generate 'roll' ('rtxv'), pitch (rtyv) and heave (pszv) from the Gaussian distribution if rph is a matrix of two columns of length 3 representing the mean and the standard deviation:
 	if(is.list(rph)){

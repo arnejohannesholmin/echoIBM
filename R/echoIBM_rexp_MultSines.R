@@ -64,7 +64,6 @@ echoIBM_rexp_MultSines<-function(parlist=list(), data=list(), Npre=1000, shape=1
 	#	stop("The list of parameters 'parlist' must contain the following variables: \"J\", \"C\", \"wC\", \"w\", \"rate\", \"prob\", \"l\", \"seed\", \"Cind\", \"buffer\"")
 	#	}
 
-	
 	########## Execution ##########
 	if(isTRUE(parlist$pre)){
 		preGenerated_rexp_MultSines <- file.path(echoIBM_datasets_directory(), "Resources", "rexp_MultSines")

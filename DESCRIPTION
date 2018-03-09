@@ -14,6 +14,7 @@ RoxygenNote: 6.0.1
 Imports:
 		akima,
 		fBasics,
+		fields,
 		gdata,
 		gsl,
 		pbapply,

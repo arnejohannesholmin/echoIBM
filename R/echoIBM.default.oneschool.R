@@ -346,7 +346,7 @@ echoIBM.default.oneschool <- function(data, esnm="MS70", compensated=c("pitch","
 	
 	##### Transformations and rotations: #####
 	# Wave number for each beam:
-	data$wavenumber <- rep(2*pi*data$freq/data$asps,l=data$Ni)
+	data$wavenumber <- rep(2 * pi * data$freq / matrix(data$asps, nrow=NROW(data$freq), ncol=NCOL(data$freq), byrow=TRUE), l=data$Ni)
 	# Identifying beams of equal frequency:
 	data$uniquek <- unique(data$wavenumber)
 	data$luniquek <- length(data$uniquek)
@@ -401,9 +401,9 @@ echoIBM.default.oneschool <- function(data, esnm="MS70", compensated=c("pitch","
 		}
 	
 	# Write the beam pattern specific variables calculated in this function to a file for copying to other simulation cases which use identical beam configurations. The calculation of these variables is time consuming, and time is saved if this file is alreaddy present at the start of the simulation:
-	if(length(bptfile)>1){
-		write.TSD(data[c("sllf","rad1","rad2","pbp1","pbp2")], bptfile[1], dimension=TRUE)
-		}
+	if(length(bptfile)>0 && !file.exists(bptfile)){
+		write.TSD(data[c("sllf","rad1","rad2","pbp1","pbp2")], bptfile[1], numt=1)
+	}
 	
 	# Output:
 	data

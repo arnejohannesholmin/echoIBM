@@ -2,7 +2,7 @@
 #*********************************************
 #' Creates a list of default settings for noise generation methods used in echoIBM, specifically the Multiple Sines - method ("ms"), the rearrangement method of uniform independent variables resulting in correlated and autocorrelated beams, and the simple independent exponential distribution (in which case only 'ssed' is defaulted).
 #'
-#' @param noise  is a vector of character strings of length 2, specifying which types of noise to apply to the data:
+#' @param noisetypes  is a vector of character strings of length 2, specifying which types of noise to apply to the data:
 #' @param data  is a list of the required beam configuration information, including length 'lenb' of the beams, number 'numb' of beams and the frequency 'freq' of the beams, as well as the sonar/echosounder type 'esnm'.
 #' @param parlist  is a list of input parameters to the function echoIBM.add.noise(), which generates noise and randomness. See echoIBM.add.noise() for explaination of the possible variables.
 #'
@@ -17,7 +17,7 @@
 #' @export
 #' @rdname echoIBM_rexp_defaults
 #'
-echoIBM_rexp_defaults<-function(noise="ms", indt=NULL, data=list(), parlist=list()){
+echoIBM_rexp_defaults<-function(noisetypes="ms", indt=NULL, data=list(), parlist=list()){
 	
 	############ AUTHOR(S): ############
 	# Arne Johannes Holmin
@@ -33,7 +33,7 @@ echoIBM_rexp_defaults<-function(noise="ms", indt=NULL, data=list(), parlist=list
 	########## DEPENDENCIES: ###########
 	# 
 	############ VARIABLES: ############
-	# ---noise--- is a vector of character strings of length 2, specifying which types of noise to apply to the data:
+	# ---noisetypes--- is a vector of character strings of length 2, specifying which types of noise to apply to the data:
 	##		"bg" - Background noise
 	##		"pn" - Periodic noise
 	##		"hi" - High intensity noise
@@ -51,7 +51,7 @@ echoIBM_rexp_defaults<-function(noise="ms", indt=NULL, data=list(), parlist=list
 	########## Preparation ##########
 	### Functions: ###
 	# A function for extracting overlap values for the signal or noise for the MS70 sonar (type="n" refers to noise, and type="s" refers to signal):
-	get.olpn <- function(parlist, noise, esnm="ms70", type="n", input_out=FALSE){
+	get.olpn <- function(parlist, noisetypes, esnm="ms70", type="n", input_out=FALSE){
 		# Function for reading the overlap values of 'type' "n" (noise) or "s" (signal):
 		read.olp<-function(data, olptype="olpb"){
 			if(length(data[[olptype]])==0){
@@ -140,8 +140,8 @@ echoIBM_rexp_defaults<-function(noise="ms", indt=NULL, data=list(), parlist=list
 		}
 		# Variable correlation for all voxels:
 		else if(strff("v",parlist$olpn) && "v" %in% legal){
-			if(!"pn" %in% noise){
-				warning("parlist$olpn=\"v\" usually implies that the periodic noise is applied to the simulations, while this is not specified in the parameter 'noise'")
+			if(!"pn" %in% noisetypes){
+				warning("parlist$olpn=\"v\" usually implies that the periodic noise is applied to the simulations, while this is not specified in the parameter 'noisetypes'")
 			}
 			# Read the overlap values of the total noise including periodic noise 'olpt' (see "S2009116_PG.O.Sars[4174] - olp and acf.R"):
 			parlist$olpn <- read.olp(data, olptype="olpt")
@@ -161,10 +161,15 @@ echoIBM_rexp_defaults<-function(noise="ms", indt=NULL, data=list(), parlist=list
 	
 	# Treat the seed:
 	if(length(parlist$seed)==0 || length(indt)==0){
-		stop("'indt' and 'seed' must be given, either as a single integer or a vector of integers, or possibly a code word such as 'ind', implying to use the time step indices as seeds")
+		stop(paste0("'indt' and 'seed' must be given, either as a single integer or a vector of integers, or possibly a code word such as 'ind', implying to use the time step indices as seeds. The following given: seed: ", parlist$seed, ", indt: ", indt, "."))
 	}
 	if(strff("ind", parlist$seed)){
 		parlist$seed <- indt
+	}
+	# Change added on 2017-11-14 to support generating a random seed vector given an initial seed in the 'parlist':
+	else if(length(parlist$seed)==1 && length(indt)!=1){
+		set.seed(parlist$seed)
+		parlist$seed <- sample(seq_len(1e7), length(indt), replace=FALSE)
 	}
 	else if(length(parlist$seed)!=length(indt)){
 		warning("Random seed 'seed' in the parameter list 'parlist' did not have the same length as the number of time steps, and was repeated to this length")
@@ -180,15 +185,15 @@ echoIBM_rexp_defaults<-function(noise="ms", indt=NULL, data=list(), parlist=list
 	
 	##### (2) Get the structure of the beams: #####
 	if(is.null(parlist$nuqf) || is.null(parlist$luqf)){
-		parlist$nuqf <- length(unique(data$freq))
-		parlist$luqf <- data$numb/parlist$nuqf
+		parlist$nuqf <- length(unique(c(data$freq)))
+		parlist$luqf <- data$numb[1] / parlist$nuqf
 		if(parlist$luqf %% 1 != 0){
 			warning("The data indicate a non-rectangular grid of beams")
 			}
 		}	
 	
 	##### (3) Get the parameters for the correlated exponential distribution: #####
-	if(any(c("ms") %in% noise)){
+	if(any(c("ms") %in% noisetypes)){
 		### (3a, 3b, 3c) Standard defaults regardless of sonar/echosounder. The combination of these parameters provides a good exponential distribution with acceptable cpu-time. See "Test_of_rexp_MultSines.R": ###
 		if(is.null(parlist$L)){
 			parlist$L <- 3
@@ -203,7 +208,7 @@ echoIBM_rexp_defaults<-function(noise="ms", indt=NULL, data=list(), parlist=list
 		### (3d) Get the duration of the sine waves: ###
 		if(is.null(parlist$w)){
 			# EK60 multifrequency echosounder:
-			if(sonR_implemented(data$esnm, type=c("SBE"))){
+			if(sonR_implemented(data$esnm[1], type=c("SBE"))){
 				# Get lengths of the sine waves in the multisine-method for EK60 (correlations found in Holmin et al. (2013)):
 				#corEK60 <- c(0.31,0.18,0.12,0.02,-0.06,0.15) # Old 2013-09-18
 				corEK60 <- c(0.31,0.18,0.12,0,0,0)
@@ -215,20 +220,20 @@ echoIBM_rexp_defaults<-function(noise="ms", indt=NULL, data=list(), parlist=list
 				parlist$w <- w
 				}
 			# ME70 multibeam echosounder:
-			else if(sonR_implemented(data$esnm, type=c("MBE"))){
+			else if(sonR_implemented(data$esnm[1], type=c("MBE"))){
 				# Assume pulselength ≈ 2 ms and sampleinterval duration 0.128 ms, giving w = 2 /0.125 * 3/4 = 12:
 				parlist$w <- rep(12,parlist$nuqf)
 				}
 			# MS70 multibeam sonar:
-			else if(sonR_implemented(data$esnm, type=c("MBS"))){
+			else if(sonR_implemented(data$esnm[1], type=c("MBS"))){
 				# Set the length of the pulses in units of sample intervals. In reality this is set to be 4, but the autocorrelation estimates of the MS70 sonar suggest 3:
 				parlist$w <- rep(3,parlist$nuqf)
 				}
 			# SX90 multibeam sonar:
-			else if(sonR_implemented(data$esnm, type=c("OFS"))){
+			else if(sonR_implemented(data$esnm[1], type=c("OFS"))){
 				# From the experience with simulations of the MS70 sonar, which normally has 2 ms pulselength and 1/2 ms sampling interval, which should imply w=4, the value w=3 was more appropriate. Thus we propose to estimate 'w' by plsl/sint * 3/4:
 				if(all(c("plsl","sint") %in% names(data))){
-					parlist$w <- rep(data$plsl/data$sint * 3/4, parlist$nuqf)
+					parlist$w <- rep(data$plsl[1] / data$sint[1] * 3/4, parlist$nuqf)
 					}
 				# Otherwise, use the values for 600 meter maximum range of the SX90:
 				else{
@@ -245,21 +250,21 @@ echoIBM_rexp_defaults<-function(noise="ms", indt=NULL, data=list(), parlist=list
 			}
 		
 		### (3e) Get the between beam overlap for the signal: ###
-		parlist$input_olps <- get.olpn(parlist,noise,esnm=data$esnm[1],type="s",input_out=TRUE)
+		parlist$input_olps <- get.olpn(parlist, noisetypes, esnm=data$esnm[1], type="s", input_out=TRUE)
 		parlist$olpn <- parlist$input_olps
-		parlist$olps <- get.olpn(parlist,noise,esnm=data$esnm[1],type="s")
+		parlist$olps <- get.olpn(parlist, noisetypes, esnm=data$esnm[1], type="s")
 		
 		### (3f) Get the between beam overlap for the noise: ###
 		# Get the character value of the olp variable, and also set the variable parlist$olpn:
-		parlist$input_olpn <- get.olpn(parlist,noise,esnm=data$esnm[1],input_out=TRUE)
+		parlist$input_olpn <- get.olpn(parlist, noisetypes, esnm=data$esnm[1], input_out=TRUE)
 		parlist$olpn <- parlist$input_olpn
-		parlist$olpn <- get.olpn(parlist,noise,esnm=data$esnm[1])
+		parlist$olpn <- get.olpn(parlist, noisetypes, esnm=data$esnm[1])
 		}
 	##### End of "Default settings for the Multiple Sines method" #####
 	
 	
 	##### (4) Default settings for the rearrangement method (no longer maintained to the extent of the "ms" method): #####
-	else if(any(c("acex","aex","cex") %in% noise)){
+	else if(any(c("acex","aex","cex") %in% noisetypes)){
 		# Standard defaults regardless of sonar/echosounder. See "Test of echoIBM_rexp_Rearr":
 		if(is.null(parlist$rate)){
 			parlist$rate <- 1
@@ -274,7 +279,7 @@ echoIBM_rexp_defaults<-function(noise="ms", indt=NULL, data=list(), parlist=list
 		parlist$buffer <- 100
 		
 		# Sonar/echosounder specific parameters. See "Test_of_rexp_MultSines.R":
-		if(sonR_implemented(data$esnm, type=c("MBS"))){
+		if(sonR_implemented(data$esnm[1], type=c("MBS"))){
 			if(is.null(parlist$rho)){
 				parlist$rho <- c(1,1,1)
 				}
@@ -290,7 +295,7 @@ echoIBM_rexp_defaults<-function(noise="ms", indt=NULL, data=list(), parlist=list
 				S[i,seq_along(parlist$rho)+i-1] <- parlist$rho
 				}
 			S <- S[,totheside+seq_len(parlist$luqf)]
-			parlist$C=zeros(data$numb,data$numb)
+			parlist$C <- zeros(data$numb[1], data$numb[1])
 			for(i in seq_len(parlist$nuqf)){
 				parlist$C[seq_len(parlist$luqf)+(i-1)*parlist$luqf, seq_len(parlist$luqf)+(i-1)*parlist$luqf] <- S
 				}
@@ -304,15 +309,15 @@ echoIBM_rexp_defaults<-function(noise="ms", indt=NULL, data=list(), parlist=list
 				}
 			parlist$wC <- 1
 			# Define identity "correlation" matrix:
-			parlist$C <- diag(data$numb)
+			parlist$C <- diag(data$numb[1])
 			}
 		
 		# Create the array of indexes for which parlist$C>0 and the width of this array (defaulted to 3 for echoIBM()):
 		if(length(parlist$Cind)==0){
-			parlist$Cind <- matrix(0:(parlist$wC-1) - (parlist$wC-1)/2,nrow=data$numb,ncol=parlist$wC,byrow=TRUE) + 0:(data$numb-1)
+			parlist$Cind <- matrix(0:(parlist$wC-1) - (parlist$wC-1)/2, nrow=data$numb[1], ncol=parlist$wC, byrow=TRUE) + 0:(data$numb[1]-1)
 			}
 		}
-	else if(any("bk" %in% noise)){
+	else if(any("bk" %in% noisetypes)){
 		# N=40 iterations seems to be sufficient for establishing the Barakat PDF to some degree of approximation, at lest for nsig>=3. Also the threshold for nsig, 'nsth' is set to 2 based on the plot in "Test Barakat.R":
 		parlist$nsth <- 2
 		parlist$N <- 40

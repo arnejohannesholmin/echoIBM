@@ -16,7 +16,7 @@
 #' @export
 #' @rdname beamPattern.TSD
 #'
-beamPattern.TSD<-function(data,method=c("closest","linear")){
+beamPattern.TSD <- function(data, method=c("closest","linear")){
 	
 	############ AUTHOR(S): ############
 	# Arne Johannes Holmin

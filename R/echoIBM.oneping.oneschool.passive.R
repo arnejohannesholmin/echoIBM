@@ -187,7 +187,7 @@ echoIBM.oneping.oneschool.passive<-function(data, esnm, TVG.exp=2, compensated=c
 	sv=zeros(data$lenb[1],data$Ni)
 	
 	# Add noise to the sv-values:
-	sv=echoIBM.add.noise(sv=sv, noise=noise, data=data, parlist=parlist)
+	sv=echoIBM.add.noise(sv=sv, noisetypes=noise, data=data, parlist=parlist)
 		
 	# Add TVG if required:
 	if(sum(TVG.exp)>0){

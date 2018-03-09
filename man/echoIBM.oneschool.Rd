@@ -4,15 +4,15 @@
 \alias{echoIBM.oneschool}
 \title{Simulates echo sounder observations based on positions, orientations, sizes and other specifics of each fish in a known (simulated) school.}
 \usage{
-echoIBM.oneschool(files, t = 1, tvessel, vesselutim, pingsSchool, areCompact,
-  adds = NULL, pingsdir, pingsname, esnm = NULL, TVG.exp = 2,
+echoIBM.oneschool(files, event, t = 1, tvessel, vesselutim, pingsSchool,
+  areCompact, adds = NULL, pingsdir, pingsname, esnm = NULL, TVG.exp = 2,
   compensated = c("pitch", "roll"), filesize = 3e+08, calibrate = TRUE,
   noise = c("nr", "bg", "ex"), mode = c("active", "passive"),
   max.memory = 1e+09, ow = TRUE, origin = 1, dumpfile = "dump.txt",
   dumpsize = 1e+07, timedumpfile = "timedump.txt", rand.sel = 1,
   scls = 1, volsc = c(1, 1, 1), method = c("closest", "linear"),
   ask = FALSE, parlist = list(), bptfile = NULL, max.radius = 0.2,
-  cores = 1, saveBrkt = FALSE)
+  cores = 1, saveBrkt = FALSE, msg = FALSE)
 }
 \arguments{
 \item{files}{is a vector of the paths to the files on which the simulation is based.}

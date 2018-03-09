@@ -7,7 +7,7 @@
 echoIBM.oneping.oneschool(data, esnm = NULL, TVG.exp = 2,
   compensated = c("pitch", "roll"), calibrate = TRUE, noise = c("nr",
   "bg", "ex"), max.memory = 1e+09, dumpfile = "dump.txt", ask = FALSE,
-  parlist = list())
+  parlist = list(), msg = FALSE)
 }
 \arguments{
 \item{data}{see below.}

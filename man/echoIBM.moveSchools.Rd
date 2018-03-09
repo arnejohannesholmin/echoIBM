@@ -2,15 +2,20 @@
 % Please edit documentation in R/echoIBM.moveSchools.R
 \name{echoIBM.moveSchools}
 \alias{echoIBM.moveSchools}
-\title{Calculates new positions of school specified compactly by the dynamic variables of the school as a whole, given time elapsed.}
+\title{Moves compactly stored school data by time.}
 \usage{
 echoIBM.moveSchools(data, utim)
 }
-\value{
+\arguments{
+\item{data}{The compatly stored school data.}
 
+\item{utim}{The time in UNIX time.}
+}
+\value{
+Modified 'data'.
 }
 \description{
-Calculates new positions of school specified compactly by the dynamic variables of the school as a whole, given time elapsed.
+If only one time step is given in the compactly stored school data, calculate new positions of school given time elapsed. If multiple time steps are given, interpolate all variables at the requested time 'utim'.
 }
 \examples{
 \dontrun{}

@@ -2,9 +2,9 @@
 % Please edit documentation in R/echoIBM.add.noise.R
 \name{echoIBM.add.noise}
 \alias{echoIBM.add.noise}
-\title{Adds noise to an array of sv-values, given the noise data present in 'data'.}
+\title{Adds noise to an array of sv-values for the ping 'indt', given the noise data present in 'data'.}
 \usage{
-echoIBM.add.noise(sv, indt, noise = c("bg", "pn", "ms"), data = NULL,
+echoIBM.add.noise(sv, indt, noisetypes = c("bg", "pn", "ms"), data = NULL,
   parlist = list())
 }
 \arguments{
@@ -12,17 +12,17 @@ echoIBM.add.noise(sv, indt, noise = c("bg", "pn", "ms"), data = NULL,
 
 \item{indt}{is a the time point index, required to pick out the correct seed.}
 
-\item{noise}{is a vector of character strings of length 2, specifying which types of noise to apply to the data:}
+\item{noisetypes}{is a vector of character strings of length 2, specifying which types of noise to apply to the data:}
 
 \item{data}{is the list of beams inputs as returned from read.TSD. For the treatment of noise the following variables are required:}
 
-\item{parlist}{is a list of input parameters to the noise generation method specified by 'noise'. Use echoIBM_rexp_defaults() to generate defaul values. Must include a seed vector of at least the same length as the maximum indt value to be used.}
+\item{parlist}{is a list of input parameters to the noise generation method specified by 'noisetypes'. Use echoIBM_rexp_defaults() to generate defaul values. Must include a seed vector of at least the same length as the maximum indt value to be used.}
 }
 \value{
 
 }
 \description{
-Adds noise to an array of sv-values, given the noise data present in 'data'.
+Adds noise to an array of sv-values for the ping 'indt', given the noise data present in 'data'.
 }
 \examples{
 \dontrun{}

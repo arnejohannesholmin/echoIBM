@@ -13,7 +13,7 @@
 #' @export
 #' @rdname etaCompression
 #'
-etaCompression<-function(data=list(),type=c("area","obln")){
+etaCompression <- function(data=list(), type=c("area", "obln")){
 	
 	############ AUTHOR(S): ############
 	# Arne Johannes Holmin
@@ -36,38 +36,38 @@ etaCompression<-function(data=list(),type=c("area","obln")){
 	########## Preparation ##########
 	# Defaults:
 	if(length(data$rho0)==0){
-		data$rho0=1026
+		data$rho0 <- 1026
 		}
 	if(length(data$gacc)==0){
-		data$gacc=9.82
+		data$gacc <- 9.82
 		}
 	if(length(data$hpr0)==0){
-		data$hpr0=101325
+		data$hpr0 <- 101325
 		}
 	if(length(data$gaml)==0){
-		data$gaml=0
+		data$gaml <- 0
 		}
 	if(length(data$gamw)==0){
-		data$gamw=-0.23
+		data$gamw <- -0.23
 		}
 	if(length(data$pszf)==0){
-		data$pszf=0
+		data$pszf <- 0
 		}
 	
 	
 	########## Execution and output ##########
 	if(type[1]=="area"){
-		exponent=data$gaml+data$gamw
-		(1-data$rho0*data$gacc*data$pszf/data$hpr0)^(data$gaml+data$gamw)
+		exponent <- data$gaml + data$gamw
+		#(1 - data$rho0 * data$gacc * data$pszf / data$hpr0)^(data$gaml + data$gamw)
 		}
 	else if(type[1]=="obln"){
-		exponent=data$gaml-data$gamw
-		(1-data$rho0*data$gacc*data$pszf/data$hpr0)^(data$gaml-data$gamw)
+		exponent <- data$gaml - data$gamw
+		#(1 - data$rho0 * data$gacc * data$pszf / data$hpr0)^(data$gaml - data$gamw)
 		}
 	else{
 		stop("Invalid type (needs to be one of \"area\" or \"obln\")")
 		}
-	(1-data$rho0*data$gacc*data$pszf/data$hpr0)^exponent
+	(1 - data$rho0 * data$gacc * data$pszf / data$hpr0)^exponent
 	##################################################
 	##################################################
 	}

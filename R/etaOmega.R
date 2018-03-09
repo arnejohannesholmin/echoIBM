@@ -15,7 +15,7 @@
 #' @export
 #' @rdname etaOmega
 #'
-etaOmega<-function(data, pbpf=c("ls","pr","ps")){
+etaOmega <- function(data, pbpf=c("ls","pr","ps")){
 	
 	############### LOG: ###############
 	# Start: 2010-12-17 - Clean version.
@@ -33,7 +33,7 @@ etaOmega<-function(data, pbpf=c("ls","pr","ps")){
 		pbpf <- data$pbpf
 		}
 	# Depth compression factor of the oblongness:
-	data$obln <- data$obln*etaCompression(data,type="obln")
+	data$obln <- data$obln * etaCompression(data, type="obln")
 	pbpf <- tolower(pbpf)
 	
 	

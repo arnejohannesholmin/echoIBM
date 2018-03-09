@@ -7,7 +7,7 @@
 pointSource.TSD(data)
 }
 \arguments{
-\item{data}{is a list containing the elements 'dire' (elevarion angle in radians [0,pi/2]) and 'wnsz' (product of wave number and size), and optionally 'dira' (azimuth angle in radians [0,pi/2]), 'indi' (index of the fish / transducer element) and 'obln' (oblongness of the ).}
+\item{data}{is a list containing the elements 'dire' (elevarion angle in radians [0,pi/2]) and 'wnsz' (product of wave number and size), and optionally 'dira' (azimuth angle in radians [0,pi/2]), 'indi' (index of the fish / transducer element).}
 }
 \value{
 

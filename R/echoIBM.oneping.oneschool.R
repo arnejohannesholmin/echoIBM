@@ -28,7 +28,7 @@
 #' @export
 #' @rdname echoIBM.oneping.oneschool
 #'
-echoIBM.oneping.oneschool <- function(data, esnm=NULL, TVG.exp=2, compensated=c("pitch", "roll"), calibrate=TRUE, noise=c("nr", "bg", "ex"), max.memory=1e9, dumpfile="dump.txt", ask=FALSE, parlist=list()){
+echoIBM.oneping.oneschool <- function(data, esnm=NULL, TVG.exp=2, compensated=c("pitch", "roll"), calibrate=TRUE, noise=c("nr", "bg", "ex"), max.memory=1e9, dumpfile="dump.txt", ask=FALSE, parlist=list(), msg=FALSE){
 	
 	############ AUTHOR(S): ############
 	# Arne Johannes Holmin
@@ -168,23 +168,23 @@ echoIBM.oneping.oneschool <- function(data, esnm=NULL, TVG.exp=2, compensated=c(
 	##################################################
 	########## Preparation ##########
 	# Define dump data:
-	dumpdata = NAs(7)
-	names(dumpdata) = c("etaj", "B_L", "etaa", "epss", "epsl", "chi", "sigma0mode")
+	dumpdata <- NAs(7)
+	names(dumpdata) <- c("etaj", "B_L", "etaa", "epss", "epsl", "chi", "sigma0mode")
 	
 	##### Defaults: #####
 	# School dynamic:
-	default.rtxf = 0
-	default.rtyf = 0
-	default.size = 0.3 # Herring?
-	default.zeta = 0.26 # Gorska and Ona 2003, Modelling the effect of swimbladder compression on the acoustic backscattering from herring at normal or near-normal dorsal incidences.
+	default.rtxf <- 0
+	default.rtyf <- 0
+	default.size <- 0.3 # Herring?
+	default.zeta <- 0.26 # Gorska and Ona 2003, Modelling the effect of swimbladder compression on the acoustic backscattering from herring at normal or near-normal dorsal incidences.
 	# Vessel:
-	default.pszv = 0
-	default.rtxv = 0
-	default.rtyv = 0
+	default.pszv <- 0
+	default.rtxv <- 0
+	default.rtyv <- 0
 	
 	
 	##### Error and default handling: #####
-	echoIBM.warnings_warninglist = NULL
+	echoIBM.warnings_warninglist <- NULL
 	
 	# Error is 'data' is not a list:
 	if(!is.list(data)){
@@ -192,120 +192,120 @@ echoIBM.oneping.oneschool <- function(data, esnm=NULL, TVG.exp=2, compensated=c(
 		}
 	
 	# Information about missing variales without defaults will be collected and printed as an error:
-	errors = NULL
+	errors <- NULL
 	
 	
 	### INPUTS REPRESENTING THE SCHOOL: ###
 	# --- Dynamic variables ---
 	# If all position variables are present, the number of fish 'Nl' is obtained as the length of the longest variable, and the shorter are recycled to match the longer. Else the number of fish 'Nl' is defaulted to 1 to complete the default actions and error handeling of missing input variables:
 	if(!any(is.null(data$psxf),is.null(data$psyf),is.null(data$pszf))){
-		Nl = max(length(data$psxf),length(data$psyf),length(data$pszf))
-		data$psxf = rep(data$psxf,length.out=Nl)
-		data$psyf = rep(data$psyf,length.out=Nl)
-		data$pszf = rep(data$pszf,length.out=Nl)
+		Nl <- max(length(data$psxf),length(data$psyf),length(data$pszf))
+		data$psxf <- rep(data$psxf,length.out=Nl)
+		data$psyf <- rep(data$psyf,length.out=Nl)
+		data$pszf <- rep(data$pszf,length.out=Nl)
 		}
 	else{
-		errors = c(errors,"Some of 'data$posx' or 'data$psxf' (fish x-position), 'data$posy' or 'data$psyf' (fish y-position) and 'data$posz' or 'data$pszf' (fish z-position) missing with no default")
-		Nl = 1
+		errors <- c(errors,"Some of 'data$posx' or 'data$psxf' (fish x-position), 'data$posy' or 'data$psyf' (fish y-position) and 'data$posz' or 'data$pszf' (fish z-position) missing with no default")
+		Nl <- 1
 		}
 	# If any fish are located above the sea surface, en error is produced:
 	if(any(data$pszf>0)){
 		warning(paste("Some fish are located above sea level. Range of 'pszf': (",min(data$pszf),", ",max(data$pszf),")",sep=""))
-		valid = data$pszf <= 0
-		correctLength = sapply(data, length) == length(valid)
-		data[correctLength] = lapply(data[correctLength], "[", valid)
+		valid <- data$pszf <= 0
+		correctLength <- sapply(data, length) == length(valid)
+		data[correctLength] <- lapply(data[correctLength], "[", valid)
 		#stop(paste("Some fish are located above sea level. Range of 'pszf': (",data$pszf,")",sep=""))
 		#stop(paste("Some fish are located above sea level. Range of 'pszf': (",min(data$pszf),", ",max(data$pszf),")",sep=""))
 		}
 	# If all three velocity vectors are given, the z- and x-rotations are obtained from the velocities. Otherwise, if 'data$rtzf' (heading) is not present, an error is collected: 
 	if(any(is.null(data$rtxf),is.null(data$rtzf)) && !any(is.null(data$vlxf),is.null(data$vlyf),is.null(data$vlzf))){
 		# Get fish angle data if not present:
-		data[c("rtzf", "rtxf")] = vl2rt.TSD(data[c("rtzf", "rtxf", "vlxf", "vlyf", "vlzf")])[c("rtzf", "rtxf")]
+		data[c("rtzf", "rtxf")] <- vl2rt.TSD(data[c("rtzf", "rtxf", "vlxf", "vlyf", "vlzf")])[c("rtzf", "rtxf")]
 		# Remove velocities from memory:
-		data$vlxf = NULL
-		data$vlyf = NULL
-		data$vlzf = NULL
+		data$vlxf <- NULL
+		data$vlyf <- NULL
+		data$vlzf <- NULL
 		}
 	else if(is.null(data$rtzf) && tolower(data$pbpf)!="ps"){
-		errors = c(errors,"'data$rtzf' (fish heading) missing with no default")
+		errors <- c(errors,"'data$rtzf' (fish heading) missing with no default")
 		}
 	# If 'data$rtxf' (pitch) is missing, it is defaulted to default.rtxf = 0 for all fish:
 	if(is.null(data$rtxf)){
-		echoIBM.warnings_warninglist = c(echoIBM.warnings_warninglist,"'data$rtxf' was defaulted")
-		data$rtxf = rep(default.rtxf,Nl)
+		echoIBM.warnings_warninglist <- c(echoIBM.warnings_warninglist, "'data$rtxf' was defaulted")
+		data$rtxf <- rep(default.rtxf,Nl)
 		}
 	# If the number of targets is positive and 'epss' or 'epsl' are to be utilized or 'data$lenl' (length of the line source representing the fish) are missing, 'data$size' must be present or defaulted:
 	if(any(data$sigma0mode %in% c(2,4)) || length(data$lenl)==0){
 		# If 'data$size' (length of fish) is missing, it is defaulted to default.size = 0.3 for all fish:
 		if(length(data$size)==0){
-			echoIBM.warnings_warninglist = c(echoIBM.warnings_warninglist,paste("'data$size' was defaulted to ",default.size," for all fish",sep=""))
-			data$size = rep(default.size,Nl)
+			echoIBM.warnings_warninglist <- c(echoIBM.warnings_warninglist, paste("'data$size' was defaulted to ",default.size," for all fish",sep=""))
+			data$size <- rep(default.size,Nl)
 			}
 		}
 	# If the size vector of the fish does not have the correct length, it is repeated to length 'Nl' with a warning:
 	if(length(data$size)!=0 && length(data$size)!=Nl){
-		echoIBM.warnings_warninglist = c(echoIBM.warnings_warninglist,paste("'data$size' was repeated to the number of fish ",Nl,sep=""))
-		data$size = rep(data$size,length.out=Nl)
+		echoIBM.warnings_warninglist <- c(echoIBM.warnings_warninglist, paste("'data$size' was repeated to the number of fish ",Nl,sep=""))
+		data$size <- rep(data$size,length.out=Nl)
 		}
 	
 	# If 'data$lenl' (length of the line source representing the fish) is missing, 'data$zeta' must be present or defaulted:
 	if(length(data$lenl)==0){
 		# If 'data$zeta' (line source length as a fraction of fish length) is missing, it is defaulted to default.zeta=1/5 for all fish:
 		if(length(data$zeta)==0){
-			echoIBM.warnings_warninglist = c(echoIBM.warnings_warninglist,paste("'data$zeta' was defaulted to ",default.zeta,sep=""))
-			data$zeta = default.zeta
+			echoIBM.warnings_warninglist <- c(echoIBM.warnings_warninglist, paste("'data$zeta' was defaulted to ",default.zeta,sep=""))
+			data$zeta <- default.zeta
 			}
 		}
 	# Length of the line sources representing the fish:
 	if(length(data$lenl)==0){
-		data$lenl = data$zeta * data$size
-		data$zeta = NULL
+		data$lenl <- data$zeta * data$size
+		data$zeta <- NULL
 		}
 	# If the length vector of the line sources does not have the correct length, it is repeated to length 'Nl' with a warning:
 	if(length(data$lenl)!=0 && length(data$lenl)!=Nl){
-		echoIBM.warnings_warninglist = c(echoIBM.warnings_warninglist,paste("'data$lenl' was repeated to the number of fish ",Nl,sep=""))
-		data$lenl = rep(data$lenl,length.out=Nl)
+		echoIBM.warnings_warninglist <- c(echoIBM.warnings_warninglist, paste("'data$lenl' was repeated to the number of fish ",Nl,sep=""))
+		data$lenl <- rep(data$lenl,length.out=Nl)
 		}
 	
 	
 	### INPUTS REPRESENTING THE VESSEL: ###
 	# If longitude and latitude positions and origin are all given, cartesian x- and y-positions relative to the origin are calculated:
 	if(!any(is.null(data$lonv),is.null(data$latv),is.null(data$orgn))){
-		data$psyv = global2car(cbind(data$lonv,data$latv),data$orgn) # This is what was former names 'pos', but changed to avoid memory leak.
-		data$psxv = data$psyv$x
-		data$psyv = data$psyv$y
+		data$psyv <- global2car(cbind(data$lonv,data$latv),data$orgn) # This is what was former names 'pos', but changed to avoid memory leak.
+		data$psxv <- data$psyv$x
+		data$psyv <- data$psyv$y
 		}
 	# If one or both of data$posx or data$psxv (x-position) and data$posy or data$psyv  (y-position) are missing, an error is collected:
 	if(any(is.null(data$psxv),is.null(data$psyv))){
-		errors = c(errors,"One or both of 'data$posx'/'data$psxv' (x-position) and 'data$posy'/'data$psyv' (y-position) missing with no default")
+		errors <- c(errors,"One or both of 'data$posx'/'data$psxv' (x-position) and 'data$posy'/'data$psyv' (y-position) missing with no default")
 		}
 	# If 'data$pszv' (z-position of the vessel) is missing, it is defaulted to default.pszv=0:
 	if(is.null(data$pszv)){
-		echoIBM.warnings_warninglist = c(echoIBM.warnings_warninglist,"'data$pszv' was defaulted")
-		data$pszv = default.pszv
+		echoIBM.warnings_warninglist <- c(echoIBM.warnings_warninglist, "'data$pszv' was defaulted")
+		data$pszv <- default.pszv
 		}
 	# If 'data$rtzv' (z-rotation of the vessel) is missing an error is collected:
 	if(is.null(data$rtzv)){
-		errors = c(errors,"'data$rtzv' (z-rotation of the vessel) missing with no default")
+		errors <- c(errors,"'data$rtzv' (z-rotation of the vessel) missing with no default")
 		}
 	# The user may choose to ignore pitch and roll of the vessel, simulating the compensation of pitch and roll performed in Simrad systems:
 	if(sum(grep("pitch",compensated))>0){
-		echoIBM.warnings_warninglist = c(echoIBM.warnings_warninglist,"'data$rtxv' (compensated for and set to 0)")
-		data$rtxv = default.rtxv
+		echoIBM.warnings_warninglist <- c(echoIBM.warnings_warninglist, "'data$rtxv' (compensated for and set to 0)")
+		data$rtxv <- default.rtxv
 		}
 	if(sum(grep("roll",compensated))>0){
-		echoIBM.warnings_warninglist = c(echoIBM.warnings_warninglist,"'data$rtyv' (compensated for and set to 0)")
-		data$rtyv = default.rtyv
+		echoIBM.warnings_warninglist <- c(echoIBM.warnings_warninglist, "'data$rtyv' (compensated for and set to 0)")
+		data$rtyv <- default.rtyv
 		}
 	# If 'data$rtxv' (x-rotation of the vessel) is missing, it is defaulted to default.rtxv=0:
 	if(is.null(data$rtxv)){
-		echoIBM.warnings_warninglist = c(echoIBM.warnings_warninglist,"'data$rtxv' was defaulted")
-		data$rtxv = default.rtxv
+		echoIBM.warnings_warninglist <- c(echoIBM.warnings_warninglist, "'data$rtxv' was defaulted")
+		data$rtxv <- default.rtxv
 		}
 	# If 'data$rtyv' (t-rotation of the vessel) is missing, it is defaulted to default.rtyv=0:
 	if(is.null(data$rtyv)){
-		echoIBM.warnings_warninglist = c(echoIBM.warnings_warninglist,"'data$rtyv' was defaulted")
-		data$rtyv = default.rtyv
+		echoIBM.warnings_warninglist <- c(echoIBM.warnings_warninglist, "'data$rtyv' was defaulted")
+		data$rtyv <- default.rtyv
 		}
 	########## Execution and output ##########
 	##### Transformations and rotations: #####
@@ -313,56 +313,60 @@ echoIBM.oneping.oneschool <- function(data, esnm=NULL, TVG.exp=2, compensated=c(
 	### Position of the transducer in the coordinate systems of the fish: ###
 	cat(paste("Transformations and rotations (number of targets: ",length(data$psxf),") ... \n",sep=""))
 	# Add the position of the echo sounder:
-	transducerposG = c(data$psxv,data$psyv,data$pszv)+c(0,0,data$psze[1])
+	transducerposG <- c(data$psxv, data$psyv, data$pszv) + c(0, 0, data$psze[1])
 	
 	# Subtract the positions of the fish:
-	transducerposL = matrix(transducerposG,ncol=3,nrow=Nl,byrow=TRUE)-cbind(data$psxf,data$psyf,data$pszf)
+	transducerposL <- matrix(transducerposG, ncol=3, nrow=Nl, byrow=TRUE) - cbind(data$psxf, data$psyf, data$pszf)
 	
 	# Discard fish that are outside of the range of the sonar:
-	maxlenb = max(data$lenb)
+	maxlenb <- max(data$lenb)
 	# The radial resolution 'data$rres':
-	data$rres = soundbeam_range(data, "rres")
-	#data$rres = data$sint * data$asps/2
-	sonarRange = maxlenb * data$rres
-	indicesRange = rowSums(transducerposL^2)<sonarRange^2
-	Nl = sum(indicesRange)
+	data$rres <- soundbeam_range(data, "rres")
+	#data$rres <- data$sint * data$asps/2
+	sonarRange <- maxlenb * data$rres
+	indicesRange <- rowSums(transducerposL^2) < sonarRange^2
+	Nl <- sum(indicesRange)
 	
 	if(Nl>0){
-		transducerposL = transducerposL[indicesRange,,drop=FALSE]
+		# Select only the targets inside the sonar range:
+		data[labl.TSD("echoIBM_dynVars")] <- lapply(data[labl.TSD("echoIBM_dynVars")], "[", indicesRange)
+		transducerposL <- transducerposL[indicesRange,,drop=FALSE]
+		
 		# Rotate as given in the documentation:
 		if(is.null(data$rtyf)){
-			data$transducerposL = rotate3D(transducerposL, by="zx", ang=cbind(data$rtzf,data$rtxf+data$tilt-pi/2), paired=TRUE, drop.out=FALSE)
+			data$transducerposL <- rotate3D(transducerposL, by="zx", ang=cbind(data$rtzf,data$rtxf+data$tilt-pi/2), paired=TRUE, drop.out=FALSE)
 			}
 		else{
-			data$transducerposL = rotate3D(transducerposL, by="zxyx", ang=cbind(data$rtzf,data$rtxf,data$rtyf,data$tilt-pi/2), paired=TRUE, drop.out=FALSE)
-			data$rtyf = NULL
+			data$transducerposL <- rotate3D(transducerposL, by="zxyx", ang=cbind(data$rtzf,data$rtxf,data$rtyf,data$tilt-pi/2), paired=TRUE, drop.out=FALSE)
+			data$rtyf <- NULL
 			}
+		
 		# Remove objects no longer in use:
 		rm(transducerposG)
 		rm(transducerposL)
-		data$rtxf = NULL
-		data$rtzf = NULL
-		data$tilt = NULL
+		data$rtxf <- NULL
+		data$rtzf <- NULL
+		data$tilt <- NULL
 		#gc()
 		
 		# Transform to spherical cordinates:
-		data$transducerposL = car2sph(data$transducerposL)
+		data$transducerposL <- car2sph(data$transducerposL)
 		
 		
 		##### Outside the loop: #####
 		cat("Frequency independent calculations ... \n")
 		
-		data$fish = zeros(Nl)
+		data$fish <- zeros(Nl)
 		# Orientation factor:
-		#data$etaomega = etaOmega(data)
-		data$etaomega = etaOmega(data[c("pbpf", "obln", "transducerposL", "rho0", "gacc", "pszf", "hpr0", "gaml", "gamw")])
+		#data$etaomega <- etaOmega(data)
+		data$etaomega <- etaOmega(data[c("pbpf", "obln", "transducerposL", "rho0", "gacc", "pszf", "hpr0", "gaml", "gamw")])
 		
 		# Depth compression factor 'etaC':
-		data$etaC = etaCompression(data[c("rho0", "gacc", "pszf", "hpr0", "gaml", "gamw")],type="area")
-		#data$etaC = etaCompression(data,type="area")
-		#etaC = (1-data$rho0 * data$gacc * data$pszf/data$hpr0)^(data$gamw+data$gaml)
+		data$etaC <- etaCompression(data[c("rho0", "gacc", "pszf", "hpr0", "gaml", "gamw")],type="area")
+		#data$etaC <- etaCompression(data,type="area")
+		#etaC <- (1-data$rho0 * data$gacc * data$pszf/data$hpr0)^(data$gamw+data$gaml)
 		# Attenuation:
-		data$etar4 = data$transducerposL[,1]^(-4)
+		data$etar4 <- data$transducerposL[,1]^(-4)
 		
 		# If the optimal backscattering cross section 'sgbs' (sigma_bs) is present, no relation to target size is specified. In this case 'sgbs' is applied at this stage and the echo ability 'epss' is NOT USED in the function echoIBM.oneping.ji() where i = 0, 1, 2:
 		if(data$sigma0mode==1){
@@ -370,24 +374,24 @@ echoIBM.oneping.oneschool <- function(data, esnm=NULL, TVG.exp=2, compensated=c(
 			}
 		# If the coefficient 'epss' linking 'sgbs' to fish size is present, it may be a function of frequency, or simply a numeric vector. In any case the target size to the power 'spow' is applied at this stage, and 'epss' is applied in the function echoIBM.oneping.ji() where i = 0, 1, 2:
 		else if(data$sigma0mode==2){
-			data$sgbs = data$size^data$spow
+			data$sgbs <- data$size^data$spow
 			}
 		# If the optimal acoustic cross sectional area 'acca' (A_0) is present, no relation to target size is specified: In this case 'acca' is applied at this stage and the echo ability 'epsl' is NOT USED in the function echoIBM.oneping.ji() where i = 0, 1, 2:
 		else if(data$sigma0mode==3){
-			data$sgbs = data$acca
+			data$sgbs <- data$acca
 			}
 		# If the coefficient 'epsl' linking 'acca' to fish size is present, it may be a function of frequency, or simply a numeric vector: In any case the target size to the power 'spow' is applied at this stage, and 'epsl' is applied in the function echoIBM.oneping.ji() where i = 0, 1, 2:
 		else if(data$sigma0mode==4){
-			data$sgbs = data$size^data$spow
+			data$sgbs <- data$size^data$spow
 			}
 			
 		# Merge non-frequency independent values:	
-		data$fish = data$etar4 * data$etaomega * data$etaC * data$sgbs
-			
-		# Scale the backscatter of the targets (scls>1 reduces CPU time):
+		data$fish <- data$etar4 * data$etaomega * data$etaC * data$sgbs
+		
 		if(length(data$scls)==1 && data$scls!=1){
-			data$fish = data$fish * data$scls
+			data$fish <- data$fish * data$scls
 			}
+		
 		
 		# Dump:
 		if(length(dumpfile)>0 && nchar(dumpfile)>0){
@@ -398,122 +402,130 @@ echoIBM.oneping.oneschool <- function(data, esnm=NULL, TVG.exp=2, compensated=c(
 			}
 			
 		# Clear from memory:
-		data$size = NULL
-		data$etaC = NULL
-		data$etar4 = NULL
-		data$etaomega = NULL
+		data$size <- NULL
+		data$etaC <- NULL
+		data$etar4 <- NULL
+		data$etaomega <- NULL
 		# gc()
 		
 		### Defining indexes for which radial paritions the fish are located in:
 		cat("Radial paritioning of targets ... \n")
 		# Indexes locating the fish at the correct radial layer, assuming constant speed of sound:
 		##### HERE IT WAS DISCOVERED A CHANGE IN THE EFFECT OF THE OCDE SINCE THE CHANGE AT 2014-03-14, AFTER WHICH THE ECHO FROM TARGETS WERE NO LONGER CALCULATED TWICE, BUT ONLY ONCE, AND THE RADIAL WHEITHING ETA_J WAS APPLIED TWICE INSTEAD, ONCE USING ETA_J AND ONCE USING 1-ETA_J. HOWEVER, THIS REVEALED THE FACT THAT data$radialindex DOES NOT REPRESENT THE VOXELS BUT RATHER THE BOUNDARIES OF THE RADIAL POSITIONS COVERED BY THE VOXELS. THUS THE CODE IN THE CALIBRATION ROUTINES SHOULD BE CHANGED ACCORDINGLY
-		data$radialindex = findInterval(data$transducerposL[,1]/data$rres,0:maxlenb)
+		data$radialindex <- findInterval(data$transducerposL[,1]/data$rres, 0:maxlenb)
 		# An object contributes to the time interval located above and the next (if r/data$rres=0.8, it contributes to time interval 1 and 2). 'data$validr' is a vector of the time intervals that are affected by the fish:
-		data$validr = min(data$radialindex):(max(data$radialindex)+1)
+		data$validr <- min(data$radialindex):(max(data$radialindex)+1)
 		# Adjust 'data$validr' and 'data$radialindex' to the length of the beams:
-		data$validr = data$validr[data$validr<=maxlenb]
+		data$validr <- data$validr[data$validr <= maxlenb]
 		# Divide 'data$radialindex' into a list of indexes for the radial layers/shells. 'NULLlist' assists in filling in NULL for layers with no fish:
-		data$radialindex = split(order(data$radialindex),sort(data$radialindex))
+		data$radialindex <- split(order(data$radialindex), sort(data$radialindex))
 		# Adjust 'data$validr' and 'data$radialindex' to the length of the beams:
-		data$radialindex = data$radialindex[as.numeric(names(data$radialindex))<=maxlenb]
+		data$radialindex <- data$radialindex[as.numeric(names(data$radialindex)) <= maxlenb]
 		
 		# Insert null elements in the list of radial indices, so that voxels with targets only in the first half of the valid radial region of the voxel are counted as well:
-		namesradialindex = as.numeric(names(data$radialindex))
-		namesNULLlist = seq(min(namesradialindex),max(namesradialindex)+1)
-		NULLlist = vector("list",length(namesNULLlist))
-		names(NULLlist) = namesNULLlist
-		NULLlist[as.character(namesradialindex)] = data$radialindex
-		data$radialindex = NULLlist
+		namesradialindex <- as.numeric(names(data$radialindex))
+		namesNULLlist <- seq(min(namesradialindex), max(namesradialindex)+1)
+		NULLlist <- vector("list", length(namesNULLlist))
+		names(NULLlist) <- namesNULLlist
+		NULLlist[as.character(namesradialindex)] <- data$radialindex
+		data$radialindex <- NULLlist
 		
 		# update 'Nl':
-		Nl = sum(unlist(sapply(data$radialindex,length)))
+		Nl <- sum(unlist(sapply(data$radialindex,length)))
 		}
 	else{
-		data$validr = NULL
+		data$validr <- NULL
 		}
 	
 	# Output voxel system:
-	sv = zeros(maxlenb,data$Ni)
-	nsig = zeros(maxlenb,data$Ni)
+	sv <- zeros(maxlenb,data$Ni)
+	nsig <- zeros(maxlenb,data$Ni)
 	
 	#memory_basic = 8 * maxlenb * data$numb
-	memory_basic = object.size(data)+object.size(sv)
+	memory_basic <- object.size(data) + object.size(sv)
 	# A vector of the echos from the last radial layer:
-	fromlast = 0
+	fromlast <- 0
 	
 	##### The loop through time intervals/radial distances #####
-	cat("r[j]:\n")
+	if(msg){
+		cat("r[j]:\n")
+	}
 	write("\nr[n]:\n",dumpfile,append=TRUE)
 	for(j in seq_along(data$validr)){
 		
 		# Which of the fish that are to be treated. According to expression (3.9) in the documentation, the fish of radial distance in the range (j-2) * delta_r to j * delta_r will contribute to the j'th time interval, which is realized by data$radialindex[j+0:1]:
-		data$thesel = data$radialindex[[j]]
-		data$lthesel = length(data$thesel)
+		data$thesel <- data$radialindex[[j]]
+		data$lthesel <- length(data$thesel)
 		if(data$lthesel>0 || fromlast>0){
 		
 			# Input only a subset of the data to the functions echoIBM.oneping.j1() and echoIBM.oneping.j2():
-			thesedata = data[c("psxf", "psyf", "pszf", "epss", "numb", "indi", "dira", "dire", "absr", "psze", "asps", "grsf", "ebpf", "pbpf", "ssif", "sigma0mode", "sllf", "pbp1", "pbp2", "bptf", "bpt1", "bpt2", "epsl", "wavenumber", "uniquek", "kfreq", "rad1", "rad2", "equalbp_em_re", "psxv", "psyv", "pszv", "rtzv", "lenl", "rtxv", "rtyv", "transducerposL", "fish", "rres", "validr", "thesel", "lthesel")]
+			thesedata <- data[c("psxf", "psyf", "pszf", "epss", "numb", "indi", "dira", "dire", "absr", "psze", "asps", "grsf", "ebpf", "pbpf", "ssif", "sigma0mode", "sllf", "pbp1", "pbp2", "bptf", "bpt1", "bpt2", "epsl", "wavenumber", "uniquek", "kfreq", "rad1", "rad2", "equalbp_em_re", "psxv", "psyv", "pszv", "rtzv", "lenl", "rtxv", "rtyv", "transducerposL", "fish", "rres", "validr", "thesel", "lthesel")]
 			
-			memory_1 = 8 * data$lthesel * (5+length(data$wavenumber)/data$luniquek*7) + memory_basic
-			memory_2 = 8 * data$lthesel * 12 + memory_basic
+			memory_1 <- 8 * data$lthesel * (5+length(data$wavenumber)/data$luniquek*7) + memory_basic
+			memory_2 <- 8 * data$lthesel * 12 + memory_basic
 			
 			# Empirically found adjustment factors for the different architectures:
 			if(.Platform$r_arch=="x86_64"){
-				memory_1 = memory_1*4
-				memory_2 = memory_2*4
+				memory_1 <- memory_1*4
+				memory_2 <- memory_2*4
 				}
 			else if(.Platform$r_arch=="i386"){
-				memory_1 = memory_1*2
-				memory_2 = memory_2*2
+				memory_1 <- memory_1*2
+				memory_2 <- memory_2*2
 				}
 			
 			if(memory_1<max.memory){
 				# Print the currently processed radial layer:
-				cat(data$validr[j],"[",data$lthesel,"]\t",sep="")
-				cat(data$validr[j],"[",data$lthesel,"]\t",sep="",file=dumpfile,append=TRUE)
+				if(msg){
+					cat(data$validr[j],"[",data$lthesel,"]\t",sep="")
+					cat(data$validr[j],"[",data$lthesel,"]\t",sep="",file=dumpfile,append=TRUE)
+				}
 				
 				# Get the svs from this radial layer, and those extending into the next:
-				thissv = echoIBM.oneping.j1(j,thesedata)
-				fromthis = thissv$sv
-				sv[data$validr[j],] = fromlast + fromthis
-				fromlast = thissv$svnext
+				thissv <- echoIBM.oneping.j1(j,thesedata)
+				fromthis <- thissv$sv
+				sv[data$validr[j],] <- fromlast + fromthis
+				fromlast <- thissv$svnext
 				
-				dumpdata = rowSums(cbind(dumpdata, thissv$dumpdata[names(dumpdata)] * data$lthesel), na.rm=TRUE)
+				dumpdata <- rowSums(cbind(dumpdata, thissv$dumpdata[names(dumpdata)] * data$lthesel), na.rm=TRUE)
 				
-				nsig[data$validr[j],] = thissv$nsig
+				nsig[data$validr[j],] <- thissv$nsig
 				}
 			else if(memory_2<max.memory){
 				# Print the currently processed radial layer:
-				cat(data$validr[j],"*[",data$lthesel,"]\t",sep="")
-				cat(data$validr[j],"*[",data$lthesel,"]\t",sep="",file=dumpfile,append=TRUE)
+				if(msg){
+					cat(data$validr[j],"*[",data$lthesel,"]\t",sep="")
+					cat(data$validr[j],"*[",data$lthesel,"]\t",sep="",file=dumpfile,append=TRUE)
+				}
 				
 				# Get the svs from this radial layer, and those extending into the next:
-				thissv = echoIBM.oneping.j2(j,thesedata)
-				fromthis = thissv$sv
-				sv[data$validr[j],] = fromlast + fromthis
-				fromlast = thissv$svnext
+				thissv <- echoIBM.oneping.j2(j,thesedata)
+				fromthis <- thissv$sv
+				sv[data$validr[j],] <- fromlast + fromthis
+				fromlast <- thissv$svnext
 				
-				dumpdata = rowSums(cbind(dumpdata, thissv$dumpdata[names(dumpdata)] * data$lthesel), na.rm=TRUE)
-				nsig[data$validr[j],] = thissv$nsig
+				dumpdata <- rowSums(cbind(dumpdata, thissv$dumpdata[names(dumpdata)] * data$lthesel), na.rm=TRUE)
+				nsig[data$validr[j],] <- thissv$nsig
 				}
 			else if(ask){
-				ans = readline(paste("Memory (",max.memory,") limit exceeded (",memory_2,") for the least memory demanding method. Continue? (y/n)",sep=""))
+				ans <- readline(paste("Memory (",max.memory,") limit exceeded (",memory_2,") for the least memory demanding method. Continue? (y/n)",sep=""))
 				if(ans=="n"){
 					stop("Function terminated")
 					}
 				# Print the currently processed radial layer:
-				cat(data$validr[j],"*[",data$lthesel,"]\t",sep="")
-				cat(data$validr[j],"*[",data$lthesel,"]\t",sep="",file=dumpfile,append=TRUE)
+				if(msg){
+					cat(data$validr[j],"*[",data$lthesel,"]\t",sep="")
+					cat(data$validr[j],"*[",data$lthesel,"]\t",sep="",file=dumpfile,append=TRUE)
+				}
 				
 				# Get the svs from this radial layer, and those extending into the next:
-				thissv = echoIBM.oneping.j2(j,thesedata)
-				fromthis = thissv$sv
-				sv[data$validr[j],] = fromlast + fromthis
-				fromlast = thissv$svnext
+				thissv <- echoIBM.oneping.j2(j,thesedata)
+				fromthis <- thissv$sv
+				sv[data$validr[j],] <- fromlast + fromthis
+				fromlast <- thissv$svnext
 				
-				dumpdata = rowSums(cbind(dumpdata, thissv$dumpdata[names(dumpdata)] * data$lthesel), na.rm=TRUE)
-				nsig[data$validr[j],] = thissv$nsig
+				dumpdata <- rowSums(cbind(dumpdata, thissv$dumpdata[names(dumpdata)] * data$lthesel), na.rm=TRUE)
+				nsig[data$validr[j],] <- thissv$nsig
 				}
 			}
 		} # End of for j.
@@ -522,8 +534,8 @@ echoIBM.oneping.oneschool <- function(data, esnm=NULL, TVG.exp=2, compensated=c(
 	
 	# Apply the threshold for the number of significant scatterers:
 	if(length(parlist$nsth)>0){
-		parlist$Brkt = which(1<=nsig & nsig<parlist$nsth)
-		parlist$nsig = nsig[parlist$Brkt]
+		parlist$Brkt <- which(1<=nsig & nsig<parlist$nsth)
+		parlist$nsig <- nsig[parlist$Brkt]
 		}
 	rm(nsig)
 	# Transform 'dumpdata' into a list after dividing by the number of fish to get the mean:
@@ -533,34 +545,34 @@ echoIBM.oneping.oneschool <- function(data, esnm=NULL, TVG.exp=2, compensated=c(
 	if(!is.null(data$cali) && calibrate){
 		# Extract for the correct beam mode, which is only applied when the calibration data are stored in a list:
 		if(is.list(data$cali)){
-			data$cali = data$cali[[data$bmmd[1]+1]]
+			data$cali <- data$cali[[data$bmmd[1]+1]]
 			}
 		# Extract calibration values at the elevation angles closest to elevation angles in the sonar
 		if(length(data$grde)>0){
-			atgrde = apply(abs(outer(data$dire, data$grde, "-")), 1, which.min)
-			cali = data$cali[cbind(seq_along(data$dire),atgrde)]
+			atgrde <- apply(abs(outer(data$dire, data$grde, "-")), 1, which.min)
+			cali <- data$cali[cbind(seq_along(data$dire),atgrde)]
 		}
 		else if(ncol(sv)!=length(data$cali)){
 			stop("Length of calibration data differ from the number of beams")
 			}
 		else{
-			cali = data$cali
+			cali <- data$cali
 			}
 		write("\nCalibration factors:\n",dumpfile,append=TRUE)
 		write(cali,dumpfile,append=TRUE)
-		sv = sv * outer(ones(maxlenb),cali)
+		sv <- sv * outer(ones(maxlenb),cali)
 		cat("Simulation calibrated", "\n")
 		}
 	else if(is.null(data$cali) && calibrate){
-		echoIBM.warnings_warninglist = c(echoIBM.warnings_warninglist,"Calibration data missing")
+		echoIBM.warnings_warninglist <- c(echoIBM.warnings_warninglist, "Calibration data missing")
 		}
 		
 	# Add noise to the sv-values (No time step index applied, To apply time step dependetnt noise, use echoIBM.merge()):
-	sv = echoIBM.add.noise(sv=sv, noise=noise, data=data, parlist=parlist)
+	sv <- echoIBM.add.noise(sv=sv, noisetypes=noise, data=data, parlist=parlist)
 		
 	# Add TVG if required:
 	if(sum(TVG.exp)>0){
-		sv = apply.TVG(x=sv, beams=data[c("lenb", "sint", "absr", "asps")], TVG.exp=TVG.exp)
+		sv <- apply.TVG(x=sv, beams=data[c("lenb", "sint", "absr", "asps")], TVG.exp=TVG.exp)
 		}
 	
 	
@@ -579,7 +591,7 @@ echoIBM.oneping.oneschool <- function(data, esnm=NULL, TVG.exp=2, compensated=c(
 	
 			
 	# Return:
-	list(sv=sv,Brkt=parlist$Brkt,nsig=parlist$nsig)
+	list(sv=sv, Brkt=parlist$Brkt, nsig=parlist$nsig)
 	##################################################
 	##################################################
 	}

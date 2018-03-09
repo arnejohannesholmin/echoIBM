@@ -44,28 +44,28 @@ echoIBM.generate_dynschool <- function(data, t=1, vesselutim=NULL, adds=list(), 
 	########## Preparation ##########
 	# Check for the required variables:
 	requiredVariables <- c(
-	"utmS", "aspS"
-	,"psxS", "psyS", "pszS"
-	,"thtS", "phiS"
-	,"szxS", "szyS", "szzS"
+	"utmS", "aspS",
+	"psxS", "psyS", "pszS",
+	"thtS", "phiS",
+	"szxS", "szyS", "szzS"
 	#,"rtxS","rtyS","rtzS"
 	#,"shpS"
 	)
 	densityVariables <- c("rhoS", "nbfS")
-	sizeVariables <- c("MEsz", "SDsz", "seed")
+	sizeVariables <- c("MEsz", "SDsz")
 	polarizationVariables <- c("plHS", "SDxf", "SDyf", "SDzf", "sEdx", "sEdy", "sEdz")
 	if(!all(requiredVariables %in% names(data))){
 		warning(paste0("All of the school specification variables (", paste0(requiredVariables,collapse=", "), ") must be present in the data. No schools generated."))
-		}
+	}
 	if(!any(densityVariables %in% names(data))){
 		warning(paste0("At least one of ", paste(densityVariables,collapse=", "), " must be present in the data. No schools generated."))
-		}
+	}
 	if(!all(sizeVariables %in% names(data))){
 		warning(paste0("All of the fish size specification variables (", paste(sizeVariables,collapse=", "), ") must be present in the data. No schools generated."))
-		}
+	}
 	if(!polarizationVariables[1] %in% names(data) && !all(polarizationVariables[-1] %in% names(data))){
 		warning(paste0("Either ", polarizationVariables[1], " or all of ", paste(densityVariables,collapse=", "), " must be present in the data. No schools generated."))
-		}
+	}
 	#range <- data$sint*data$asps/2*max(data$lenb)
 	range <- soundbeam_range(data, pos="max")
 	### # Get the horizontal range of the sonar/echosounder:
@@ -85,33 +85,23 @@ echoIBM.generate_dynschool <- function(data, t=1, vesselutim=NULL, adds=list(), 
 	
 		
 	########## Execution ##########
-	# Check whether any of the schools are within range of the sonar:
-	# Get the current positions of the schools:
-	if(t>1){
-		timediff <- vesselutim[t] - vesselutim[t-1]
-		}
-	else if(length(vesselutim)>1){
-		timediff <- vesselutim[t+1] - vesselutim[t]
-		}
-	else{
-		timediff <- 1
-		}
-	
 	# Move the schools to match the time of the current ping:
 	data <- echoIBM.moveSchools(data, vesselutim[t])
+	
 	# This is crude, since the case that a very large school is present will result in a large value of 'maxsize'. However, this is just to get the schools that are considered in each ping, and including more schools than are inside the sampling volume causes no harm:
 	maxsize <- apply(cbind(data$szxS, data$szyS, data$szzS), 1, max)
 	
 	# Get the distance to the schools along the sea surface:
 	distToSchools <- sqrt((data$psxS - data$psxv)^2 + (data$psyS - data$psyv)^2)
 	inside <- distToSchools < range + margin + maxsize
-	### # Get the schools that are valid for the current time step:
-	### insideTime <- vesselutim[t] >= data$utmS
-	### if(length(data$ut9S)>0){
-	### 	insideTime <- insideTime & vesselutim[t] <= data$ut9S
-	### 	}
-	### # Discard the schools for which the current time is outside of the time range of the schools given by 'utmS' (start time) and 'ut9S' (end time):
-	### inside <- which(inside & insideTime)
+	
+	# Get the schools that are valid for the current time step:
+	insideTime <- vesselutim[t] >= data$utmS
+	if(length(data$ut9S)>0){
+		insideTime <- insideTime & vesselutim[t] <= data$ut9S
+		}
+	# Discard the schools for which the current time is outside of the time range of the schools given by 'utmS' (start time) and 'ut9S' (end time):
+	inside <- which(inside & insideTime)
 	
 	# For the schools inside the volume relevant to sampling, draw fish positions and sizes:
 	#tempdynschool <- list()
@@ -127,42 +117,37 @@ echoIBM.generate_dynschool <- function(data, t=1, vesselutim=NULL, adds=list(), 
 	#	data$plHS <- data$plHS*180/pi
 	#	}
 	
-	# For some reason the unlist method above caused time lag, so we instead try appending:
+	# For some reason the unlist method above caused time lag, so we instead try appending. Not so many schools inside the sonar range at each time anyhow:
 	# For the schools inside the volume relevant to sampling, draw fish positions and sizes:
-	echoIBM.generate_oneschool_labl <- labl.TSD("echoIBM.generate_oneschool_labl")
-	dynschool <- vector("list", length(echoIBM.generate_oneschool_labl))
-	names(dynschool) <- echoIBM.generate_oneschool_labl
+	dynVars <- labl.TSD("echoIBM_dynVars")
+	dynschool <- vector("list", length(dynVars))
+	names(dynschool) <- dynVars
 	if(length(data$rhoS)==0){
 		data$rhoS <- NAs(length(inside))
-		}
+	}
 	if(length(data$nbfS)==0){
 		data$nbfS <- NAs(length(inside))
-		}
+	}
 	for(i in seq_along(inside)){
-		thisdata <- echoIBM.generate_oneschool(data, school=inside[i], dt=timediff, dumpfile=dumpfile)
-		for(j in seq_along(echoIBM.generate_oneschool_labl)){
-			dynschool[[echoIBM.generate_oneschool_labl[j]]] <- c(dynschool[[echoIBM.generate_oneschool_labl[j]]], thisdata[[echoIBM.generate_oneschool_labl[j]]])
-			}
+		thisdata <- echoIBM.generate_oneschool(data, school=inside[i], dumpfile=dumpfile)
+		if(length(thisdata)==0){
+			inside[i] <- NA
+			next
+		}
+		for(j in seq_along(dynVars)){
+			dynschool[[dynVars[j]]] <- c(dynschool[[dynVars[j]]], thisdata[[dynVars[j]]])
+		}
+		
 		# Update 'rhoS' (in the case that it was not given), and 'nbfS':
 		data$rhoS[inside[i]] <- thisdata$rhoS[inside[i]]
 		data$nbfS[inside[i]] <- thisdata$nbfS[inside[i]]
-		}
+	}
 	
-	# Convert to degrees:
-	data$plHS <- data$plHS * 180/pi
-	
-	# Write school information to the dumpfile:
-	cat("The following schools were simulated at the current time step (",t,"): ", prettyIntegers(inside), "\n", sep="")
-	if(length(dumpfile)>0){
-		cat("\nThe following schools were simulated at the current time step (", t, "): \n\n", sep="", file=dumpfile, append=TRUE)
-		if(any(inside)){
-			write.table(t(round(as.data.frame(c(list(indS=inside), lapply(data[c("utmS", "aspS", "psxS", "psyS", "pszS", "thtS", "phiS", "szxS", "szyS", "szzS", "volS", "rhoS", "nbfS", "MEsz", "SDsz", "seed", "plHS")], "[", inside))), digits=1)), dumpfile, append=TRUE, col.names=FALSE, sep="\t", quote=FALSE)
-			}
-		else{
-			cat("none", file=dumpfile, append=TRUE)
-			}
-		cat("\n\n", file=dumpfile, append=TRUE)
-		}
+	# Subset 'data' to the school inside the observation range:
+	inside <- inside[!is.na(inside)]
+	data <- lapply(data[intersect(names(data), labl.TSD("cs"))], "[", inside)
+	# Add the data stored in 'data' to the individual fish dynamics:
+	dynschool <- c(dynschool, data)
 	
 	# Apply the school information in 'adds':
 	dynschoolLengths <- unlist(lapply(dynschool, length))
@@ -171,11 +156,29 @@ echoIBM.generate_dynschool <- function(data, t=1, vesselutim=NULL, adds=list(), 
 		dynschoolinadds <- intersect(names(adds), names(dynschool))
 		Nl <- max(dynschoolLengths)
 		dynschool[dynschoolinadds] <- lapply(adds[dynschoolinadds], rep, length.out=Nl)
+	}
+	
+	# Write school information to the dumpfile. Here we do not dump the generated fish positions, but only the compact school variables, where number of fish and packing density has been updated above:
+	if(length(inside)){
+		cat("The following schools were simulated at the current time step (", t, "): ", prettyIntegers(inside), "\n", sep="")
+	}
+	if(length(dumpfile)>0){
+		# Convert to degrees in the dumped output:
+		data$plHS <- data$plHS * 180/pi
+	
+		cat("\nThe following schools were simulated at the current time step (", t, "): \n\n", sep="", file=dumpfile, append=TRUE)
+		if(any(inside)){
+			write.table(t(as.data.frame(c(list(indS=inside), data))), dumpfile, append=TRUE, col.names=FALSE, sep="\t", quote=FALSE)
 		}
+		else{
+			cat("none", file=dumpfile, append=TRUE)
+		}
+		cat("\n\n", file=dumpfile, append=TRUE)
+	}
 	
 	
 	########## Output ##########
 	dynschool
 	##################################################
 	##################################################
-	}
+}

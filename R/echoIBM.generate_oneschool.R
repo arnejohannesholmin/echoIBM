@@ -4,7 +4,6 @@
 #'
 #' @param data  is a list containing the necessary data: 
 #' @param school  is the index number of the school.
-#' @param dt  is the difference in time between time steps.
 #'
 #' @return
 #'
@@ -18,7 +17,7 @@
 #' @export
 #' @rdname echoIBM.generate_oneschool
 #'
-echoIBM.generate_oneschool<-function(data, school=1, dt=1, seed=NULL, dumpfile=NULL, aboveSurface=c("cut","force")){
+echoIBM.generate_oneschool<-function(data, school=1, seed=NULL, dumpfile=NULL, aboveSurface=c("cut","force")){
 	
 	############ AUTHOR(S): ############
 	# Arne Johannes Holmin
@@ -40,14 +39,16 @@ echoIBM.generate_oneschool<-function(data, school=1, dt=1, seed=NULL, dumpfile=N
 	#	'thtS', 'phiS', 
 	#	and optionally 'plHS'.
 	# ---school--- is the index number of the school.
-	# ---dt--- is the difference in time between time steps.
 	
 	
 	##################################################
 	##################################################
 	########## Preparation ##########
+	# Select the given school:
+	cs <- labl.TSD("cs")
+	data[cs] <- lapply(data[cs], "[", school)
 	# Set the seed of the school:
-	set.seed(data$seed[school])
+	set.seed(data$seed)
 	
 		
 	########## Execution ##########
@@ -65,52 +66,58 @@ echoIBM.generate_oneschool<-function(data, school=1, dt=1, seed=NULL, dumpfile=N
 	}
 	
 	# If the packing density is missing, calculate it from the number of fish:
-	if(length(data$rhoS[school])==0 && length(data$nbfS)>0 && !is.na(data$nbfS[school])){
+	if(length(data$rhoS)==0 && length(data$nbfS)>0 && !is.na(data$nbfS)){
 		# The volume of the school:
-		if(strff("e",data$shpS[school])){
+		if(strff("e",data$shpS)){
 			# Volume of an ellipsoid:
-			semiaxisX <- data$szxS[school]/2
-			semiaxisY <- data$szyS[school]/2
-			semiaxisZ <- data$szzS[school]/2
+			semiaxisX <- data$szxS/2
+			semiaxisY <- data$szyS/2
+			semiaxisZ <- data$szzS/2
 			data$volS <- 4/3*pi * semiaxisX * semiaxisY * semiaxisZ
 		}
-		else if(strff("r",data$shpS[school])){
+		else if(strff("r",data$shpS)){
 			# Volume of a box:
-			data$volS <- data$szxS[school] * data$szyS[school] * data$szzS[school]
+			data$volS <- data$szxS * data$szyS * data$szzS
 		}
-		data$rhoS[school] <- data$nbfS[school]/data$volS
+		data$rhoS <- data$nbfS/data$volS
 	}
-	spacing <- data$rhoS[school]^(-1/3)
+	spacing <- data$rhoS^(-1/3)
 	# First generate gridded positions:
-	grid <- as.matrix(expand.grid(seq(-data$szxS[school]/2,data$szxS[school]/2,spacing), seq(-data$szyS[school]/2,data$szyS[school]/2,spacing), seq(-data$szzS[school]/2,data$szzS[school]/2,spacing)))
+	grid <- as.matrix(expand.grid(seq(-data$szxS/2, data$szxS/2, spacing), seq(-data$szyS/2, data$szyS/2, spacing), seq(-data$szzS/2, data$szzS/2, spacing)))
 	
-	if(strff("e",data$shpS[school])){
+	if(strff("e",data$shpS)){
 		# Crop off to the ellipsoid:
-		inside <- (grid[,1]/(data$szxS[school]/2))^2 + (grid[,2]/(data$szyS[school]/2))^2 + (grid[,3]/(data$szzS[school]/2))^2 <= 1
+		d <- matrix(c(data$szxS, data$szyS, data$szzS) / 2, byrow=TRUE, nrow=nrow(grid), ncol=ncol(grid))
+		inside <- rowSums((grid / d)^2) <= 1
+		#inside <- (grid[,1]/(data$szxS/2))^2 + (grid[,2]/(data$szyS/2))^2 + (grid[,3]/(data$szzS/2))^2 <= 1
 		grid <- grid[inside,]
 	}
 	
 	# Rotate the school:
-	if(length(data$rtzS)){
-		grid <- rotate3D(grid, by="z", ang=data$rtzS, drop.out=FALSE)
+	if(length(data$rtzS) && !all(data$rtzS==0)){
+		grid <- rotate3D(grid, by="z", ang=data$rtzS)
 	}		
-	if(length(data$rtxS)){
-		grid <- rotate3D(grid, by="x", ang=data$rtxS, drop.out=FALSE)
+	if(length(data$rtxS) && !all(data$rtxS==0)){
+		grid <- rotate3D(grid, by="x", ang=data$rtxS)
 	}		
-	if(length(data$rtyS)){
-		grid <- rotate3D(grid, by="y", ang=data$rtyS, drop.out=FALSE)
+	if(length(data$rtyS) && !all(data$rtyS==0)){
+		grid <- rotate3D(grid, by="y", ang=data$rtyS)
 	}		
 	
 	# Add the position of the school:
-	grid[,1] <- grid[,1] + data$psxS[school]
-	grid[,2] <- grid[,2] + data$psyS[school]
-	grid[,3] <- grid[,3] + data$pszS[school]
-	data$nbfS[school] <- nrow(grid)
+	grid[,1] <- grid[,1] + data$psxS
+	grid[,2] <- grid[,2] + data$psyS
+	grid[,3] <- grid[,3] + data$pszS
+	if(length(grid)==0){
+		warning(paste0("School nr ", school, " was too small to be generated with the current packing density."))
+		return()
+	}
+	data$nbfS <- nrow(grid)
 	
 	# Get the positions of the fish, added noise:
-	data$psxf <- grid[,1] + rnorm(data$nbfS[school], 0, data$SDxf)
-	data$psyf <- grid[,2] + rnorm(data$nbfS[school], 0, data$SDyf)
-	data$pszf <- grid[,3] + rnorm(data$nbfS[school], 0, data$SDzf)
+	data$psxf <- grid[,1] + rnorm(data$nbfS, 0, data$SDxf)
+	data$psyf <- grid[,2] + rnorm(data$nbfS, 0, data$SDyf)
+	data$pszf <- grid[,3] + rnorm(data$nbfS, 0, data$SDzf)
 	
 	# Fish above the sea surface:
 	if(tolower(substr(aboveSurface[1],1,1))=="f"){
@@ -124,38 +131,38 @@ echoIBM.generate_oneschool<-function(data, school=1, dt=1, seed=NULL, dumpfile=N
 	
 	# Add noise to the fish positions. If the polarization is given, calculate the standard deviation on the positions:
 	if(length(data$plHS)>0){
-		write(c(school, data$plHS[school], data$plHS), "test", append=TRUE, ncolumns=20)
-		write("\n\n", "test", append=TRUE)
+		#write(c(school, data$plHS, data$plHS), "test", append=TRUE, ncolumns=20)
+		#write("\n\n", "test", append=TRUE)
 		file <- system.file("extdata", "grsd_plHS.TSD", package="echoIBM")
 		#echoIBM_datadir_ <- file.path(echoIBM_frameworks, "R", "Functions", "echoIBM Main", "Utilities")
 		#filebasename <- "grsd_plHS.TSD"
 		#file <- file.path(echoIBM_datadir_, filebasename)
 		grsd_plHS <- read.TSD(file)
 		# Get the standard deviation of the displacement of the fish:
-		### if(min(grsd_plHS$plHS)>data$plHS[school] || max(grsd_plHS$plHS)<data$plHS[school]){
+		### if(min(grsd_plHS$plHS)>data$plHS || max(grsd_plHS$plHS)<data$plHS){
 		### 	stop(paste("Polarization values outside of the valid range (0,pi/2) radians. Range:", paste(round(range(data$plHS),digits=3),collapse=", ")))
 		### }
-		# Temporary redefine standard deviations to use when generating the polarization. This does not affect the fish positions, but is only used to derive the velocities of the fish:
-		data$SDxf <- data$SDyf <- data$SDzf <- approx(grsd_plHS$plHS, grsd_plHS$grsd, data$plHS[school], rule=2)$y
+		# Temporarily redefine standard deviations to use when generating the polarization. This does not affect the fish positions, but is only used to derive the velocities of the fish:
+		data$SDxf <- data$SDyf <- data$SDzf <- approx(grsd_plHS$plHS, grsd_plHS$grsd, data$plHS, rule=2)$y
 		
 		# Get the second positions of the fish, added noise and the movement of the school, used to calculate the velocities of the fish:
 		# Displacement equal to 1 is used in "grsd_plHS.TSD":
-		displacement_car <- sph2car(c(1, data$thtS[school], data$phiS[school]))
-		data$psxf1 <- grid[,1] + rnorm(data$nbfS[school], 0, data$SDxf)
-		data$psyf1 <- grid[,2] + rnorm(data$nbfS[school], 0, data$SDyf)
-		data$pszf1 <- grid[,3] + rnorm(data$nbfS[school], 0, data$SDzf)
-		data$psxf2 <- grid[,1] + rnorm(data$nbfS[school], 0, data$SDxf) + displacement_car[1]
-		data$psyf2 <- grid[,2] + rnorm(data$nbfS[school], 0, data$SDyf) + displacement_car[2]
-		data$pszf2 <- grid[,3] + rnorm(data$nbfS[school], 0, data$SDzf) + displacement_car[3]
+		displacement_car <- sph2car(c(1, data$thtS, data$phiS))
+		data$psxf1 <- grid[,1] + rnorm(data$nbfS, 0, data$SDxf)
+		data$psyf1 <- grid[,2] + rnorm(data$nbfS, 0, data$SDyf)
+		data$pszf1 <- grid[,3] + rnorm(data$nbfS, 0, data$SDzf)
+		data$psxf2 <- grid[,1] + rnorm(data$nbfS, 0, data$SDxf) + displacement_car[1]
+		data$psyf2 <- grid[,2] + rnorm(data$nbfS, 0, data$SDyf) + displacement_car[2]
+		data$pszf2 <- grid[,3] + rnorm(data$nbfS, 0, data$SDzf) + displacement_car[3]
 		data$vlxf <- data$psxf2 - data$psxf1
 		data$vlyf <- data$psyf2 - data$psyf1
 		data$vlzf <- data$pszf2 - data$pszf1
 	}
 	# Set the fish to simulated omnidirectional if polarization is missing:
 	else{
-		data$vlxf <- rnorm(data$nbfS[school])
-		data$vlyf <- rnorm(data$nbfS[school])
-		data$vlzf <- rnorm(data$nbfS[school])
+		data$vlxf <- rnorm(data$nbfS)
+		data$vlyf <- rnorm(data$nbfS)
+		data$vlzf <- rnorm(data$nbfS)
 	}
 	
 	# Add rotation data:
@@ -166,11 +173,10 @@ echoIBM.generate_oneschool<-function(data, school=1, dt=1, seed=NULL, dumpfile=N
 		thisPDsz <- "rnorm"
 	}
 	else{
-		thisPDsz <- data$PDsz[school]
+		thisPDsz <- data$PDsz
 	}
-	data$size <- do.call(thisPDsz, list(data$nbfS[school], data$MEsz[school], data$SDsz[school]))
-	#data$size <- rnorm(data$nbfS[school],data$MEsz,data$SDsz)
-	
+	data$size <- do.call(thisPDsz, list(data$nbfS, data$MEsz, data$SDsz))
+	#data$size <- rnorm(data$nbfS,data$MEsz,data$SDsz)
 	
 	
 	########## Output ##########

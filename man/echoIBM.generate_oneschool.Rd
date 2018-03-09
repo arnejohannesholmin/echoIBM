@@ -4,15 +4,13 @@
 \alias{echoIBM.generate_oneschool}
 \title{Generates the position variables of one school. The fish are first put on an iso grid defined by the packing density. Then noise is added to these positions by the Gaussian distribution with mean 0 and standard deviation specified the inputs 'SDxf', 'SDyf', 'SDzf', (repeated to length 3 and defaulted to 1 if missing), all in units of the grid size. Finally, the orientations of the fish is set independently of the positions, by generating two sets of positions which are gridded positions separated by one grid unit in the x-direction and added noise by a standard deviation producing the desired polarization (by a pre-generated table).}
 \usage{
-echoIBM.generate_oneschool(data, school = 1, dt = 1, seed = NULL,
-  dumpfile = NULL, aboveSurface = c("cut", "force"))
+echoIBM.generate_oneschool(data, school = 1, seed = NULL, dumpfile = NULL,
+  aboveSurface = c("cut", "force"))
 }
 \arguments{
 \item{data}{is a list containing the necessary data:}
 
 \item{school}{is the index number of the school.}
-
-\item{dt}{is the difference in time between time steps.}
 }
 \value{
 

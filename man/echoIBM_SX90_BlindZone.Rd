@@ -2,18 +2,22 @@
 % Please edit documentation in R/echoIBM.setup.R
 \name{echoIBM.setup}
 \alias{echoIBM.setup}
-\title{***DECRIPTION MISSING***}
+\title{Prepare for simulation of underwater acoustic data using \code{\link{echoIBM}}.}
 \usage{
-echoIBM.setup(eventName, dir, t = "all", pre = TRUE, vessel = list(),
-  schoolStatic = list(), schoolDynamic = list(), ctd = list(),
-  beams = list(), noise = list(), calibration = list(), addnoise = TRUE,
-  passive = FALSE, cores = 1)
+echoIBM.setup(event, dir = NULL, esnm = "EK60", t = "all", pre = TRUE,
+  vessel = list(), school = list(), ctd = FALSE, beams = list(),
+  noise = list(), calibration = list())
+}
+\arguments{
+\item{event}{The name of the event, or the path to all sub events event/esnm/"tsd", in which case \code{dir} is ignored.}
+
+\item{dir}{Directory in which to place the event.}
 }
 \value{
 
 }
 \description{
-***DECRIPTION MISSING***
+Prepare for simulation of underwater acoustic data using \code{\link{echoIBM}}.
 }
 \examples{
 \dontrun{}

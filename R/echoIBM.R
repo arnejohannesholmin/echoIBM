@@ -27,7 +27,7 @@
 #' @param scls  is a factor by which the backscattering cross sectional area of the targets are scaled.
 #' @param method  is "closest" if the beam pattern value of the closest grid point is to be selected, and "linear" if linear interpolation should be used to extract the beam pattern value (time demanding and only available for 2D grids).
 #' @param ask  is TRUE if the used should be asked to for approval if the memory of the least memory demanding calculation method of the individual radial sampling intervals exceed the memory limit 'max.memory'.
-#' @param parlist  is a list of input parameters to the function echoIBM.add.noise(), which generates noise and randomness. See echoIBM.add.noise() for explaination of the possible variables.
+#' @param parlist  is a list of input parameters to the function echoIBM.add.noise(), which generates noise and randomness. See echoIBM.add.noise() for explaination of the possible variables. Important variables are seed and pre=TRUE to use pre-generated randomness.
 #' @param bptfile  is the name of the file to which 'sllf', 'rad1', 'rad2', 'pbp1' and 'pbp2' is written (use NULL for no writing).
 #' @param path  is TRUE to allow the user to select vessel positions interactively.
 #' @param pathnr  is the number of the vessel path drawn, to be used in the name of the ".vessel" file. If a new ".vessel" file is to be written, 'pathnr' must be different than the pathnr of existing files.
@@ -37,13 +37,14 @@
 #' @examples
 #' \dontrun{}
 #'
-#' @importFrom sonR echoIBM.getSchoolfileType
+#' @importFrom sonR echoIBM.getSchoolfileType read.event
 #' @importFrom TSD labl.TSD prettyIntegers read.TSD read.TSDs s2dhms strff utim.TSD
+#' @importFrom utils head
 #'
 #' @export
 #' @rdname echoIBM
 #'
-echoIBM <- function(event, t=1, adds=NULL, rph=NULL, esnm=NULL, TVG.exp=2, compensated=c("pitch","roll"), filesize=3e8, calibrate=TRUE, noise=c("bg","cex"), mode=c("active","passive"), tvessel=NULL, scan.volume=TRUE, margin=500, smooth="spline", max.memory=1e9, ow=TRUE, origin=1, recycle=FALSE, keep.temp=c(TRUE,FALSE), dumpsize=10e6, cores=1, rand.sel=1, scls=1, method=c("closest","linear"), ask=FALSE, parlist=list(), bptfile=TRUE, max.radius=0.2, path=FALSE, pathnr=1, onlyMerge=FALSE){
+echoIBM <- function(event, t=1, adds=NULL, rph=NULL, esnm=NULL, TVG.exp=2, compensated=c("pitch","roll"), filesize=3e8, calibrate=TRUE, noise=c("bg","cex"), mode=c("active","passive"), tvessel=NULL, scan.volume=TRUE, margin=500, smooth="spline", max.memory=1e9, ow=TRUE, origin=1, recycle=FALSE, keep.temp=c(TRUE,FALSE), dumpsize=10e6, cores=1, rand.sel=1, scls=1, method=c("closest","linear"), ask=FALSE, parlist=list(), bptfile=TRUE, max.radius=0.2, path=FALSE, pathnr=1, onlyMerge=FALSE, msg=FALSE){
 	
 	############ AUTHOR(S): ############
 	# Arne Johannes Holmin
@@ -90,7 +91,7 @@ echoIBM <- function(event, t=1, adds=NULL, rph=NULL, esnm=NULL, TVG.exp=2, compe
 	
 	if(length(keep.temp) == 1){
 		keep.temp <- c(keep.temp,FALSE)
-		}
+	}
 	
 	# Define the warnings (because the usual system of R for specifying warnings only returns the warnings at the return of the top level function):
 	echoIBM.warnings_warninglist <- NULL
@@ -99,18 +100,18 @@ echoIBM <- function(event, t=1, adds=NULL, rph=NULL, esnm=NULL, TVG.exp=2, compe
 	eventname <- rev(strsplit(event[1], "/", fixed=TRUE)[[1]])
 	if(tolower(eventname[1]) != "tsd"){
 		echoIBM.warnings_warninglist <- c(echoIBM.warnings_warninglist,"The path to the event specified by 'event' does not end with \"tsd\". Naming of the .pings files may be unexpected")
-		}
+	}
 	eventname <- eventname[3]
 	
 	# Define the name of the file to which the radii of the trasducer elements, the beam pattern types, and the side lobe level factors are written:
 	if(isTRUE(bptfile)){
 		#bptfile <- paste(event[1],"/",eventname,"_beampattern.beams",sep="")
-		bptfile <- file.path(event[1], paste0(eventname, "_beampattern.beams"))
-		}
+		bptfile <- file.path(event[1], paste0(eventname, "_beampattern.tsd"))
+	}
 	else if(length(bptfile)>0 && nchar(bptfile)>0){
 		#bptfile <- paste(event[1],"/",bptfile,".beams",sep="")
-		bptfile <- file.path(event[1], paste0(bptfile, ".beams"))
-		}
+		bptfile <- file.path(event[1], paste0(bptfile, ".tsd"))
+	}
 	
 	# The dynamic variable names of the vessel (elements in 'adds' named by one of these names will be subsetted for each ping):
 	dynvesselnames <- labl.TSD(c("v","t"), list.out=FALSE)
@@ -137,11 +138,11 @@ echoIBM <- function(event, t=1, adds=NULL, rph=NULL, esnm=NULL, TVG.exp=2, compe
 			schooldirs <- c(schooldirs,filesanddir[i])
 			schoolfiles <- c(schoolfiles,list(filesi[valid_schoolfiles]))
 			underevents <- c(underevents,basename(filesanddir[i]))
-			}
 		}
+	}
 	# Get file extensions:
 	#ext <- tools::file_ext(files)
-	filegroups <- echoIBM.getFileTypes(filesanddir, ext=c("beams", "ctd", "vessel"), key=list(beams=c("bgns", "nrnp", "cali")))
+	filegroups <- echoIBM.getFileTypes(filesanddir)
 	#ext <- lapply(strsplit(filesanddir[!isdir],".",fixed=TRUE),function(x) tail(x,1))
 	
 	# Add ".school"-files that are not located in separate directories (see at the beginning of 'schoolfiles'), but only if both static and dynamic school files are present:
@@ -157,12 +158,12 @@ echoIBM <- function(event, t=1, adds=NULL, rph=NULL, esnm=NULL, TVG.exp=2, compe
 		#if(sum(valid_schoolfiles)==1 || (any(c(schooltype_mainD==1, schooltype_mainB==1)) && any(schooltype_mainS==1))){
 		if(any(c(schooltype_mainD == 1, schooltype_mainB == 1)) && any(schooltype_mainS == 1)){
 			schoolfiles <- c(list(schoolfiles_main),schoolfiles)
-			}
+		}
 		# Else, add to the other schools:
 		else if(any(schooltype_mainD == 1) || any(schooltype_mainS == 1)){
 			schoolfiles <- lapply(schoolfiles,function(x) c(x,schoolfiles_main))
-			}
 		}
+	}
 	
 	
 	# 'schooltype' is 0 for dynamic school files and 1 for static school files:
@@ -170,26 +171,26 @@ echoIBM <- function(event, t=1, adds=NULL, rph=NULL, esnm=NULL, TVG.exp=2, compe
 	# For loop through the school files:
 	for(i in seq_along(schoolfiles)){
 		schooltype[[i]] <- echoIBM.getSchoolfileType(schoolfiles[[i]],dynschoolnames,staticschoolnames)$schooltypeS
-		}
+	}
 	
 	# Assure that 'recycle' is a list, and repeat to the apropriate length (the number of separate directories holding school files):
 	if(length(schoolfiles)>1){
 		# Transform to list:
 		if(is.function(recycle)){
 			recycle <- list(recycle)
-			}
+		}
 		else if(!is.list(recycle)){
 			recycle <- as.list(recycle)
-			}
+		}
 		# Expand the list to the appropriate length:
 		if(length(recycle)<length(schoolfiles)){
 			recycle <- rep(recycle, length.out=max(length(recycle),length(schoolfiles)))
-			}
 		}
+	}
 	# If only one school is given and 'recycle' is not a list, simply transform to a list:
 	else if(!is.list(recycle)){
 		recycle <- list(recycle)
-		}
+	}
 	
 	# Read the .beams files (used when merging simulations of different school, and used for extracting the name 'esnm' of the acoustic instrument):
 	# Read one by one, ignoring calibration data and storing the beam configuration of the calibration data to cross-reference with the other beam configuration information (no longer used):
@@ -199,25 +200,29 @@ echoIBM <- function(event, t=1, adds=NULL, rph=NULL, esnm=NULL, TVG.exp=2, compe
 	### 	thisbeams <- read.TSD(filegroups$beams[i],t="all",var="all",dimension=TRUE,header=FALSE)
 	### 	if(!"cali" %in% names(thisbeams)){
 	### 		beams <- c(beams,thisbeams)
-	### 		}
+	### 	}
 	### 	#if("cali" %in% names(thisbeams)){
 	### 	#	cali <- c(cali,thisbeams[c("cali","grde")])
-	### 	#	}
+	### 	#}
 	### 	#else{
 	### 	#	beams <- c(beams,thisbeams)
-	### 	#	}
-	### 	}
+	### 	#}
+	### }
 	
-	beams <- read.TSDs(filegroups$beams, t="all", var="all", clean=FALSE)
+	# Read beams data for all modes:
+	### # 2017-10-16: Reading in beams data at each time step was a bad idea, since the beams data are modified using echoIBM.default.oneschool() in echoIBM.oneschool(). Thus we only accept one beam setting, i.e., one ping of beams data, and all the work on implemening an indp file will not be used for now, but may be used in the future? ###
+	### beams0 <- read.event(event, t="all", var="beams")
+	beams0 <- read.event(event, t=1, var="beams")
+	#---# beams <- read.TSDs(filegroups$beams, t="all", var="all", clean=FALSE)
 	# Add the beams information in 'adds':
-	beamsinadds <- intersect(names(beams),names(adds))
-	beams[beamsinadds] <- adds[beamsinadds]
+	beamsinadds <- intersect(names(beams0),names(adds))
+	beams0[beamsinadds] <- adds[beamsinadds]
 	if(is.null(esnm)){
-		esnm <- beams$esnm
-		}
+		esnm <- head(beams0$esnm, 1)
+	}
 	
 	# Read the .ctd files (used when merging simulations of different school):
-	ctd <- read.TSDs(filegroups$ctd, t="all", var="all")
+	ctd <- read.TSDs(filegroups$ctd, t="all")
 	ctdinadds <- intersect(names(ctd),names(adds))
 	ctd[ctdinadds] <- adds[ctdinadds]
 	
@@ -225,7 +230,7 @@ echoIBM <- function(event, t=1, adds=NULL, rph=NULL, esnm=NULL, TVG.exp=2, compe
 	vesselutim <- utim.TSD(c(adds[intersect(names(adds),dynvesselnames)], read.TSDs(filegroups$vessel, t="all", var="time", header=FALSE)))
 	if(is.list(vesselutim)){
 		vesselutim <- vesselutim[[1]]
-		}
+	}
 	# The vessel files contains all time steps, and 'numt' is thus extracted from the vessel time points:
 	indt <- seq_along(vesselutim)
 	
@@ -238,20 +243,20 @@ echoIBM <- function(event, t=1, adds=NULL, rph=NULL, esnm=NULL, TVG.exp=2, compe
 		if(length(thisutim$psxS)>0){
 			thisutim <- list(sort(vesselutim))
 			areCompact[i] <- TRUE
-			}
+		}
 		else{
 			thisutim <- utim.TSD(thisutim, keep.list=TRUE)
-			}
+		}
 		if(length(thisutim)>0){
 			schoolutim[[i]] <- thisutim
-			}
 		}
+	}
 	
 	# If the simulations are done in passive mode, simply override any dynamic school variables by psxf=Inf, psyf=Inf, pszf=Inf, rtzf=0, sgbs=0 (WHY??????):
 	if(strff("p",mode[1])){
 		adds <- c(list(psxf=Inf, psyf=Inf, pszf=Inf, rtzf=0, sgbs=0),adds)
 		schoolutim <- list(list(sort(vesselutim)))
-		}
+	}
 	suppressWarnings(uniqeschoolutim <- sort(unique(unlist(schoolutim))))
 	
 	
@@ -262,7 +267,7 @@ echoIBM <- function(event, t=1, adds=NULL, rph=NULL, esnm=NULL, TVG.exp=2, compe
 		# If t=="all", all time points are read:
 		if(identical(t,"all")){
 			t <- 1:numt
-			}
+		}
 		t <- t[t>=1 & t<=numt]
 		
 		# Get the dynamic school files to be used in when plotting the vessel positions. Else the dynamic school files are treated in echoIBM.oneschool:
@@ -271,7 +276,7 @@ echoIBM <- function(event, t=1, adds=NULL, rph=NULL, esnm=NULL, TVG.exp=2, compe
 			dynschoolfiles[[i]] <- schoolfiles[[i]][schooltype[[i]] == 0]
 		}
 		# Set the path of the vessel:
-		output <- set.path.vessel.cm(schooldirs=schooldirs, dynschoolfiles=dynschoolfiles, recycle=recycle, t=round(t), tvessel=tvessel, numt=numt, smooth=smooth, margin=margin, scan.volume=scan.volume, beams=beams, ctd=ctd, rph=rph, event=event, eventname=eventname, pathnr=pathnr)
+		output <- set.path.vessel.cm(schooldirs=schooldirs, dynschoolfiles=dynschoolfiles, recycle=recycle, t=round(t), tvessel=tvessel, numt=numt, smooth=smooth, margin=margin, scan.volume=scan.volume, beams=beams0, ctd=ctd, rph=rph, event=event, eventname=eventname, pathnr=pathnr)
 		return(output)
 	}
 	# Use vessel-files as the basis for extracting 'numt' when path==FALSE:
@@ -290,7 +295,7 @@ echoIBM <- function(event, t=1, adds=NULL, rph=NULL, esnm=NULL, TVG.exp=2, compe
 		
 		
 		# Create a list for each school holding the school file numbers and the time step indices of the school files correponding to each time step in the vessel data:
-		pingsSchool <- vector("list",length(schoolutim))
+		pingsSchool <- vector("list", length(schoolutim))
 		for(i in seq_along(pingsSchool)){
 			# Create a matrix of 4 columns:
 			# (1) the utim information of the school files of the current school (after unlisting)
@@ -322,7 +327,7 @@ echoIBM <- function(event, t=1, adds=NULL, rph=NULL, esnm=NULL, TVG.exp=2, compe
 	# Warning if 't' is empty:
 	if(length(t) == 0){
 		warning("'t' is empty. Possibly the range of the vessel time points is not covering the requested 't'")
-		}
+	}
 		
 	
 	########## Execution and output ##########
@@ -340,7 +345,7 @@ echoIBM <- function(event, t=1, adds=NULL, rph=NULL, esnm=NULL, TVG.exp=2, compe
 	if(length(dumpfile)>0 && nchar(dumpfile)>0){
 		if(!file.exists(dirname(dumpfile))){
 			dir.create(dirname(dumpfile))
-			}
+		}
 		write(paste("########## DUMP FROM THE SIMULATION EXPERIMENT BUILT FROM THE FILES LOCATED IN THE DIRECTORY (WITH SUBDIRECTORIES): ##########\n\n",event[1],
 			ngettext(length(t),"\n\n##### SIMULATION DONE FOR TIME STEP: #####\n","\n\n##### SIMULATIONS DONE FOR TIME STEPS: #####\n"), 
 			prettyIntegers(t, sep="-", collapse=",", force=TRUE),
@@ -353,38 +358,38 @@ echoIBM <- function(event, t=1, adds=NULL, rph=NULL, esnm=NULL, TVG.exp=2, compe
 					ngettext(length(t), paste0("\nUsing the following time step for school ", i, ":\n"), paste("\nUsing the following time steps for school ", i, ":\n")), 
 					prettyIntegers(unlist(lapply(pingsSchool[[i]][t],function(xx) xx[,4])), sep="-", collapse=",", force=TRUE)), 
 				dumpfile, append=TRUE)
-				}
 			}
+		}
 		write(paste0("\n\n##### SIMULATION STARTED: #####\n", format(as.POSIXlt(starttime,tz="GMT"), usetz=TRUE)), dumpfile, append=TRUE)
 		write("\n\n\n##### FILES USED IN THE SIMULATION: #####", dumpfile, append=TRUE)
 		if(is.list(schoolfiles) && length(schoolfiles)>1){
 			for(i in seq_along(schoolfiles)){
 				write(paste0("SCHOOL NR. ", i, ":"), dumpfile, append=TRUE)
 				write(unlist(schoolfiles[[i]]), dumpfile, append=TRUE)
-				}
 			}
+		}
 		else{
 			write(unlist(schoolfiles), dumpfile, append=TRUE)
-			}
+		}
 		write(filegroups$beams, dumpfile, append=TRUE)
 		write(filegroups$vessel, dumpfile, append=TRUE)
 		write(filegroups$ctd, dumpfile, append=TRUE)
-		}
+	}
 	
 	### # 'rand.sel' may be given higher than 1, implying that the targets remaining after a random selection are scaled correspondingly:
 	### if(rand.sel[1]>1){
 	### 	scls <- rand.sel[1]
 	### 	rand.sel[1] <- 1/rand.sel[1]
 	### 	warning("'scls' set to 'rand.sel' and 'rand.sel' set to 1/rand.sel")
-	### 	}
+	### }
 	# Write to the dumpfile (2):
 	if(length(dumpfile)>0 && nchar(dumpfile)>0 && any(rand.sel[1] != 1, scls != 1)){
 		# Report that a random selection of the targets is simulated, and that the backscatter from the targets is scaled:
 		echoIBM.dump_summary(list(rand.sel=rand.sel, scls=scls), dumpfile, type="rand.sel_scale", append=TRUE)
-		}
+	}
 	
 	# Default values for 'parlist':
-	parlist <- echoIBM_rexp_defaults(noise=noise, indt=indt, data=beams, parlist=parlist)
+	parlist <- echoIBM_rexp_defaults(noisetypes=noise, indt=indt, data=beams0, parlist=parlist)
 	
 	# Write to the dumpfile (3):
 	if(length(dumpfile)>0 && nchar(dumpfile)>0){
@@ -392,18 +397,20 @@ echoIBM <- function(event, t=1, adds=NULL, rph=NULL, esnm=NULL, TVG.exp=2, compe
 		implemented_noise <- intersect(noise,c("ms","acex","aex","cex","ex","nr","bg","pn","bk","phase"))
 		if(length(implemented_noise) == 0){
 			implemented_noise <- "none"
-			}
+		}
 		write(paste0("\n\n\n\n\n##### NOISE APPLIED TO THE SIMULATIONS: #####\n", paste(implemented_noise, collapse="\n")), dumpfile, append=TRUE)
-		}	
+	}	
 	# Dump information before going through the time steps:
 	if(length(dumpfile)>0 && nchar(dumpfile)>0){
 		# Information about the acoustical instrument:
 		echoIBM.dump_summary(parlist, dumpfile, type="noise", append=TRUE)
-		}
+	}
 			
 	# Create a temporary directory holding the separately generated simulations, to be merged at the end of the function. This directory is deleted if keep.temp[1]==FALSE:
 	tempevent <- file.path(dirname(event[1]),"temp")
-	dir.create(tempevent)
+	if(!file.exists(tempevent)){
+		dir.create(tempevent)
+	}
 	
 	# Write to the dumpfile:
 	if(length(schoolfiles) == 0 || strff("p",mode[1])){
@@ -411,21 +418,24 @@ echoIBM <- function(event, t=1, adds=NULL, rph=NULL, esnm=NULL, TVG.exp=2, compe
 		schoolfiles <- vector("list",1)
 		if(length(dumpfile)>0 && nchar(dumpfile)>0){
 			write(paste0("\n\n\n##### SIMULATIONS DONE IN PASSIVE MODE #####\n\n\n"), dumpfile, append=TRUE)
-			}
 		}
+	}
 	else{
 		if(length(dumpfile)>0 && nchar(dumpfile)>0){
 			write(paste0("\n\n\n##### SCHOOL NR. ", i, ": #####\n\n\n"), dumpfile, append=TRUE)
-			}	
-		}
+		}	
+	}
 	
+	# The number of cores can be given separate for simulation and noise:
+	cores <- rep(cores, length.out=2)
+
 	# Move through the schools:
 	if(!onlyMerge){
 		for(i in seq_along(schoolfiles)){
 			# Get the list of files for the current school (merging general files for the simulation with the school specific files located in the individual school directories):
 			files <- unique(c(filesanddir[!isdir],unlist(schoolfiles[i])))
 			# No noise, add afterwards:
-			echoIBM.oneschool(files=files, t=t, tvessel=tvessel, vesselutim=vesselutim, pingsSchool=pingsSchool[[i]], areCompact=areCompact[i], adds=adds, pingsdir=tempevent, pingsname=if(length(schooldirs)>1) paste(eventname,underevents[i],sep="_") else eventname, esnm=esnm, TVG.exp=TVG.exp, compensated=compensated, filesize=filesize, calibrate=calibrate, noise="", mode=mode, max.memory=max.memory, ow=ow, origin=origin, dumpfile=dumpfile, dumpsize=dumpsize, timedumpfile=timedumpfile, rand.sel=rand.sel, scls=scls, method=method, ask=ask, parlist=parlist, bptfile=bptfile, max.radius=max.radius, cores=cores)
+			echoIBM.oneschool(files=files, event=event[1], t=t, tvessel=tvessel, vesselutim=vesselutim, pingsSchool=pingsSchool[[i]], areCompact=areCompact[i], adds=adds, pingsdir=tempevent, pingsname=if(length(schooldirs)>1) paste(eventname,underevents[i],sep="_") else eventname, esnm=esnm, TVG.exp=TVG.exp, compensated=compensated, filesize=filesize, calibrate=calibrate, noise="", mode=mode, max.memory=max.memory, ow=ow, origin=origin, dumpfile=dumpfile, dumpsize=dumpsize, timedumpfile=timedumpfile, rand.sel=rand.sel, scls=scls, method=method, ask=ask, parlist=parlist, bptfile=bptfile, max.radius=max.radius, msg=msg, cores=cores[1])
 		}
 	}
 
@@ -433,15 +443,17 @@ echoIBM <- function(event, t=1, adds=NULL, rph=NULL, esnm=NULL, TVG.exp=2, compe
 	cat("\n")
 	TVGinout <- sum(TVG.exp)>0
 	
+	
 	# Merge the pings and add noise and randomness:
-	#echoIBM.merge(event=event[1], t=if(length(tvessel)==0) t else tvessel, beams=beams, ctd=ctd, TVG.in=TVGinout, TVG.out=TVGinout, TVG.exp=TVG.exp, filesize=filesize, noise=noise, ow=ow, parlist=parlist, cores=cores, keep.temp=keep.temp[2])
-	echoIBM.add.noise.TSD(event=event[1], fileind=NULL, beams=beams, ctd=ctd, TVG.in=TVGinout, TVG.out=TVGinout, TVG.exp=TVG.exp, noise=noise, scls=scls, ow=ow, parlist=parlist, cores=cores)
+	#echoIBM.merge(event=event[1], t=if(length(tvessel)==0) t else tvessel, beams0=beams0, ctd=ctd, TVG.in=TVGinout, TVG.out=TVGinout, TVG.exp=TVG.exp, filesize=filesize, noise=noise, ow=ow, parlist=parlist, cores=cores, keep.temp=keep.temp[2])
+	#echoIBM.add.noise.event(event=event[1], fileind=NULL, beams0=beams0, ctd=ctd, TVG.in=TVGinout, TVG.out=TVGinout, TVG.exp=TVG.exp, noisetypes=noise, scls=scls, ow=ow, parlist=parlist, cores=cores[2])
+	echoIBM.add.noise.event(event=event[1], fileind=NULL, beams0=beams0, ctd=ctd, TVG.in=TVGinout, TVG.out=TVGinout, TVG.exp=TVG.exp, noisetypes=noise, ow=ow, parlist=parlist, cores=cores[2])
 		
 		
 	# Delete the temporary directory if required
 	if(!keep.temp[1]){
 		unlink(tempevent,TRUE)
-		}
+	}
 	
 	# Write to the dumpfile (6):
 	if(length(dumpfile)>0 && nchar(dumpfile)>0){
@@ -450,11 +462,11 @@ echoIBM <- function(event, t=1, adds=NULL, rph=NULL, esnm=NULL, TVG.exp=2, compe
 		if(length(echoIBM.warnings_warninglist)>0){
 			for(i in seq_along(echoIBM.warnings_warninglist)){
 				write(paste0(i, ": ", echoIBM.warnings_warninglist[i]), dumpfile, append=TRUE)
-				}
 			}
+		}
 		else{
 			write("none", dumpfile, append=TRUE)
-			}
+		}
 		
 		# Print the end time and time used by the simulation:
 		endtime <- Sys.time()
@@ -463,7 +475,7 @@ echoIBM <- function(event, t=1, adds=NULL, rph=NULL, esnm=NULL, TVG.exp=2, compe
 		write("\n\n\n##### TIME USED: #####", dumpfile, append=TRUE)
 		write(colnames(ptime), ncolumns=5, file=dumpfile, sep="\t", append=TRUE)
 		write(ptime, file=dumpfile, sep="\t", append=TRUE)
-		}
-	##################################################
-	##################################################
 	}
+	##################################################
+	##################################################
+}

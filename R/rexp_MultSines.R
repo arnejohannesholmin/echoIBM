@@ -102,6 +102,9 @@ rexp_MultSines<-function(J=1324, I=25, L=3, N=40, P=10, w=3, olpn=c(0.5,1,0.5), 
 	}
 	# Apply the mean by multiplying by 'mean' both for exponential and Weibull:
 	if(!identical(mean, 1)){
+		if(length(mean)<2){
+			mean <- matrix(mean, byrow=TRUE, ncol=ncol(out), nrow=nrow(out))
+		}
 		out <- out * mean
 	}
 	return(out)
