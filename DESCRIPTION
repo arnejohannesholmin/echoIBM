@@ -1,6 +1,6 @@
 Package: echoIBM
 Title: Simulation of multibeam sonar data
-Version: 1.1
+Version: 1.2
 Authors@R: c(
   person("Arne Johannes", "Holmin", role = c("aut","cre"), email = "arnejh@imr.no"))
 Author: Arne Johannes Holmin [aut, cre],

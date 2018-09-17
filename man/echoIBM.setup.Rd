@@ -34,17 +34,18 @@ echoIBM.setCalibration(event, files = NULL, ...)
 
 echoIBM.setNoise(event, files = NULL, nr0a = list(), ...)
 
-echoIBM.setSchool(event, surveyRegion = NULL, target = c("herring",
-  "mackerel", "point"), schools = c("layer", "uniform", "flat"),
-  schoolSize = list(x = 100, y = 100, z = 20, type = "Weibull", shape = 5, cor
-  = 0.4), schoolDens = 1852^-2, schoolDist = NULL, schoolCount = NULL,
-  fillSurveyRegion = TRUE, seed = 0, depthRange = c(-100, 0),
-  onlyFirstEvent = FALSE, ...)
+echoIBM.setSchool(event, surveyRegion = NULL, expandSurveyRegion = NULL,
+  target = c("herring", "mackerel", "point"), schools = c("layer",
+  "uniform", "flat"), schoolSize = list(x = 100, y = 100, z = 20, type =
+  "Weibull", shape = 5, cor = 0.4), schoolDens = 1852^-2, schoolDist = NULL,
+  schoolCount = NULL, fillSurveyRegion = TRUE, seed = 0,
+  depthRange = c(-100, 0), onlyFirstEvent = FALSE, ...)
 
 echoIBM.setVessel(event, starttime = "2015-01-01 00:00:00", utim = NULL,
   origin = c(0, 0), heading = 0, distance = NULL, duration = 1,
   speed = NULL, nodesLocal = NULL, nodesEarth = NULL, pingduration = 1,
-  numt = NULL, heave = 0, rtxv = 0, rtyv = 0, rtzv = 0, ...)
+  numt = NULL, heave = 0, rtxv = 0, rtyv = 0, rtzv = 0,
+  offset = NULL, freeze = NULL, ...)
 
 echoIBM.getVesselPath(starttime = "2015-01-01 00:00:00", origin = NULL,
   heading = NULL, distance = NULL, speed = NULL, duration = NULL,
@@ -70,7 +71,7 @@ replaceKeepDim(x, replacement, esnm, ...)
 
 \item{distance}{The distance associated with each vessel track segment.}
 
-\item{speed}{The speed of the vessel in knots associated with each vessel track segment.}
+\item{speed}{The speed of the vessel in knots, associated with each vessel track segment.}
 
 \item{duration}{The duration of each vessel track segment in seconds.}
 

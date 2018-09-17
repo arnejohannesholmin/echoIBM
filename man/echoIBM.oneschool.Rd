@@ -12,7 +12,8 @@ echoIBM.oneschool(files, event, t = 1, tvessel, vesselutim, pingsSchool,
   dumpsize = 1e+07, timedumpfile = "timedump.txt", rand.sel = 1,
   scls = 1, volsc = c(1, 1, 1), method = c("closest", "linear"),
   ask = FALSE, parlist = list(), bptfile = NULL, max.radius = 0.2,
-  cores = 1, saveBrkt = FALSE, msg = FALSE)
+  cores = 1, saveBrkt = FALSE, msg = FALSE, discardOutside = c(r = Inf,
+  az = Inf, el = Inf), fishReaction = list())
 }
 \arguments{
 \item{files}{is a vector of the paths to the files on which the simulation is based.}
@@ -60,6 +61,12 @@ echoIBM.oneschool(files, event, t = 1, tvessel, vesselutim, pingsSchool,
 \item{cores}{is an integer specifying the number of cores to run the simulations over in parallel (should be lower than the number of cores in the computer).}
 
 \item{saveBrkt}{is TRUE to save the variables 'Brkt' and 'nsig', which contain data only when the number of significant targets is low enough (<=2) for the exact Barakat distribution to kick in instead of the approximation of the exponential distribution.}
+
+\item{msg}{Logical: If TRUE, show messages to the console and to dump files.}
+
+\item{discardOutside}{A vector of three elements specifying the size of the margin around the -3 dB main beam, specifide in units of the range/angular resolution, inside which targets are considered. Using e.g. c(2, 3, 3) will discard targest outside of a volume extending three beam widths around the beam width of the system (and to 2 times the radial range beyond the maximum range). This may save process time, but is not recommended without testing, as higher order side lobes encounter a larger volume than lower order side lobes.}
+
+\item{fishReaction}{A list of variables specifying the fish reaction to the vessel. Must contain the following variables: "magR", "mxrR", "mxdR", "facR". See info.TSD(c("magR", "mxrR", "mxdR", "facR")) for definition of these variables.}
 }
 \value{
 

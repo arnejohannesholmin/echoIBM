@@ -7,4 +7,11 @@ Providing utilities for simulating multibeam sonar data (echosounder, fishery so
 
 Stable version simplifying simulation for the user is under construction. 
 
-Moved development to GitHub
+Moved development to GitHub.
+
+
+########## Version 1.2 ##########
+
+Several bug fixes related to generating simulation experiments using echoIBM.setup() and the dependent functions echoIBM.set*(). Added echoIBM.addRandomness(), echoIBM.fishReaction() and changed echoIBM.fishInside(). However, these funcitons will go into echoIBM.generate_oneschool(). 
+
+Replaced echoIBM.oneping.j1() and echoIBM.oneping.j2() with echoIBM.oneping.oneschool.onesample(), making the code more robust and easier to understand.

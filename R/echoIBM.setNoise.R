@@ -33,8 +33,8 @@ echoIBM.setNoise <- function(
 		path <- event$path[[i]]
 		esnm <- event$esnm[[i]]
 		
-		# Match 'esnm' against the pre-defined systems:
-		files <- files[grep(esnm, basename(files), ignore.case=TRUE)]
+		# Match 'esnm' against the pre-defined systems, and get the corresponding file:
+		files <- getFileFromEsnm(files, esnm, type="noise", beforeUnderscore=TRUE)
 
 		# Read the noise file if there was a match:
 		numt <- 1
@@ -61,11 +61,6 @@ echoIBM.setNoise <- function(
 		
 		write.TSD(noise, tofile, numt=numt)
 		return(tofile)
-	}
-
-	# Get available noise files:
-	if(length(files)==0){
-		files <- list.files(system.file("extdata", "noise", package="echoIBM"), full.names=TRUE)
 	}
 
 	outfiles <- sapply(seq_along(event$path), copyForOneEsnm, event=event, files=files, nr0a=nr0a, dotList=dotList)

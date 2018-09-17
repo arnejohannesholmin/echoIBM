@@ -25,6 +25,9 @@
 #' @param bptfile  is the name of the file to which 'sllf', 'rad1', 'rad2', 'pbp1' and 'pbp2' is written (use NULL for no writing).
 #' @param cores  is an integer specifying the number of cores to run the simulations over in parallel (should be lower than the number of cores in the computer).
 #' @param saveBrkt  is TRUE to save the variables 'Brkt' and 'nsig', which contain data only when the number of significant targets is low enough (<=2) for the exact Barakat distribution to kick in instead of the approximation of the exponential distribution.
+#' @param msg				Logical: If TRUE, show messages to the console and to dump files.
+#' @param discardOutside	A vector of three elements specifying the size of the margin around the -3 dB main beam, specifide in units of the range/angular resolution, inside which targets are considered. Using e.g. c(2, 3, 3) will discard targest outside of a volume extending three beam widths around the beam width of the system (and to 2 times the radial range beyond the maximum range). This may save process time, but is not recommended without testing, as higher order side lobes encounter a larger volume than lower order side lobes.
+#' @param fishReaction		A list of variables specifying the fish reaction to the vessel. Must contain the following variables: "magR", "mxrR", "mxdR", "facR". See info.TSD(c("magR", "mxrR", "mxdR", "facR")) for definition of these variables. 
 #'
 #' @return
 #'
@@ -40,7 +43,7 @@
 #' @export
 #' @rdname echoIBM.oneschool
 #'
-echoIBM.oneschool <- function(files, event, t=1, tvessel, vesselutim, pingsSchool, areCompact, adds=NULL, pingsdir, pingsname, esnm=NULL, TVG.exp=2, compensated=c("pitch", "roll"), filesize=3e8, calibrate=TRUE, noise=c("nr", "bg", "ex"), mode=c("active", "passive"), max.memory=1e9, ow=TRUE, origin=1, dumpfile="dump.txt", dumpsize=10e6, timedumpfile="timedump.txt", rand.sel=1, scls=1, volsc=c(1, 1, 1), method=c("closest", "linear"), ask=FALSE, parlist=list(), bptfile=NULL, max.radius=0.2, cores=1, saveBrkt=FALSE, msg=FALSE){
+echoIBM.oneschool <- function(files, event, t=1, tvessel, vesselutim, pingsSchool, areCompact, adds=NULL, pingsdir, pingsname, esnm=NULL, TVG.exp=2, compensated=c("pitch", "roll"), filesize=3e8, calibrate=TRUE, noise=c("nr", "bg", "ex"), mode=c("active", "passive"), max.memory=1e9, ow=TRUE, origin=1, dumpfile="dump.txt", dumpsize=10e6, timedumpfile="timedump.txt", rand.sel=1, scls=1, volsc=c(1, 1, 1), method=c("closest", "linear"), ask=FALSE, parlist=list(), bptfile=NULL, max.radius=0.2, cores=1, saveBrkt=FALSE, msg=FALSE, discardOutside=c(r=Inf,az=Inf,el=Inf), fishReaction=list()){
 	
 	############ AUTHOR(S): ############
 	# Arne Johannes Holmin
@@ -72,9 +75,18 @@ echoIBM.oneschool <- function(files, event, t=1, tvessel, vesselutim, pingsSchoo
 	##################################################
 	########## Preparation ##########
 	##### Functions: #####
+	# Function for extracting a time step from a vector, and leave it untouched if of length 1:
+	extract_timestep <- function(x, t){
+		if(length(x)>1){
+			x[t]
+		}
+		else{
+			x
+		}
+	}
+	
 	# Function used to simulate and write to file one ping:
-	simulateWriteOne <- function(thist, thist_vec, data, pingsSchool, pingfile, event, vesselfiles, origin, mode, dynschoolfiles, adds, dynschoolnames, staticschoolnames, dumpfile, tempdump, nchart, esnm, TVG.exp, compensated, calibrate, noise, parlist, rand.sel, max.memory, lt, tvessel, scls){
-		
+	simulateWriteOne <- function(thist, thist_vec, data, pingsSchool, pingfile, event, vesselfiles, origin, mode, dynschoolfiles, adds, dynschoolnames, staticschoolnames, dumpfile, tempdump, nchart, esnm, TVG.exp, compensated, calibrate, noise, parlist, rand.sel, max.memory, lt, tvessel, scls, discardOutside, fishReaction){
 		
 		# Store the process time to save the time used for the simulation:
 		ptm <- proc.time()[3]
@@ -111,6 +123,11 @@ echoIBM.oneschool <- function(files, event, t=1, tvessel, vesselutim, pingsSchoo
 		write(paste("\n\n\n\n\n########## TIME STEP ", thist, " (", paste(ftim.TSD(vessel, format="yyyy-mm-dd HH:MM:SS.FFF"), " GMT", sep=""), "): ##########", sep=""), thisdumpfile, append=FALSE)
 
 		# Get the dynamic school variables, if mode is "active":
+		# Add the seed of the randomness added to the school in echoIBM.generate_oneschool():
+		data$seed <- parlist$seed[thist]
+		data$discardOutside <- discardOutside
+		data$rand.sel <- rand.sel
+		
 		dynschool <- list()
 		if(strff("a", mode[1])){
 			if(areCompact){
@@ -136,22 +153,37 @@ echoIBM.oneschool <- function(files, event, t=1, tvessel, vesselutim, pingsSchoo
 				}
 			}
 		}
-	
+		gentime <- proc.time()[3]-ptm
+		cat("Time used for generating schools:", gentime, "sec \n")
+		
 		# Add the data in 'adds' (overrides the data read in the school files):
 		#dynschoolinadds <- intersect(names(adds), dynschoolnames)
 		#dynschool[dynschoolinadds] <- adds[dynschoolinadds]
-		# Strip 'dynschool' of any static variables:
-		dynschool <- dynschool[intersect(dynschoolnames, names(dynschool))]
-
+		
 		# Removed since the info is written to the individual dump files:
 		### Write info to the dumpfile:
 		###if(length(dumpfile)>0 && nchar(dumpfile)>0){
 		###	write(paste("\n\n\n\n\n########## TIME STEP ", thist, " (", paste(ftim.TSD(vessel, format="yyyy-mm-dd HH:MM:SS.FFF"), " GMT", sep=""), "): ##########", sep=""), dumpfile, append=TRUE)
 		###	}
-		# Discard fish outside of the radial and angular range of the sonar/echosounder:
-		dynschool <- echoIBM.fishInside(dynschool, data, dumpfile=dumpfile)
-	
-	
+		
+					## Discard fish outside of the radial and angular range of the sonar/echosounder:
+					##discardOutside <- c(2, 3, 3)
+					#temp <- echoIBM.fishInside(dynschool=dynschool, data=data, dumpfile=thisdumpfile, discardOutside=discardOutside, rand.sel)
+					#dynschool <- temp$dynschool
+					#data <- temp$data
+		            #
+					## Add randomness in fish positions and orientations:
+					#dynschool$seed <- parlist$seed[thist]
+					#dynschool <- echoIBM.addRandomness(dynschool, grsd_plHS=NULL)
+
+		# Apply reaction of the fish to the vessel:
+		thisFishReaction <- lapply(fishReaction, extract_timestep, t=thist)
+		dynschool <- echoIBM.fishReaction(c(dynschool, vessel, thisFishReaction, data["psze"]))
+
+		# Keep only the dynamic school variables:
+		# Strip 'dynschool' of any static variables:
+		dynschool <- dynschool[intersect(dynschoolnames, names(dynschool))]
+		
 		# If mode is "passive" the funciton echoIBM.oneping.oneschool.passive() is used:
 		if(sum(unlist(lapply(dynschool, length)))==0){
 			if(strff("a", mode[1])){
@@ -161,27 +193,29 @@ echoIBM.oneschool <- function(files, event, t=1, tvessel, vesselutim, pingsSchoo
 		}
 		else{
 			# Simulate the i'th time step of the current school (the order of the input list c(dynschool, data, vessel) is important, because the dynamic school data may be present in files containing static variables, and in the order used the specifically read dynamic data has precedence):
-			# Extract a random selection of the targets using 'rand.sel':
-			Nl <- max(length(dynschool$psxf), length(dynschool$psyf), length(dynschool$pszf))
-			if(0<rand.sel[1] && rand.sel[1]<1){
-				if(length(rand.sel)>1){
-					set.seed(rand.sel[2])
-				}
-				affected.variables <- c(dynschoolnames, staticschoolnames)
-				#selection <- sample(c(TRUE, FALSE), Nl, TRUE, c(rand.sel[1], 1-rand.sel[1]))
-				selection <- sample(seq_len(Nl), round(Nl * rand.sel[1]))
-				for(j in seq_along(affected.variables)){
-					thisvar <- affected.variables[j]
-					if(length(data[[thisvar]])==Nl && !is.function(data[[thisvar]])){
-						data[[thisvar]] <- data[[thisvar]][selection]
-					}
-					if(length(dynschool[[thisvar]])==Nl && !is.function(dynschool[[thisvar]])){
-						dynschool[[thisvar]] <- dynschool[[thisvar]][selection]
-					}
-				}
-			}
+			
+			### # Extract a random selection of the targets using 'rand.sel':
+			### Nl <- max(length(dynschool$psxf), length(dynschool$psyf), length(dynschool$pszf))
+			### if(0<rand.sel[1] && rand.sel[1]<1){
+			### 	if(length(rand.sel)>1){
+			### 		set.seed(rand.sel[2])
+			### 	}
+			### 	affected.variables <- c(dynschoolnames, staticschoolnames)
+			### 	#selection <- sample(c(TRUE, FALSE), Nl, TRUE, c(rand.sel[1], 1-rand.sel[1]))
+			### 	selection <- sample(seq_len(Nl), round(Nl * rand.sel[1]))
+			### 	for(j in seq_along(affected.variables)){
+			### 		thisvar <- affected.variables[j]
+			### 		if(length(data[[thisvar]])==Nl && !is.function(data[[thisvar]])){
+			### 			data[[thisvar]] <- data[[thisvar]][selection]
+			### 		}
+			### 		if(length(dynschool[[thisvar]])==Nl && !is.function(dynschool[[thisvar]])){
+			### 			dynschool[[thisvar]] <- dynschool[[thisvar]][selection]
+			### 		}
+			### 	}
+			### }
 			
 			# Repeat data$epss and data$epsl if any of them are not NULL or a function:
+			Nl <- max(length(dynschool$psxf), length(dynschool$psyf), length(dynschool$pszf))
 			if(length(data$epss)>0 && !is.function(data$epss)){
 				data$epss <- rep(data$epss, length.out=Nl)
 			}
@@ -194,8 +228,8 @@ echoIBM.oneschool <- function(files, event, t=1, tvessel, vesselutim, pingsSchoo
 			thisdata <- c(dynschool, lapply(adds[intersect(names(adds), dynvesselnames)], function(x) x[thist]), data[setdiff(names(data), c(names(dynschool), names(vessel)))], vessel)
 			
 			# If scls is given in the school data and in the input parameter 'scls', multiply these:
-			if(scls!=1 && length(data$scls)){
-				data$scls <- data$scls * scls
+			if(scls!=1 && length(thisdata$scls)){
+				thisdata$scls <- thisdata$scls * scls
 			}
 			
 			#---# # If the 'indp' is given, which links each time step to presets in the beams data, select the appropriate preset. Otherwise extract the current time step, if any:
@@ -207,6 +241,9 @@ echoIBM.oneschool <- function(files, event, t=1, tvessel, vesselutim, pingsSchoo
 		
 			sv <- echoIBM.oneping.oneschool(thisdata, esnm=esnm, TVG.exp=TVG.exp, compensated=compensated, calibrate=calibrate, noise=noise, max.memory=max.memory, dumpfile=thisdumpfile, ask=FALSE, parlist=parlist, msg=msg)
 		}
+		simtime <- proc.time()[3]-ptm - gentime
+		cat("Time used for simulation:", simtime, "sec \n")
+		
 		# Compress the acoustic data:
 		vbsc <- c(sv$sv)
 		vxIX <- which(vbsc>0)
@@ -234,9 +271,11 @@ echoIBM.oneschool <- function(files, event, t=1, tvessel, vesselutim, pingsSchoo
 		
 		# Write the data to file:
 		write.TSD(con=pingfile, x=x, numt=1, ow=ow, keep.float=TRUE, append=thist!=thist_vec[1], reserve=length(thist_vec))
+		
 		# Print and write the time used for the current simulation:
 		simtime <- proc.time()[3]-ptm
-		cat(simtime, "sec \n")
+		cat("Time used in total:", simtime, "sec \n------------------------------\n")
+		
 		if(length(thisdumpfile)>0 && nchar(thisdumpfile)>0){
 			write(c(thist, simtime), timedumpfile, append=TRUE, sep="\t")
 		}
@@ -246,214 +285,14 @@ echoIBM.oneschool <- function(files, event, t=1, tvessel, vesselutim, pingsSchoo
 	
 	
 	
-	simulateWrite <- function(thist_vec, data, pingsSchool, event, vesselfiles, origin, mode, dynschoolfiles, adds, dynschoolnames, staticschoolnames, dumpfile, tempdump, nchart, esnm, TVG.exp, compensated, calibrate, noise, parlist, rand.sel, max.memory, lt, tvessel, scls){
+	simulateWrite <- function(thist_vec, data, pingsSchool, event, vesselfiles, origin, mode, dynschoolfiles, adds, dynschoolnames, staticschoolnames, dumpfile, tempdump, nchart, esnm, TVG.exp, compensated, calibrate, noise, parlist, rand.sel, max.memory, lt, tvessel, scls, discardOutside, fishReaction){
 		# Define the name of the file to which the simulated data are written (containing the first time step index):
 		pingfile <- file.path(pingsdir, paste(pingsname, "_", esnm, "_T", zeropad(thist_vec[1], nchar(lt)), ".pings", sep=""))
 		# Run through the time steps:
-		outputWarn <- lapply(thist_vec, simulateWriteOne, thist_vec=thist_vec, data=data, pingsSchool=pingsSchool, pingfile=pingfile, event=event, vesselfiles=vesselfiles, origin=origin, mode=mode, dynschoolfiles=dynschoolfiles, adds=adds, dynschoolnames=dynschoolnames, staticschoolnames=staticschoolnames, dumpfile=dumpfile, tempdump=tempdump, nchart=nchart, esnm=esnm, TVG.exp=TVG.exp, compensated=compensated, calibrate=calibrate, noise=noise, parlist=parlist, rand.sel=rand.sel, max.memory=max.memory, lt=lt, tvessel=tvessel, scls=scls)
+		outputWarn <- lapply(thist_vec, simulateWriteOne, thist_vec=thist_vec, data=data, pingsSchool=pingsSchool, pingfile=pingfile, event=event, vesselfiles=vesselfiles, origin=origin, mode=mode, dynschoolfiles=dynschoolfiles, adds=adds, dynschoolnames=dynschoolnames, staticschoolnames=staticschoolnames, dumpfile=dumpfile, tempdump=tempdump, nchart=nchart, esnm=esnm, TVG.exp=TVG.exp, compensated=compensated, calibrate=calibrate, noise=noise, parlist=parlist, rand.sel=rand.sel, max.memory=max.memory, lt=lt, tvessel=tvessel, scls=scls, discardOutside=discardOutside, fishReaction=fishReaction)
 		# Return the warnings:
-		return(outputWarn)		
+		return(pingfile)		
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	###simulateWrite <- function(thist_vec, data, pingsSchool, event, vesselfiles, origin, mode, dynschoolfiles, adds, dynschoolnames, staticschoolnames, dumpfile, tempdump, nchart, esnm, TVG.exp, compensated, calibrate, noise, parlist, rand.sel, max.memory, lt, tvessel, scls){
-	###	for(thist in thist_vec){
-	###		# Store the process time to save the time used for the simulation:
-	###		ptm <- proc.time()[3]
-	###		thiswarning <- NULL
-	###		thisdumpfile <- file.path(tempdump, paste(substr(basename(dumpfile), 1, nchar(basename(dumpfile))-4), "_", zeropad(thist, nchart), ".txt", sep=""))
-	###		
-	###		# Get the dynamic school file number 'thisfilenr' and the time step number of the file 'thisindtoffile' for the current time step:
-	###		thisfilenr <- pingsSchool[[thist]][, 2]
-	###		thisindtoffile <- pingsSchool[[thist]][, 3]
-	###		
-	###		# Simulate echo sounder observation for ping thist:
-	###		vessel <- read.TSDs(vesselfiles, t=thist, var="all", header=FALSE, info=FALSE)
-	###		if(length(vessel)==0){
-	###			warning(paste("No vessel data present in the following vessel files for time step ", thist, ":\n", paste(vesselfiles, collapse="\n"), sep=""))
-	###		}
-	###		else if(!all(sapply(vessel, length)==1)){
-	###			stop("The vessel file(s) may not be organized by time steps, causing more than one value to be read for the vessel information at each time step")
-	###		}
-	###		if(is.null(vessel$psxv) && is.null(vessel$psyv)){
-	###			vessel0 <- read.TSDs(vesselfiles, t=origin, var=c("lonv", "latv"), header=FALSE)
-	###			posv <- global2car(cbind(vessel$lonv, vessel$latv), vessel0)
-	###			vessel$psxv <- posv[, 1]
-	###			vessel$psyv <- posv[, 2]
-	###		}
-	###		# Add the vessel information to the data:
-	###		data[names(vessel)] <- vessel
-	###		
-	###		### # 2017-10-16: Reading in beams data at each time step was a bad idea, since the beams data are modified using echoIBM.default.oneschool() in echoIBM.oneschool(). Thus we only accept one beam setting, i.e., one ping of beams data, and all the work on implemening an indp file will not be used for now, but may be used in the future? ###
-	###		### # Read beams data for the current time step:
-	###		### beams <- read.event(event, t=thist, var="beams")
-	###		### data[names(beams)] <- beams
-	###		
-	###		# Write info to the current dumpfile:
-	###		write(paste("\n\n\n\n\n########## TIME STEP ", thist, " (", paste(ftim.TSD(vessel, format="yyyy-mm-dd HH:MM:SS.FFF"), " GMT", sep=""), "): ##########", sep=""), thisdumpfile, append=FALSE)
-	###	
-	###		# Get the dynamic school variables, if mode is "active":
-	###		dynschool <- list()
-	###		if(strff("a", mode[1])){
-	###			if(areCompact){
-	###				# Apply the 'utim' information used as input to echoIBM.moveSchools() if 'recycle' was given as a numeric in echoIBM(), in which case 'pingsSchool' contains only the numerics 'recycle':
-	###				dynschool <- echoIBM.generate_dynschool(data, t=thisindtoffile[1], vesselutim=vesselutim, adds=adds, dumpfile=thisdumpfile)
-	###			}
-	###			else if(length(thisfilenr)>0){
-	###				if(length(thisfilenr)==1){
-	###					dynschool <- read.TSD(dynschoolfiles[thisfilenr[1]], t=thisindtoffile[1], var="all", header=FALSE, dimension=FALSE)
-	###				}
-	###				else{
-	###					tempdynschool <- list()
-	###					for(i in seq_along(thisfilenr)){
-	###						thisdata <- read.TSD(dynschoolfiles[thisfilenr[i]], t=thisindtoffile[i], var="all", header=FALSE, dimension=FALSE)
-	###						tempdynschool[paste(names(thisdata), i, sep="")] <- thisdata
-	###					}
-	###					# Merge the data read in separate steps in the for loop:
-	###					names(tempdynschool) <- substr(names(tempdynschool), 1, 4)
-	###					namestempdynschool <- names(tempdynschool)
-	###					for(i in seq_along(namestempdynschool)){
-	###						dynschool[[namestempdynschool[i]]] <- unlist(tempdynschool[namestempdynschool==namestempdynschool[i]])
-	###					}
-	###				}
-	###			}
-	###		}
-	###		
-	###		# Add the data in 'adds' (overrides the data read in the school files):
-	###		#dynschoolinadds <- intersect(names(adds), dynschoolnames)
-	###		#dynschool[dynschoolinadds] <- adds[dynschoolinadds]
-	###		# Strip 'dynschool' of any static variables:
-	###		printt(3333333333)
-	###		printt((dynschool$scls))
-	###		dynschool <- dynschool[intersect(dynschoolnames, names(dynschool))]
-	###	
-	###		# Removed since the info is written to the individual dump files:
-	###		### Write info to the dumpfile:
-	###		###if(length(dumpfile)>0 && nchar(dumpfile)>0){
-	###		###	write(paste("\n\n\n\n\n########## TIME STEP ", thist, " (", paste(ftim.TSD(vessel, format="yyyy-mm-dd HH:MM:SS.FFF"), " GMT", sep=""), "): ##########", sep=""), dumpfile, append=TRUE)
-	###		###	}
-	###		# Discard fish outside of the radial and angular range of the sonar/echosounder:
-	###		printt(44444444)
-	###		printt((dynschool$scls))
-	###		dynschool <- echoIBM.fishInside(dynschool, data, dumpfile=dumpfile)
-	###		
-	###		
-	###		printt(555555)
-	###		printt((dynschool$scls))
-	###		# If mode is "passive" the funciton echoIBM.oneping.oneschool.passive() is used:
-	###		if(sum(unlist(lapply(dynschool, length)))==0){
-	###			if(strff("a", mode[1])){
-	###				thiswarning <- c(thiswarning, paste("School dynamics missing for time step ", thist, sep=""))
-	###			}
-	###			sv <- echoIBM.oneping.oneschool.passive(data, esnm=esnm, TVG.exp=TVG.exp, compensated=compensated, calibrate=calibrate, noise=noise, dumpfile=thisdumpfile, parlist=parlist)
-	###		}
-	###		else{
-	###			# Simulate the i'th time step of the current school (the order of the input list c(dynschool, data, vessel) is important, because the dynamic school data may be present in files containing static variables, and in the order used the specifically read dynamic data has precedence):
-	###			# Extract a random selection of the targets using 'rand.sel':
-	###			Nl <- max(length(dynschool$psxf), length(dynschool$psyf), length(dynschool$pszf))
-	###			if(0<rand.sel[1] && rand.sel[1]<1){
-	###				if(length(rand.sel)>1){
-	###					set.seed(rand.sel[2])
-	###				}
-	###				affected.variables <- c(dynschoolnames, staticschoolnames)
-	###				selection <- sample(c(TRUE, FALSE), Nl, TRUE, c(rand.sel[1], 1-rand.sel[1]))
-	###				for(j in seq_along(affected.variables)){
-	###					thisvar <- affected.variables[j]
-	###					if(length(data[[thisvar]])==Nl && !is.function(data[[thisvar]])){
-	###						data[[thisvar]] <- data[[thisvar]][selection]
-	###					}
-	###					if(length(dynschool[[thisvar]])==Nl && !is.function(dynschool[[thisvar]])){
-	###						dynschool[[thisvar]] <- dynschool[[thisvar]][selection]
-	###					}
-	###				}
-	###			}
-	###			printt(66666)
-	###			printt((dynschool$scls))
-	###			printt((data$scls))
-	###			
-	###			# Repeat data$epss and data$epsl if any of them are not NULL or a function:
-	###			if(length(data$epss)>0 && !is.function(data$epss)){
-	###				data$epss <- rep(data$epss, length.out=Nl)
-	###			}
-	###			if(length(data$epsl)>0 && !is.function(data$epsl)){
-	###				data$epsl <- rep(data$epsl, length.out=Nl)
-	###			}
-	###		
-	###			# Simulate the current time step (adding dynamic vessel data from 'adds'):
-	###			#data <- c(list(scls=scls), dynschool, lapply(adds[intersect(names(adds), dynvesselnames)], function(x) x[thist]), data[setdiff(names(data), c(names(dynschool), names(vessel)))], vessel)
-	###			data <- c(dynschool, lapply(adds[intersect(names(adds), dynvesselnames)], function(x) x[thist]), data[setdiff(names(data), c(names(dynschool), names(vessel)))], vessel)
-	###			printt(777777)
-	###			printt((data$scls))
-	###			
-	###			# If scls is given in the school data and in the input parameter 'scls', multiply these:
-	###			if(scls!=1 && length(data$scls)){
-	###				printt(111)
-	###				data$scls <- data$scls * scls
-	###			}
-	###			printt(888888)
-	###			printt((data$scls))
-	###			
-	###			#---# # If the 'indp' is given, which links each time step to presets in the beams data, select the appropriate preset. Otherwise extract the current time step, if any:
-	###			#---# beamsnames <- labl.TSD("rb")
-	###			#---# if(length(dim(data$freq))>1){
-	###			#---# 	areBeamsVar <- intersect(names(data), beamsnames)
-	###			#---# 	data[areBeamsVar] <- extractTimeStep(data[areBeamsVar], if(length(data$indp)) data$indp[thist] else thist)
-	###			#---# }
-	###			
-	###			sv <- echoIBM.oneping.oneschool(data, esnm=esnm, TVG.exp=TVG.exp, compensated=compensated, calibrate=calibrate, noise=noise, max.memory=max.memory, dumpfile=thisdumpfile, ask=FALSE, parlist=parlist, msg=msg)
-	###		}
-	###		# Compress the acoustic data:
-	###		vbsc <- c(sv$sv)
-	###		vxIX <- which(vbsc>0)
-	###		if(length(vxIX)>=length(vbsc)/2){
-	###			vxIX <- NULL
-	###		}
-	###		else{
-	###			vbsc <- vbsc[vxIX]
-	###		}
-	###		# Write the ping:
-	###		if(lt==length(tvessel)){
-	###			x_time <- list(indt=as.double(tvessel[t==thist]), utim=vesselutim[tvessel[t==thist]])
-	###		}
-	###		else{
-	###			x_time <- list(indt=as.double(thist), utim=vesselutim[thist])
-	###		}
-	###		if(saveBrkt){
-	###			x <- c( x_time, list(numb=data$numb, lenb=data$lenb, vbsc=vbsc, vxIX=vxIX, Brkt=sv$Brkt, nsig=sv$nsig), vessel[c("psxv", "psyv", "pszv", "rtxv", "rtyv", "rtzv", "ispv")] )
-	###		}
-	###		else{
-	###			x <- c( x_time, list(numb=data$numb, lenb=data$lenb, vbsc=vbsc, vxIX=vxIX), vessel[c("psxv", "psyv", "pszv", "rtxv", "rtyv", "rtzv", "ispv")] )
-	###		}
-	###		# Assure that no duplicated elements names of 'x' are present when writing to file (Favouring the first of duplicatly named elements):
-	###		x <- x[!duplicated(names(x))]
-	###		if(thist==thist_vec[1]){
-	###			pingfile <- file.path(pingsdir, paste(pingsname, "_", esnm, "_T", zeropad(x_time$indt, nchar(lt)), ".pings", sep=""))
-	###		}
-	###		# Write the data to file:
-	###		write.TSD(con=pingfile, x=x, numt=1, ow=ow, keep.float=TRUE, append=thist!=thist_vec[1], reserve=length(thist_vec))
-	###		# Print and write the time used for the current simulation:
-	###		simtime <- proc.time()[3]-ptm
-	###		cat(simtime, "sec \n")
-	###		if(length(thisdumpfile)>0 && nchar(thisdumpfile)>0){
-	###			write(c(thist, simtime), timedumpfile, append=TRUE, sep="\t")
-	###		}
-	###	} # End of for loop through time steps.
-	###	
-	###	# Return the warnings:
-	###	thiswarning
-	###} # End of simulateWrite
-	##### End of Functions: #####
 	
 	
 	# If this function is the top level function, create the warnings object:
@@ -492,7 +331,8 @@ echoIBM.oneschool <- function(files, event, t=1, tvessel, vesselutim, pingsSchoo
 	#beams <- read.TSDs(filegroups$beams, t="all", var="all", drop=FALSE)
 	### # 2017-10-16: Reading in beams data at each time step was a bad idea, since the beams data are modified using echoIBM.default.oneschool() in echoIBM.oneschool(). Thus we only accept one beam setting, i.e., one ping of beams data, and all the work on implemening an indp file will not be used for now, but may be used in the future? ###
 	### beams0 <- read.event(event, t="all", var="beams")
-	beams0 <- read.event(filegroups$beams, t=1, var="all")
+	
+	beams0 <- read.TSDs(filegroups$beams, t=1, var="all")
 	
 	if(is.null(esnm)){
 		esnm <- head(beams0$esnm, 1)
@@ -531,7 +371,7 @@ echoIBM.oneschool <- function(files, event, t=1, tvessel, vesselutim, pingsSchoo
 		adds[dynvesselinadds[addstooshort]] <- lapply(adds[dynvesselinadds[addstooshort]], function(x) rep(x, length.out=max(t)))
 		}
 	
-	
+		
 	########## Execution and output ##########
 	# Simulate and write:
 	if(length(t)>0){
@@ -596,11 +436,10 @@ echoIBM.oneschool <- function(files, event, t=1, tvessel, vesselutim, pingsSchoo
 		else{
 			cat("Simulating:\n")
 		}
-		out <- pblapply(t, simulateWrite, data=data, pingsSchool=pingsSchool, event=event, vesselfiles=filegroups$vessel, origin=origin, mode=mode, dynschoolfiles=dynschoolfiles, adds=adds, dynschoolnames=dynschoolnames, staticschoolnames=staticschoolnames, dumpfile=dumpfile, tempdump=tempdump, nchart=max(nchar(unlist(t))), esnm=esnm, TVG.exp=TVG.exp, compensated=compensated, calibrate=calibrate, noise=noise, parlist=parlist, rand.sel=rand.sel, max.memory=max.memory, lt=maxt, tvessel=tvessel, scls=scls, cl=cores)	
+		out <- pblapply(t, simulateWrite, data=data, pingsSchool=pingsSchool, event=event, vesselfiles=filegroups$vessel, origin=origin, mode=mode, dynschoolfiles=dynschoolfiles, adds=adds, dynschoolnames=dynschoolnames, staticschoolnames=staticschoolnames, dumpfile=dumpfile, tempdump=tempdump, nchart=max(nchar(unlist(t))), esnm=esnm, TVG.exp=TVG.exp, compensated=compensated, calibrate=calibrate, noise=noise, parlist=parlist, rand.sel=rand.sel, max.memory=max.memory, lt=maxt, tvessel=tvessel, scls=scls, discardOutside=discardOutside, fishReaction=fishReaction, cl=cores)	
 		if(parallel){
 			stopCluster(cores)
 		}
-		
 		
 		# Merge the dump files:
 		# Use a maximum file size:
@@ -620,7 +459,9 @@ echoIBM.oneschool <- function(files, event, t=1, tvessel, vesselutim, pingsSchoo
 				write("none", dumpfile, append=TRUE)
 			}
 		}
+		return(out)
 	}
-	##################################################
-	##################################################
+	else{
+		return(NULL)
+	}
 }

@@ -48,7 +48,9 @@ etaCompression <- function(data=list(), type=c("area", "obln")){
 		data$gaml <- 0
 		}
 	if(length(data$gamw)==0){
-		data$gamw <- -0.23
+		#data$gamw <- -0.23
+		# The epth compression should not be defaulted to herring, and should rather me 0:
+		data$gamw <- 0
 		}
 	if(length(data$pszf)==0){
 		data$pszf <- 0

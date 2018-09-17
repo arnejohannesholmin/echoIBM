@@ -28,11 +28,32 @@ echoIBM.moveSchools <- function(data, utim){
 		out
 	}
 	
+	# In this function the heading of the school is used. Before 2018-09-16, both the heading and the orientation were indicated with the (thtS, phiS) pair, but this was changed to use (hazS, helS) for the heading (azimuth, elevation), and (oazS, oelS) for the orientation. Here (hazS, helS) is used, and if missing interpreted from (thtS, phiS) if present:
+	thtSphiS_present <- length(data$thtS)>0 && length(data$phiS)>0
+	hazShelS_present <- length(data$hazS)>0 && length(data$helS)>0
+	#if(!hazShelS_present && thtSphiS_present){
+	#	data$hazS <- data$thtS
+	#	data$helS <- data$phiS
+	#}
+	if(!hazShelS_present){
+		if(thtSphiS_present){
+			data$hazS <- data$thtS
+			data$helS <- data$phiS
+		}
+		else{
+			warnings("hazS and helS missing, and was defaulted to 0 and pi/2 (heading horizontally east)")
+			data$hazS <- 0
+			data$helS <- pi/2
+		}
+	}
+	
+	
 	# Modify the school data only if the UNIX time is present:
 	if(length(data$utmS)){
 		if(NCOL(data$psxS)==1){
 			timespan <- utim - data$utmS
-			xyz <- cbind(data$psxS, data$psyS, data$pszS) + sph2car(cbind(timespan * data$aspS, data$thtS, data$phiS))
+			#xyz <- cbind(data$psxS, data$psyS, data$pszS) + sph2car(cbind(timespan * data$aspS, data$thtS, data$phiS))
+			xyz <- cbind(data$psxS, data$psyS, data$pszS) + sph2car(cbind(timespan * data$aspS, data$hazS, data$helS))
 			data$psxS <- xyz[,1]
 			data$psyS <- xyz[,2]
 			data$pszS <- xyz[,3]

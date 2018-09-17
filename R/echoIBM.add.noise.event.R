@@ -27,8 +27,7 @@
 #' @export
 #' @rdname echoIBM
 #'
-echoIBM.add.noise.event <- function(event, fileind=NULL, beams0=NULL, ctd=NULL, TVG.in=TRUE, TVG.out=TRUE, TVG.exp=2, noisetypes=c("nr","bg","cex"), ow=TRUE, parlist=list(), cores=1){
-#echoIBM.add.noise.event <- function(event, fileind=NULL, beams0=NULL, ctd=NULL, TVG.in=TRUE, TVG.out=TRUE, TVG.exp=2, noisetypes=c("nr","bg","cex"), scls=1, ow=TRUE, parlist=list(), cores=1){
+echoIBM.add.noise.event <- function(event, pingsfiles=NULL, fileind=NULL, beams0=NULL, ctd=NULL, TVG.in=TRUE, TVG.out=TRUE, TVG.exp=2, noisetypes=c("nr","bg","cex"), ow=TRUE, parlist=list(), cores=1){
 	
 	########## Preparation ##########
 	# Hard code the dumpfile name of the merging:
@@ -45,11 +44,6 @@ echoIBM.add.noise.event <- function(event, fileind=NULL, beams0=NULL, ctd=NULL, 
 		if(TVG.in){
 			thisdata$vbsc <- SimradRaw::apply.TVG(thisdata$vbsc, beams=c(beams0, ctd), rm=TRUE, TVG.exp=TVG.exp)
 		}
-		
-		#### Scale the signal:
-		###if(scls!=1){
-		###	thisdata$vbsc <- thisdata$vbsc * scls
-		###}
 		
 		### Add noise to the summed data: ###
 		if(length(dim(thisdata$vbsc))==2){
@@ -116,9 +110,11 @@ echoIBM.add.noise.event <- function(event, fileind=NULL, beams0=NULL, ctd=NULL, 
 	### Sum up the simulations and add noise: ###
 	# Get the names of the .pings files located in the "temp"-directoy:
 	tempevent <- file.path(dirname(event[1]), "temp")
-	cat("Listing temporary files...\n")
-	files <- list.files(tempevent, full.names=TRUE, recursive=TRUE)
-	pingsfiles <- echoIBM.getFileTypes(files, ext=c("pings"))$pings
+	if(length(pingsfiles)==0){
+		cat("Listing temporary files...\n")
+		files <- list.files(tempevent, full.names=TRUE, recursive=TRUE)
+		pingsfiles <- echoIBM.getFileTypes(files, ext=c("pings"))$pings
+	}
 	if(length(pingsfiles)==0){
 		warning(paste0("There are no pings-files in the directory of temp-files ", tempevent))
 	}
@@ -152,10 +148,6 @@ echoIBM.add.noise.event <- function(event, fileind=NULL, beams0=NULL, ctd=NULL, 
 	
 	# Write to the dumpfile (3):
 	if(length(dumpfile)>0 && nchar(dumpfile)>0){
-		#### If the signal is scaled:
-		###if(scls!=1){
-		###	write(paste0("\n\n# Signal scaled by the factor ", scls, "\n\n"), dumpfile, append=TRUE)
-		###}
 		
 		# Report the noise applied to the simulations:
 		implemented_noise <- intersect(gsub("_fun", "", noisetypes),c("ms","acex","aex","cex","ex","nr","bg","pn","bk","phase"))

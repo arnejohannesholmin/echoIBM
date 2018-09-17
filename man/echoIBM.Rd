@@ -13,11 +13,13 @@ echoIBM(event, t = 1, adds = NULL, rph = NULL, esnm = NULL,
   keep.temp = c(TRUE, FALSE), dumpsize = 1e+07, cores = 1, rand.sel = 1,
   scls = 1, method = c("closest", "linear"), ask = FALSE,
   parlist = list(), bptfile = TRUE, max.radius = 0.2, path = FALSE,
-  pathnr = 1, onlyMerge = FALSE, msg = FALSE)
+  pathnr = 1, onlyMerge = FALSE, msg = FALSE, discardOutside = c(r =
+  Inf, az = Inf, el = Inf), fishReaction = list())
 
-echoIBM.add.noise.event(event, fileind = NULL, beams0 = NULL, ctd = NULL,
-  TVG.in = TRUE, TVG.out = TRUE, TVG.exp = 2, noisetypes = c("nr", "bg",
-  "cex"), ow = TRUE, parlist = list(), cores = 1)
+echoIBM.add.noise.event(event, pingsfiles = NULL, fileind = NULL,
+  beams0 = NULL, ctd = NULL, TVG.in = TRUE, TVG.out = TRUE,
+  TVG.exp = 2, noisetypes = c("nr", "bg", "cex"), ow = TRUE,
+  parlist = list(), cores = 1)
 }
 \arguments{
 \item{event}{is a vector of strings, where the first is the path to the directory of the simulation files, and any additional stings are directories or files containing for example school files located elsewhere than the main directory given by the first string in 'event'. Additional schools must be given as directories in 'event', not as paths to individual files, as this implies that these files "belong" to any existing school located in event[1]. Files containing beam configuration, noise values, calibration values, ctd-values and vessel dynamics need to be given in the main directory! Also the directories need to be exact, and not directories above the actual directory, like in read.event(). School information may be given also ...???}
@@ -46,7 +48,7 @@ echoIBM.add.noise.event(event, fileind = NULL, beams0 = NULL, ctd = NULL,
 
 \item{scan.volume}{is TRUE if the volume selected when path=TRUE is to be scanned to see if the school is inside the volume at each ping.}
 
-\item{margin}{is a vector of the margins on either side of the span of 'x' (recycled if not of length 4).}
+\item{margin}{is a vector of the margins on either side of the span of 'x' (recycled if not of length 4) (used only when path=TRUE).}
 
 \item{smooth}{has one possible value "spline", smooths the x-values and the y-values of the generated vessel path separately using the spline function.}
 
@@ -77,6 +79,14 @@ echoIBM.add.noise.event(event, fileind = NULL, beams0 = NULL, ctd = NULL,
 \item{path}{is TRUE to allow the user to select vessel positions interactively.}
 
 \item{pathnr}{is the number of the vessel path drawn, to be used in the name of the ".vessel" file. If a new ".vessel" file is to be written, 'pathnr' must be different than the pathnr of existing files.}
+
+\item{onlyMerge}{Logical: If TRUE, do not simulate but only merge existing temporary simulated files.}
+
+\item{msg}{Logical: If TRUE, show messages to the console and to dump files.}
+
+\item{discardOutside}{A vector of three elements specifying the size of the margin around the -3 dB main beam, specifide in units of the range/angular resolution, inside which targets are considered. Using e.g. c(2, 3, 3) will discard targest outside of a volume extending three beam widths around the beam width of the system (and to 2 times the radial range beyond the maximum range). This may save process time, but is not recommended without testing, as higher order side lobes encounter a larger volume than lower order side lobes.}
+
+\item{fishReaction}{A list of variables specifying the fish reaction to the vessel. Must contain the following variables: "magR", "mxrR", "mxdR", "facR". See info.TSD(c("magR", "mxrR", "mxdR", "facR")) for definition of these variables.}
 
 \item{beams0}{is the list of beams inputs as returned from read.TSD. For the treatment of noise at least one of the following variables are required: bgns, nrn0.}
 

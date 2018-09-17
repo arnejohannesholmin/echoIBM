@@ -31,9 +31,9 @@ echoIBM.setCTD <- function(
 		path <- event$path[[i]]
 		esnm <- event$esnm[[i]]
 		
-		# Match 'esnm' against the pre-defined systems:
-		files <- files[grep(esnm, basename(files), ignore.case=TRUE)]
-	
+		# Match 'esnm' against the pre-defined systems, and get the corresponding file:
+		files <- getFileFromEsnm(files, esnm, type="ctd", beforeUnderscore=TRUE)
+		
 		# Read the resource CTD file if there was a match. These files must have one time step per beam mode 'bmmd'. Use drop.out=FALSE to allow for selecting time steps using 'bmmd' below:
 		CTD <- read.TSD(files[1], t="all", drop.out=FALSE)
 		
@@ -54,15 +54,15 @@ echoIBM.setCTD <- function(
 		return(CTDfile)
 	}
 	
-	# Get available CTD files:
-	CTDdir <- system.file("extdata", "ctd", package="echoIBM")
-	if(length(files)==0){
-		files <- list.files(CTDdir, full.names=TRUE)
-	}
-	if(length(files)==0){
-		warning(paste0("No CTD files available in ", CTDdir))
-		return(NULL)
-	}
+	## Get available CTD files:
+	#CTDdir <- system.file("extdata", "ctd", package="echoIBM")
+	#if(length(files)==0){
+	#	files <- list.files(CTDdir, full.names=TRUE)
+	#}
+	#if(length(files)==0){
+	#	warning(paste0("No CTD files available in ", CTDdir))
+	#	return(NULL)
+	#}
 	
 	
 	# Loop through the acoustic instruments:

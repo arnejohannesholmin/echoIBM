@@ -40,8 +40,8 @@ echoIBM.setBeams <- function(
 		esnm <- event$esnm[[i]]
 		### bmmd <- bmmd[[esnm]]
 		
-		# Match 'esnm' against the pre-defined systems:
-		files <- files[grep(esnm, basename(files), ignore.case=TRUE)]
+		# Match 'esnm' against the pre-defined systems, and get the corresponding file:
+		files <- getFileFromEsnm(files, esnm, type="beams", beforeUnderscore=TRUE)
 	
 		# Read the resource beams file if there was a match. These files must have one time step per beam mode 'bmmd'. Use drop.out=FALSE to allow for selecting time steps using 'bmmd' below:
 		if(length(files)){
@@ -124,16 +124,36 @@ echoIBM.setBeams <- function(
 	utim <- echoIBM.readFile(event$path[1], ext="vessel", t="all")$utim
 	numt <- length(utim)
 	
-	
-	# Get available beams files:
-	if(length(files)==0){
-		files <- list.files(system.file("extdata", "beams", package="echoIBM"), full.names=TRUE)
-	}
-	
 	# Loop through the acoustic instruments:
 	### out <- sapply(seq_along(event$path), copyForOneEsnm, event=event, files=files, data=data, bmmd=bmmd, utim=utim, numt=numt, maxrange=maxrange)
 	out <- sapply(seq_along(event$path), copyForOneEsnm, event=event, files=files, dotList=dotList, utim=utim, numt=numt, maxrange=maxrange, mode=mode)
 	
 	names(out) <- event$esnm
 	return(out)
+}
+match_esnm <- function(files, esnm, beforeUnderscore=TRUE){
+	if(beforeUnderscore){
+		esnm <- strsplit(esnm, "_", fixed=TRUE)[[1]][1]
+	}
+	files[grep(esnm, basename(files), ignore.case=TRUE)]
+}
+getFileFromEsnm <- function(files, esnm, type, beforeUnderscore=TRUE){
+	# Match 'esnm' against the pre-defined systems:
+	if(length(files)==0){
+		dir <- system.file("extdata", type, package="echoIBM")
+		# Get available beams files:
+		files <- list.files(dir, full.names=TRUE)
+		# If there are no files:
+		if(length(files)==0){
+			warning(paste0("No files available in ", dir))
+			return(NULL)
+		}
+		# Pick out the relevnt file:
+		files <- match_esnm(files, esnm, beforeUnderscore=TRUE)
+	}
+	# If files are given in the input, asume these are given for all systems (change added on 2018-09-07):
+	else{
+		files <- files[[esnm]]
+	}
+	files
 }

@@ -17,7 +17,7 @@
 #' @export
 #' @rdname echoIBM.generate_oneschool
 #'
-echoIBM.generate_oneschool<-function(data, school=1, seed=NULL, dumpfile=NULL, aboveSurface=c("cut","force")){
+echoIBM.generate_oneschool <- function(data, school=1, seed=NULL, dumpfile=NULL, aboveSurface=c("cut","force")){
 	
 	############ AUTHOR(S): ############
 	# Arne Johannes Holmin
@@ -46,25 +46,12 @@ echoIBM.generate_oneschool<-function(data, school=1, seed=NULL, dumpfile=NULL, a
 	########## Preparation ##########
 	# Select the given school:
 	cs <- labl.TSD("cs")
-	data[cs] <- lapply(data[cs], "[", school)
+	data[cs] <- lapply(data[cs], function(x) if(length(x)==1) x else x[school])
 	# Set the seed of the school:
-	set.seed(data$seed)
+	#set.seed(data$seed)
 	
 		
 	########## Execution ##########
-	# Apply the default standard deviation value:
-	if(all(sapply(data[c("SDxf","SDyf","SDzf")],length)==0)){
-		data$SDxf <- 1
-	}
-	# Repeat the standard deviation value:
-	u <- unlist(data[c("SDxf","SDyf","SDzf")])
-	if(length(u)<3){
-		u <- rep(u,length.out=3)
-		data$SDxf <- u[1]
-		data$SDyf <- u[2]
-		data$SDzf <- u[3]
-	}
-	
 	# If the packing density is missing, calculate it from the number of fish:
 	if(length(data$rhoS)==0 && length(data$nbfS)>0 && !is.na(data$nbfS)){
 		# The volume of the school:
@@ -83,7 +70,36 @@ echoIBM.generate_oneschool<-function(data, school=1, seed=NULL, dumpfile=NULL, a
 	}
 	spacing <- data$rhoS^(-1/3)
 	# First generate gridded positions:
-	grid <- as.matrix(expand.grid(seq(-data$szxS/2, data$szxS/2, spacing), seq(-data$szyS/2, data$szyS/2, spacing), seq(-data$szzS/2, data$szzS/2, spacing)))
+	getGridOneDimensionRandom <- function(size, spacing){
+		# Pick a random position of the grid
+		start <- runif(1, -size/2, -size/2 + spacing)
+		
+		numGrid <- ceiling(size / spacing)
+		
+		grid <- seq(0, numGrid) * spacing + start
+		grid <- grid[-size/2 <= grid  &  grid <= size/2]
+		
+		grid
+	}
+	# First generate gridded positions:
+	getGridOneDimension <- function(size, spacing){
+		nhalf <- floor(size/2 / spacing)
+		
+		grid <- seq(-nhalf, nhalf) * spacing
+		
+		grid
+	}
+	
+	
+	
+	
+	grid <- as.matrix(expand.grid(
+		getGridOneDimension(size=data$szxS, spacing=spacing), 
+		getGridOneDimension(size=data$szyS, spacing=spacing), 
+		getGridOneDimension(size=data$szzS, spacing=spacing)
+		))
+		
+		#grid <- as.matrix(expand.grid(seq(-data$szxS/2, data$szxS/2, spacing), seq(-data$szyS/2, data$szyS/2, spacing), seq(-data$szzS/2, data$szzS/2, spacing)))
 	
 	if(strff("e",data$shpS)){
 		# Crop off to the ellipsoid:
@@ -105,19 +121,15 @@ echoIBM.generate_oneschool<-function(data, school=1, seed=NULL, dumpfile=NULL, a
 	}		
 	
 	# Add the position of the school:
-	grid[,1] <- grid[,1] + data$psxS
-	grid[,2] <- grid[,2] + data$psyS
-	grid[,3] <- grid[,3] + data$pszS
+	data$psxf <- grid[,1] + data$psxS
+	data$psyf <- grid[,2] + data$psyS
+	data$pszf <- grid[,3] + data$pszS
 	if(length(grid)==0){
 		warning(paste0("School nr ", school, " was too small to be generated with the current packing density."))
 		return()
 	}
-	data$nbfS <- nrow(grid)
+	#data$nbfS <- nrow(grid)
 	
-	# Get the positions of the fish, added noise:
-	data$psxf <- grid[,1] + rnorm(data$nbfS, 0, data$SDxf)
-	data$psyf <- grid[,2] + rnorm(data$nbfS, 0, data$SDyf)
-	data$pszf <- grid[,3] + rnorm(data$nbfS, 0, data$SDzf)
 	
 	# Fish above the sea surface:
 	if(tolower(substr(aboveSurface[1],1,1))=="f"){
@@ -127,56 +139,15 @@ echoIBM.generate_oneschool<-function(data, school=1, seed=NULL, dumpfile=NULL, a
 		valid <- data$pszf<=0
 		long <- sapply(data,length)==length(valid)
 		data[long] <- lapply(data[long], "[", valid)
+		#data$nbfS <- sum(valid)
 	}
 	
-	# Add noise to the fish positions. If the polarization is given, calculate the standard deviation on the positions:
-	if(length(data$plHS)>0){
-		#write(c(school, data$plHS, data$plHS), "test", append=TRUE, ncolumns=20)
-		#write("\n\n", "test", append=TRUE)
-		file <- system.file("extdata", "grsd_plHS.TSD", package="echoIBM")
-		#echoIBM_datadir_ <- file.path(echoIBM_frameworks, "R", "Functions", "echoIBM Main", "Utilities")
-		#filebasename <- "grsd_plHS.TSD"
-		#file <- file.path(echoIBM_datadir_, filebasename)
-		grsd_plHS <- read.TSD(file)
-		# Get the standard deviation of the displacement of the fish:
-		### if(min(grsd_plHS$plHS)>data$plHS || max(grsd_plHS$plHS)<data$plHS){
-		### 	stop(paste("Polarization values outside of the valid range (0,pi/2) radians. Range:", paste(round(range(data$plHS),digits=3),collapse=", ")))
-		### }
-		# Temporarily redefine standard deviations to use when generating the polarization. This does not affect the fish positions, but is only used to derive the velocities of the fish:
-		data$SDxf <- data$SDyf <- data$SDzf <- approx(grsd_plHS$plHS, grsd_plHS$grsd, data$plHS, rule=2)$y
-		
-		# Get the second positions of the fish, added noise and the movement of the school, used to calculate the velocities of the fish:
-		# Displacement equal to 1 is used in "grsd_plHS.TSD":
-		displacement_car <- sph2car(c(1, data$thtS, data$phiS))
-		data$psxf1 <- grid[,1] + rnorm(data$nbfS, 0, data$SDxf)
-		data$psyf1 <- grid[,2] + rnorm(data$nbfS, 0, data$SDyf)
-		data$pszf1 <- grid[,3] + rnorm(data$nbfS, 0, data$SDzf)
-		data$psxf2 <- grid[,1] + rnorm(data$nbfS, 0, data$SDxf) + displacement_car[1]
-		data$psyf2 <- grid[,2] + rnorm(data$nbfS, 0, data$SDyf) + displacement_car[2]
-		data$pszf2 <- grid[,3] + rnorm(data$nbfS, 0, data$SDzf) + displacement_car[3]
-		data$vlxf <- data$psxf2 - data$psxf1
-		data$vlyf <- data$psyf2 - data$psyf1
-		data$vlzf <- data$pszf2 - data$pszf1
-	}
-	# Set the fish to simulated omnidirectional if polarization is missing:
-	else{
-		data$vlxf <- rnorm(data$nbfS)
-		data$vlyf <- rnorm(data$nbfS)
-		data$vlzf <- rnorm(data$nbfS)
-	}
 	
-	# Add rotation data:
-	data[c("rtzf","rtxf")] <- vl2rt.TSD(data[c("rtzf","rtxf","vlxf","vlyf","vlzf")])[c("rtzf","rtxf")]
+	# Discard fish outside of the radial and angular range of the sonar/echosounder:
+	data <- echoIBM.fishInside2(data=data, dumpfile=dumpfile, discardOutside=data$discardOutside, rand.sel=data$rand.sel)
 	
-	# Add sizes of the fish:
-	if(length(data$PDsz)==0){
-		thisPDsz <- "rnorm"
-	}
-	else{
-		thisPDsz <- data$PDsz
-	}
-	data$size <- do.call(thisPDsz, list(data$nbfS, data$MEsz, data$SDsz))
-	#data$size <- rnorm(data$nbfS,data$MEsz,data$SDsz)
+	# Add randomness in fish positions and orientations:
+	data <- echoIBM.addRandomness(data, grsd_plHS=NULL)
 	
 	
 	########## Output ##########

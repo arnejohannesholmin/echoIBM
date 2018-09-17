@@ -1,8 +1,7 @@
 #*********************************************
 #*********************************************
-#' Discards fish outside of the sampling region of the sonar/echosounder.
+#' Discards fish outside of the sampling region of the sonar/echosounder FOR EACH SCHOOL.
 #'
-#' @param dynschool  is a list of the dynamic fish information to be subsetted.
 #' @param data  is a list holding the variables 'esnm', and vessel spesifications.
 #'
 #' @return
@@ -17,33 +16,13 @@
 #' @export
 #' @rdname echoIBM.fishInside
 #'
-echoIBM.fishInside <- function(dynschool, data, dumpfile, discardOutside=c(r=Inf,az=Inf,el=Inf), rand.sel=1){
+echoIBM.fishInside2 <- function(data, dumpfile, discardOutside=c(r=Inf,az=Inf,el=Inf), rand.sel=1){
 	
-	############ AUTHOR(S): ############
-	# Arne Johannes Holmin
-	############ LANGUAGE: #############
-	# English
 	############### LOG: ###############
 	# Start: 2014-02-27 - Clean version.
-	########### DESCRIPTION: ###########
-	# Discards fish outside of the sampling region of the sonar/echosounder.
-	########## DEPENDENCIES: ###########
-	#
-	############ VARIABLES: ############
-	# ---dynschool--- is a list of the dynamic fish information to be subsetted.
-	# ---data--- is a list holding the variables 'esnm', and vessel spesifications.
-	
-	
-	##################################################
-	##################################################
-	########## Preparation ##########
-	### if(all(is.infinite(discardOutside[2:3]))){
-	### 	return(list(dynschool=dynschool, data=data))
-	### 	}
-	### 
 	
 	# Extract a random selection of the targets using 'rand.sel':
-	Nl <- max(length(dynschool$psxf), length(dynschool$psyf), length(dynschool$pszf))
+	Nl <- max(length(data$psxf), length(data$psyf), length(data$pszf))
 	selection <- seq_len(Nl)
 	
 	if(0<rand.sel[1] && rand.sel[1]<1){
@@ -107,12 +86,12 @@ echoIBM.fishInside <- function(dynschool, data, dumpfile, discardOutside=c(r=Inf
 		box <- apply(edgesXY, 2, range)
 	
 		inside <- 
-			dynschool$psxf[selection] >= box[1,1] & 
-			dynschool$psxf[selection] <= box[2,1] & 
-			dynschool$psyf[selection] >= box[1,2] & 
-			dynschool$psyf[selection] <= box[2,2] & 
-			dynschool$pszf[selection] >= box[1,3] & 
-			dynschool$pszf[selection] <= box[2,3]
+			data$psxf[selection] >= box[1,1] & 
+			data$psxf[selection] <= box[2,1] & 
+			data$psyf[selection] >= box[1,2] & 
+			data$psyf[selection] <= box[2,2] & 
+			data$pszf[selection] >= box[1,3] & 
+			data$pszf[selection] <= box[2,3]
 	
 		if(length(dumpfile)>0 && nchar(dumpfile)>0){
 			write(paste0("\n\n# Proportion of fish discarded outside of the observation volume: ", mean(!inside)),dumpfile,append=TRUE)
@@ -134,13 +113,7 @@ echoIBM.fishInside <- function(dynschool, data, dumpfile, discardOutside=c(r=Inf
 		if(length(data[[thisvar]])==Nl && !is.function(data[[thisvar]])){
 			data[[thisvar]] <- data[[thisvar]][selection]
 		}
-		if(length(dynschool[[thisvar]])==Nl && !is.function(dynschool[[thisvar]])){
-			dynschool[[thisvar]] <- dynschool[[thisvar]][selection]
-		}
 	}
 	
-	
-	list(dynschool=dynschool, data=data)
-	##################################################
-	##################################################
-	}
+	return(data)
+}

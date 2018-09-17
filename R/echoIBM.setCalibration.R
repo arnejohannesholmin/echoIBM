@@ -32,8 +32,8 @@ echoIBM.setCalibration <- function(
 		path <- event$path[[i]]
 		esnm <- event$esnm[[i]]
 		
-		# Match 'esnm' against the pre-defined systems:
-		files <- files[grep(esnm, basename(files), ignore.case=TRUE)]
+		# Match 'esnm' against the pre-defined systems, and get the corresponding file:
+		files <- getFileFromEsnm(files, esnm, type="calibration", beforeUnderscore=TRUE)
 
 		# Read the calibration file if there was a match:
 		if(length(files)){
@@ -51,10 +51,10 @@ echoIBM.setCalibration <- function(
 		return(tofile)
 	}
 
-	# Get available calibration files:
-	if(length(files)==0){
-		files <- list.files(system.file("extdata", "calibration", package="echoIBM"), full.names=TRUE)
-	}
+	## Get available calibration files:
+	#if(length(files)==0){
+	#	files <- list.files(system.file("extdata", "calibration", package="echoIBM"), full.names=TRUE)
+	#}
 
 	outfiles <- sapply(seq_along(event$path), copyForOneEsnm, event=event, files=files, dotList=dotList)
 	names(outfiles) <- event$esnm

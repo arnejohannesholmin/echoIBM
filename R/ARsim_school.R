@@ -189,7 +189,21 @@ ARsim_school<-function(con=NULL, size=c(30,20,10), shape=c("e","cc"), pd=1, pol=
 			rthetaphi <- car2sph(psxf2-psxf1, psyf2-psyf1, pszf2-pszf1)
 			#towrite <- list(utim=t0+t[i], psxf=psxf2, psyf=psyf2, pszf=pszf2, rtzf=rthetaphi[,2], rtxf=rthetaphi[,3])
 			# Subtract the current:
-			towrite <- list(utim=t0+t[i], psxf=psxf2_withCurrent, psyf=psyf2_withCurrent, pszf=pszf2_withCurrent, vlxf=(psxf2-psxf1)/dt, vlyf=(psyf2-psyf1)/dt, vlzf=(pszf2-pszf1)/dt, rtzf=rthetaphi[,2]-pi/2, rtxf=pi/2-rthetaphi[,3], crrt=current[i,], velS=vel[i,], polS=pol[i,], sdAR=sd[i,])
+			towrite <- list(
+				utim = t0+t[i], 
+				psxf = psxf2_withCurrent, 
+				psyf = psyf2_withCurrent, 
+				pszf = pszf2_withCurrent, 
+				vlxf = (psxf2 - psxf1) / dt, 
+				vlyf = (psyf2 - psyf1) / dt, 
+				vlzf = (pszf2 - pszf1) / dt, 
+				rtzf = rthetaphi[,2] - pi/2, 
+				rtxf = pi/2 - rthetaphi[,3], 
+				crrt = current[i,], 
+				velS = vel[i,], 
+				polS = pol[i,], 
+				sdAR = sd[i,]
+			)
 			# Issue av warning if there are fish above the surface:
 			if(any(pszf2_withCurrent>0)){
 				warnings("Fish generated that are above the sea surface")

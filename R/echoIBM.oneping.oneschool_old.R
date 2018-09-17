@@ -28,8 +28,12 @@
 #' @export
 #' @rdname echoIBM.oneping.oneschool
 #'
-echoIBM.oneping.oneschool <- function(data, esnm=NULL, TVG.exp=2, compensated=c("pitch", "roll"), calibrate=TRUE, noise=c("nr", "bg", "ex"), max.memory=1e9, dumpfile="dump.txt", ask=FALSE, parlist=list(), msg=FALSE){
+echoIBM.oneping.oneschool_old <- function(data, esnm=NULL, TVG.exp=2, compensated=c("pitch", "roll"), calibrate=TRUE, noise=c("nr", "bg", "ex"), max.memory=1e9, dumpfile="dump.txt", ask=FALSE, parlist=list(), msg=FALSE){
 	
+	############ AUTHOR(S): ############
+	# Arne Johannes Holmin
+	############ LANGUAGE: #############
+	# English
 	############### LOG: ###############
 	# Start: 2009-09-16 - First version.
 	# Update: 2010-03-22 - Changed method to reduce memory occupied by the function.
@@ -42,6 +46,10 @@ echoIBM.oneping.oneschool <- function(data, esnm=NULL, TVG.exp=2, compensated=c(
 	# Update: 2014-03-14 - Changed to comply with the new echoIBM.oneping.j1() using svnext, which calculates the echo only once for the two voxels that are affected by each target.
 	# Update: 2015-02-22 - Changed to support grid calibration values.
 	# Last: 2015-02-24 - Fixed bug in the radialindex, which had one too many null elements at the beginning of the list.
+	########### DESCRIPTION: ###########
+	# Simulates one echo sounder observation of based on positions, orientations, sizes and other specifics of each fish in one known (simulated) school.
+	########## DEPENDENCIES: ###########
+	# global2car(), rotate3D(), car2sph(), integrateonsphere(), zeros()
 	############ VARIABLES: ############
 	# 	'Nl' is the number of fish in the school.
 	#	'Ni' is the number of beams of the sonar.
@@ -160,7 +168,8 @@ echoIBM.oneping.oneschool <- function(data, esnm=NULL, TVG.exp=2, compensated=c(
 	##################################################
 	########## Preparation ##########
 	# Define dump data:
-	dumpdata <- 0
+	dumpdata <- NAs(8)
+	names(dumpdata) <- c("etaj", "B_L", "etaa", "epss", "epsl", "chi", "sigma0mode", "withoutetaj")
 	
 	##### Defaults: #####
 	# School dynamic:
@@ -180,7 +189,7 @@ echoIBM.oneping.oneschool <- function(data, esnm=NULL, TVG.exp=2, compensated=c(
 	# Error is 'data' is not a list:
 	if(!is.list(data)){
 		stop("'data' not a list")
-	}
+		}
 	
 	# Information about missing variales without defaults will be collected and printed as an error:
 	errors <- NULL
@@ -220,8 +229,8 @@ echoIBM.oneping.oneschool <- function(data, esnm=NULL, TVG.exp=2, compensated=c(
 		
 		# Update the number of fish:
 		Nl <- max(length(data$psxf), length(data$psyf), length(data$pszf))
-	}
-	
+		}
+		
 		
 	# If all three velocity vectors are given, the z- and x-rotations are obtained from the velocities. Otherwise, if 'data$rtzf' (heading) is not present, an error is collected: 
 	if(any(is.null(data$rtxf), is.null(data$rtzf)) && !any(is.null(data$vlxf), is.null(data$vlyf), is.null(data$vlzf))){
@@ -231,16 +240,16 @@ echoIBM.oneping.oneschool <- function(data, esnm=NULL, TVG.exp=2, compensated=c(
 		data$vlxf <- NULL
 		data$vlyf <- NULL
 		data$vlzf <- NULL
-	}
+		}
 	else if(is.null(data$rtzf) && tolower(data$pbpf)!="ps"){
 		errors <- c(errors, "'data$rtzf' (fish heading) missing with no default")
-	}
+		}
 	
 	# If 'data$rtxf' (pitch) is missing, it is defaulted to default.rtxf = 0 for all fish:
 	if(is.null(data$rtxf)){
 		echoIBM.warnings_warninglist <- c(echoIBM.warnings_warninglist, "'data$rtxf' was defaulted")
 		data$rtxf <- rep(default.rtxf, Nl)
-	}
+		}
 	
 	# If the number of targets is positive and 'epss' or 'epsl' are to be utilized or 'data$lenl' (length of the line source representing the fish) are missing, 'data$size' must be present or defaulted:
 	if(any(data$sigma0mode %in% c(2,4)) || length(data$lenl)==0){
@@ -248,14 +257,14 @@ echoIBM.oneping.oneschool <- function(data, esnm=NULL, TVG.exp=2, compensated=c(
 		if(length(data$size)==0){
 			echoIBM.warnings_warninglist <- c(echoIBM.warnings_warninglist, paste0("'data$size' was defaulted to ", default.size, " for all fish"))
 			data$size <- rep(default.size, Nl)
+			}
 		}
-	}
 	
 	# If the size vector of the fish does not have the correct length, it is repeated to length 'Nl' with a warning:
 	if(length(data$size)!=0 && length(data$size)!=Nl){
 		echoIBM.warnings_warninglist <- c(echoIBM.warnings_warninglist, paste0("'data$size' was repeated to the number of fish ", Nl))
 		data$size <- rep(data$size, length.out=Nl)
-	}
+		}
 	
 	# If 'data$lenl' (length of the line source representing the fish) is missing, 'data$zeta' must be present or defaulted:
 	if(length(data$lenl)==0){
@@ -263,21 +272,21 @@ echoIBM.oneping.oneschool <- function(data, esnm=NULL, TVG.exp=2, compensated=c(
 		if(length(data$zeta)==0){
 			echoIBM.warnings_warninglist <- c(echoIBM.warnings_warninglist, paste0("'data$zeta' was defaulted to ", default.zeta))
 			data$zeta <- default.zeta
+			}
 		}
-	}
 	
 	# Length of the line sources representing the fish:
 	if(length(data$lenl)==0){
 		data$lenl <- data$zeta * data$size
 		data$zeta <- NULL
-	}
+		}
 	
 	# If the length vector of the line sources does not have the correct length, it is repeated to length 'Nl' with a warning:
 	if(length(data$lenl)!=0 && length(data$lenl)!=Nl){
 		echoIBM.warnings_warninglist <- c(echoIBM.warnings_warninglist, paste0("'data$lenl' was repeated to the number of fish ", Nl))
 		data$lenl <- rep(data$lenl, length.out=Nl)
-	}
-		
+		}
+	
 	
 	### INPUTS REPRESENTING THE VESSEL: ###
 	# If longitude and latitude positions and origin are all given, cartesian x- and y-positions relative to the origin are calculated:
@@ -285,39 +294,39 @@ echoIBM.oneping.oneschool <- function(data, esnm=NULL, TVG.exp=2, compensated=c(
 		data$psyv <- global2car(cbind(data$lonv, data$latv), data$orgn) # This is what was former names 'pos', but changed to avoid memory leak.
 		data$psxv <- data$psyv$x
 		data$psyv <- data$psyv$y
-	}
+		}
 	# If one or both of data$posx or data$psxv (x-position) and data$posy or data$psyv  (y-position) are missing, an error is collected:
 	if(any(is.null(data$psxv), is.null(data$psyv))){
 		errors <- c(errors, "One or both of 'data$posx'/'data$psxv' (x-position) and 'data$posy'/'data$psyv' (y-position) missing with no default")
-	}
+		}
 	# If 'data$pszv' (z-position of the vessel) is missing, it is defaulted to default.pszv=0:
 	if(is.null(data$pszv)){
 		echoIBM.warnings_warninglist <- c(echoIBM.warnings_warninglist, "'data$pszv' was defaulted")
 		data$pszv <- default.pszv
-	}
+		}
 	# If 'data$rtzv' (z-rotation of the vessel) is missing an error is collected:
 	if(is.null(data$rtzv)){
 		errors <- c(errors, "'data$rtzv' (z-rotation of the vessel) missing with no default")
-	}
+		}
 	# The user may choose to ignore pitch and roll of the vessel, simulating the compensation of pitch and roll performed in Simrad systems:
 	if(sum(grep("pitch", compensated))>0){
 		echoIBM.warnings_warninglist <- c(echoIBM.warnings_warninglist, "'data$rtxv' (compensated for and set to 0)")
 		data$rtxv <- default.rtxv
-	}
+		}
 	if(sum(grep("roll", compensated))>0){
 		echoIBM.warnings_warninglist <- c(echoIBM.warnings_warninglist, "'data$rtyv' (compensated for and set to 0)")
 		data$rtyv <- default.rtyv
-	}
+		}
 	# If 'data$rtxv' (x-rotation of the vessel) is missing, it is defaulted to default.rtxv=0:
 	if(is.null(data$rtxv)){
 		echoIBM.warnings_warninglist <- c(echoIBM.warnings_warninglist, "'data$rtxv' was defaulted")
 		data$rtxv <- default.rtxv
-	}
+		}
 	# If 'data$rtyv' (t-rotation of the vessel) is missing, it is defaulted to default.rtyv=0:
 	if(is.null(data$rtyv)){
 		echoIBM.warnings_warninglist <- c(echoIBM.warnings_warninglist, "'data$rtyv' was defaulted")
 		data$rtyv <- default.rtyv
-	}
+		}
 	########## Execution and output ##########
 	##### Transformations and rotations: #####
 	
@@ -347,11 +356,11 @@ echoIBM.oneping.oneschool <- function(data, esnm=NULL, TVG.exp=2, compensated=c(
 		# Rotate as given in the documentation:
 		if(is.null(data$rtyf)){
 			data$transducerposL <- rotate3D(transducerposL, by="zx", ang=cbind(data$rtzf, data$rtxf + data$tilt - pi/2), paired=TRUE, drop.out=FALSE)
-		}
+			}
 		else{
 			data$transducerposL <- rotate3D(transducerposL, by="zxyx", ang=cbind(data$rtzf, data$rtxf, data$rtyf, data$tilt - pi/2), paired=TRUE, drop.out=FALSE)
 			data$rtyf <- NULL
-		}
+			}
 		
 		# Remove objects no longer in use:
 		rm(transducerposG)
@@ -383,26 +392,26 @@ echoIBM.oneping.oneschool <- function(data, esnm=NULL, TVG.exp=2, compensated=c(
 		# If the optimal backscattering cross section 'sgbs' (sigma_bs) is present, no relation to target size is specified. In this case 'sgbs' is applied at this stage and the echo ability 'epss' is NOT USED in the function echoIBM.oneping.ji() where i = 0, 1, 2:
 		if(data$sigma0mode==1){
 			# data$sgbs already present:	
-		}
+			}
 		# If the coefficient 'epss' linking 'sgbs' to fish size is present, it may be a function of frequency, or simply a numeric vector. In any case the target size to the power 'spow' is applied at this stage, and 'epss' is applied in the function echoIBM.oneping.ji() where i = 0, 1, 2:
 		else if(data$sigma0mode==2){
 			data$sgbs <- data$size^data$spow
-		}
+			}
 		# If the optimal acoustic cross sectional area 'acca' (A_0) is present, no relation to target size is specified: In this case 'acca' is applied at this stage and the echo ability 'epsl' is NOT USED in the function echoIBM.oneping.ji() where i = 0, 1, 2:
 		else if(data$sigma0mode==3){
 			data$sgbs <- data$acca
-		}
+			}
 		# If the coefficient 'epsl' linking 'acca' to fish size is present, it may be a function of frequency, or simply a numeric vector: In any case the target size to the power 'spow' is applied at this stage, and 'epsl' is applied in the function echoIBM.oneping.ji() where i = 0, 1, 2:
 		else if(data$sigma0mode==4){
 			data$sgbs <- data$size^data$spow
-		}
+			}
 			
 		# Merge non-frequency independent values:	
 		data$fish <- data$etar4 * data$etaomega * data$etaC * data$sgbs
 		
-		if(length(data$scls) && mean(data$scls)!=1){
-			data$fish <- data$fish * mean(data$scls)
-		}
+		if(length(data$scls)==1 && data$scls!=1){
+			data$fish <- data$fish * data$scls
+			}
 		
 		
 		# Dump:
@@ -411,7 +420,7 @@ echoIBM.oneping.oneschool <- function(data, esnm=NULL, TVG.exp=2, compensated=c(
 			echoIBM.dump_summary(data[labl.TSD("v")], dumpfile, type="vessel", append=TRUE)
 			# Dynamic information about the vessel:
 			echoIBM.dump_summary(data[labl.TSD("dse")], dumpfile, type="dynschool", append=TRUE)
-		}
+			}
 			
 		# Clear from memory:
 		data$size <- NULL
@@ -445,10 +454,10 @@ echoIBM.oneping.oneschool <- function(data, esnm=NULL, TVG.exp=2, compensated=c(
 		
 		# update 'Nl':
 		Nl <- sum(unlist(sapply(data$radialindex, length)))
-	}
+		}
 	else{
 		data$validr <- NULL
-	}
+		}
 	
 	# Output voxel system:
 	sv <- zeros(maxlenb, data$Ni)
@@ -482,12 +491,11 @@ echoIBM.oneping.oneschool <- function(data, esnm=NULL, TVG.exp=2, compensated=c(
 			if(.Platform$r_arch=="x86_64"){
 				memory_1 <- memory_1*4
 				memory_2 <- memory_2*4
-			}
+				}
 			else if(.Platform$r_arch=="i386"){
 				memory_1 <- memory_1*2
 				memory_2 <- memory_2*2
-			}
-			
+				}
 			
 			if(memory_1<max.memory){
 				# Print the currently processed radial layer:
@@ -495,8 +503,17 @@ echoIBM.oneping.oneschool <- function(data, esnm=NULL, TVG.exp=2, compensated=c(
 					cat(data$validr[j], "[", data$lthesel, "]\t", sep="")
 					cat(data$validr[j], "[", data$lthesel, "]\t", sep="", file=dumpfile, append=TRUE)
 				}
+				
 				# Get the svs from this radial layer, and those extending into the next:
-				thissv <- echoIBM.oneping.oneschool.onesample(j, thesedata, split=FALSE)
+				thissv <- echoIBM.oneping.j1(j, thesedata)
+				fromthis <- thissv$sv
+				sv[data$validr[j],] <- fromlast + fromthis
+				fromlast <- thissv$svnext
+				
+				
+				dumpdata <- rowSums(cbind(dumpdata, thissv$dumpdata[names(dumpdata)] * data$lthesel), na.rm=TRUE)
+				
+				nsig[data$validr[j],] <- thissv$nsig
 				}
 			else if(memory_2<max.memory){
 				# Print the currently processed radial layer:
@@ -504,33 +521,38 @@ echoIBM.oneping.oneschool <- function(data, esnm=NULL, TVG.exp=2, compensated=c(
 					cat(data$validr[j], "*[", data$lthesel, "]\t", sep="")
 					cat(data$validr[j], "*[", data$lthesel, "]\t", sep="", file=dumpfile, append=TRUE)
 				}
+				
 				# Get the svs from this radial layer, and those extending into the next:
-				thissv <- echoIBM.oneping.oneschool.onesample(j, thesedata, split=TRUE)
-			}
+				thissv <- echoIBM.oneping.j2(j, thesedata)
+				fromthis <- thissv$sv
+				sv[data$validr[j],] <- fromlast + fromthis
+				fromlast <- thissv$svnext
+				
+				dumpdata <- rowSums(cbind(dumpdata, thissv$dumpdata[names(dumpdata)] * data$lthesel), na.rm=TRUE)
+				nsig[data$validr[j],] <- thissv$nsig
+				}
 			else if(ask){
 				ans <- readline(paste0("Memory (", max.memory, ") limit exceeded (", memory_2, ") for the least memory demanding method. Continue? (y/n)"))
 				if(ans=="n"){
 					stop("Function terminated")
-				}
+					}
 				# Print the currently processed radial layer:
 				if(msg){
 					cat(data$validr[j], "*[", data$lthesel, "]\t", sep="")
 					cat(data$validr[j], "*[", data$lthesel, "]\t", sep="", file=dumpfile, append=TRUE)
 				}
+				
 				# Get the svs from this radial layer, and those extending into the next:
-				thissv <- echoIBM.oneping.oneschool.onesample(j, thesedata, split=TRUE)
+				thissv <- echoIBM.oneping.j2(j, thesedata)
+				fromthis <- thissv$sv
+				sv[data$validr[j],] <- fromlast + fromthis
+				fromlast <- thissv$svnext
+				
+				dumpdata <- rowSums(cbind(dumpdata, thissv$dumpdata[names(dumpdata)] * data$lthesel), na.rm=TRUE)
+				nsig[data$validr[j],] <- thissv$nsig
+				}
 			}
-			
-			# Store the sv and next sv:
-			fromthis <- thissv$sv
-			sv[data$validr[j],] <- fromlast + fromthis
-			fromlast <- thissv$svnext
-			nsig[data$validr[j],] <- thissv$nsig
-			
-			# Append the dumpdata of the current sample, multiplied by the number of fish:
-			dumpdata <- dumpdata + thissv$dumpdata * data$lthesel
-		}
-	} # End of for j.
+		} # End of for j.
 	cat("\n")
 	cat("\n", file=dumpfile, append=TRUE)
 	
@@ -539,21 +561,17 @@ echoIBM.oneping.oneschool <- function(data, esnm=NULL, TVG.exp=2, compensated=c(
 	if(length(parlist$nsth)>0){
 		parlist$Brkt <- which(1<=nsig & nsig<parlist$nsth)
 		parlist$nsig <- nsig[parlist$Brkt]
-	}
+		}
 	rm(nsig)
 	# Transform 'dumpdata' into a list after dividing by the number of fish to get the mean:
-	if(length(dumpdata)){
-		dumpdata <- dumpdata / Nl
-	}
-	#echoIBM.dump_summary(cbind(dumpdata, Nl=Nl), dumpfile, type="freqschool", append=TRUE)
-	echoIBM.dump_summary(c(as.list(dumpdata), list(Nl=Nl)), dumpfile, type="freqschool", append=TRUE)
+	echoIBM.dump_summary(c(as.list(dumpdata/(Nl)), list(Nl=Nl)), dumpfile, type="freqschool", append=TRUE)
 	
 	# Calibrate the beams:
 	if(!is.null(data$cali) && calibrate){
 		# Extract for the correct beam mode, which is only applied when the calibration data are stored in a list:
 		if(is.list(data$cali)){
 			data$cali <- data$cali[[data$bmmd[1]+1]]
-		}
+			}
 		# Extract calibration values at the elevation angles closest to elevation angles in the sonar
 		if(length(data$grde)>0){
 			atgrde <- apply(abs(outer(data$dire, data$grde, "-")), 1, which.min)
@@ -561,18 +579,18 @@ echoIBM.oneping.oneschool <- function(data, esnm=NULL, TVG.exp=2, compensated=c(
 		}
 		else if(ncol(sv)!=length(data$cali)){
 			stop("Length of calibration data differ from the number of beams")
-		}
+			}
 		else{
 			cali <- data$cali
-		}
+			}
 		write("\nCalibration factors:\n", dumpfile, append=TRUE)
 		write(cali, dumpfile, append=TRUE)
 		sv <- sv * outer(ones(maxlenb), cali)
 		cat("Simulation calibrated", "\n")
-	}
+		}
 	else if(is.null(data$cali) && calibrate){
 		echoIBM.warnings_warninglist <- c(echoIBM.warnings_warninglist, "Calibration data missing")
-	}
+		}
 		
 	# Add noise to the sv-values (No time step index applied, To apply time step dependetnt noise, use echoIBM.merge()):
 	sv <- echoIBM.add.noise(sv=sv, noisetypes=noise, data=data, parlist=parlist)
@@ -580,7 +598,7 @@ echoIBM.oneping.oneschool <- function(data, esnm=NULL, TVG.exp=2, compensated=c(
 	# Add TVG if required:
 	if(sum(TVG.exp)>0){
 		sv <- apply.TVG(x=sv, beams=data[c("lenb", "sint", "absr", "asps")], TVG.exp=TVG.exp)
-	}
+		}
 	
 	
 	# Print the warnings to the dumpfile:
@@ -589,16 +607,16 @@ echoIBM.oneping.oneschool <- function(data, esnm=NULL, TVG.exp=2, compensated=c(
 		if(length(echoIBM.warnings_warninglist)>0){
 			for(i in seq_along(echoIBM.warnings_warninglist)){
 				write(paste0(i, ": ", echoIBM.warnings_warninglist[i]), dumpfile, append=TRUE)
+				}
 			}
-		}
 		else{
 			write("none", dumpfile, append=TRUE)
+			}
 		}
-	}
 	
 			
 	# Return:
 	list(sv=sv, Brkt=parlist$Brkt, nsig=parlist$nsig)
 	##################################################
 	##################################################
-}
+	}

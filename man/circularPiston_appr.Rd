@@ -3,7 +3,7 @@
 \docType{data}
 \name{besselJ1_appr_angmax}
 \alias{besselJ1_appr_angmax}
-\title{Function used for approximating the beam pattern of the beams}
+\title{Function used for approximating the beam pattern of the beam pattern from a circular piston. The values past the 8 side lobe is approximated by a line (see examples).}
 \format{An object of class \code{numeric} of length 1.}
 \usage{
 besselJ1_appr_angmax
@@ -15,10 +15,16 @@ besselJ1_appr_angmax
 
 }
 \description{
-Function used for approximating the beam pattern of the beams
+Function used for approximating the beam pattern of the beam pattern from a circular piston. The values past the 8 side lobe is approximated by a line (see examples).
 }
 \examples{
-\dontrun{}
+\dontrun{
+x <- seq(0, 100, length.out=1e5)
+system.time(c1 <- circularPiston_appr(x))
+system.time(c2 <- (2 * besselJ(x, 1) / x)^2)
+plot(10*log10(c1), type="l")
+lines(10*log10(c2), type="l", col=2)
+}
 
 }
 \keyword{datasets}

@@ -46,7 +46,7 @@ echoIBM.generate_dynschool <- function(data, t=1, vesselutim=NULL, adds=list(), 
 	requiredVariables <- c(
 	"utmS", "aspS",
 	"psxS", "psyS", "pszS",
-	"thtS", "phiS",
+	#"thtS", "phiS",
 	"szxS", "szyS", "szzS"
 	#,"rtxS","rtyS","rtzS"
 	#,"shpS"
@@ -77,6 +77,11 @@ echoIBM.generate_dynschool <- function(data, t=1, vesselutim=NULL, adds=list(), 
 	###	# Assume 45 degrees angle of the upper beams:
 	###	range <- range * sin(45 / 180*pi)
 	###	}
+	
+	# Repeat varables that should be given for each time step (such as rhoS):
+	Nschools <- length(data$psxS)
+	echoIBM.generate_oneschool_labl <- labl.TSD("echoIBM.generate_oneschool_labl")
+	data[echoIBM.generate_oneschool_labl] <- lapply(data[echoIBM.generate_oneschool_labl], function(x) if(length(x)==1) rep(x, Nschools) else x)
 		
 	# Special case if seeds were given using sEds:
 	if(!length(data$seed) && length(data$sEds)){
@@ -88,11 +93,13 @@ echoIBM.generate_dynschool <- function(data, t=1, vesselutim=NULL, adds=list(), 
 	# Move the schools to match the time of the current ping:
 	data <- echoIBM.moveSchools(data, vesselutim[t])
 	
+	
+	
 	# This is crude, since the case that a very large school is present will result in a large value of 'maxsize'. However, this is just to get the schools that are considered in each ping, and including more schools than are inside the sampling volume causes no harm:
 	maxsize <- apply(cbind(data$szxS, data$szyS, data$szzS), 1, max)
 	
 	# Get the distance to the schools along the sea surface:
-	distToSchools <- sqrt((data$psxS - data$psxv)^2 + (data$psyS - data$psyv)^2)
+	distToSchools <- sqrt((data$psxS - c(data$psxv))^2 + (data$psyS - c(data$psyv))^2)
 	inside <- distToSchools < range + margin + maxsize
 	
 	# Get the schools that are valid for the current time step:
@@ -145,7 +152,15 @@ echoIBM.generate_dynschool <- function(data, t=1, vesselutim=NULL, adds=list(), 
 	
 	# Subset 'data' to the school inside the observation range:
 	inside <- inside[!is.na(inside)]
-	data <- lapply(data[intersect(names(data), labl.TSD("cs"))], "[", inside)
+	#data <- lapply(data[intersect(names(data), labl.TSD("cs"))], "[", inside)
+	
+	data <- lapply(data[intersect(names(data), labl.TSD("cs"))], function(x) if(length(x) > 1) x[inside] else x)
+	
+	
+	
+	
+	
+	
 	# Add the data stored in 'data' to the individual fish dynamics:
 	dynschool <- c(dynschool, data)
 	
@@ -153,9 +168,9 @@ echoIBM.generate_dynschool <- function(data, t=1, vesselutim=NULL, adds=list(), 
 	dynschoolLengths <- unlist(lapply(dynschool, length))
 	if(length(adds)>0 && length(dynschoolLengths)>0 && !any(dynschoolLengths==0)){
 		# Add the data in 'adds' (overrides the data read in the school files):
-		dynschoolinadds <- intersect(names(adds), names(dynschool))
+		dynschoolInAdds <- intersect(names(adds), names(dynschool))
 		Nl <- max(dynschoolLengths)
-		dynschool[dynschoolinadds] <- lapply(adds[dynschoolinadds], rep, length.out=Nl)
+		dynschool[dynschoolInAdds] <- lapply(adds[dynschoolInAdds], rep, length.out=Nl)
 	}
 	
 	# Write school information to the dumpfile. Here we do not dump the generated fish positions, but only the compact school variables, where number of fish and packing density has been updated above:

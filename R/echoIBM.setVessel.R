@@ -17,7 +17,7 @@
 #' @param heading		The heading of the vessel in radians counter clockwise from East, either given as a single numeric, or as a vector of headings associated with vessel track segments.
 #' @param distance		The distance associated with each vessel track segment.
 #' @param duration		The duration of each vessel track segment in seconds.
-#' @param speed			The speed of the vessel in knots associated with each vessel track segment.
+#' @param speed			The speed of the vessel in knots, associated with each vessel track segment.
 #' @param nodesLocal	The nodes defining the vessel track segments, given as local nodes relative to the origin (can include the origin c(0, 0))
 #' @param nodesEarth	The nodes defining the vessel track segments, given as global nodes in the coordinate system of the earth relative to the origin (can include the origin c(0, 0)).
 #' @param pingduration	The duration of the pings in seconds. Currently only one single fixed value is allowed.
@@ -42,7 +42,7 @@ echoIBM.setVessel <- function(
 	starttime = "2015-01-01 00:00:00", 
 	utim = NULL, 
 	origin = c(0, 0), 
-	heading = 0, 
+	heading = 0, # East
 	distance = NULL, 
 	duration = 1, 
 	speed = NULL, 
@@ -54,6 +54,8 @@ echoIBM.setVessel <- function(
 	rtxv = 0, 
 	rtyv = 0, 
 	rtzv = 0, 
+	offset = NULL, 
+	freeze = NULL, 
 	...){
 	
 	############### LOG: ###############
@@ -70,12 +72,28 @@ echoIBM.setVessel <- function(
 	# Expand all variables to equal length for faster reading and writing:
 	vessel <- lapply(vessel, rep, length.out=max(sapply(vessel, length)))
 	
+	# Define files: 
 	vesselfiles <- file.path(event$path, paste0(event$name, ".vessel"))
 	names(vesselfiles) <- event$esnm
 	
+	# Repeat the vessel data:
+	vesselAll <- rep(list(vessel), length(vesselfiles))
+	names(vesselAll) <- event$esnm
+	# Apply offset on the vessel data:
+	nameMatch <- intersect(names(offset), names(vesselAll))
+	for(name in nameMatch){
+		vesselAll[[name]] <- addVesselOffset(vesselAll[[name]], offset=offset[[name]])
+	}
+	# Freeze the vessel data:
+	nameMatch <- intersect(names(freeze), names(vesselAll))
+	for(name in nameMatch){
+		vesselAll[[name]] <- freezeVesselPosition(vesselAll[[name]], freeze=freeze[[name]])
+	}
+	
 	# Run through the events and write the vessel file:
 	lapply(vesselfiles, function(x) suppressWarnings(dir.create(dirname(x), recursive=TRUE)))
-	lapply(vesselfiles, function(file) write.TSD(vessel, con=file, numt=vessel$numt[1]))
+	#lapply(vesselfiles, function(file) write.TSD(vessel, con=file, numt=vessel$numt[1]))
+	lapply(seq_along(vesselfiles), function(i) write.TSD(vesselAll[[i]], con=vesselfiles[i], numt=vesselAll[[i]]$numt[1]))
 	
 	# Add the files to the output:
 	return(vesselfiles)
@@ -125,8 +143,9 @@ echoIBM.getVesselPath <- function(
 		if(length(numt)==0){
 			warning("Speed not given and was set to 10 knots = 10 * 1852 / 3600 = 5.14 m/s")
 		}
-		speed <- 10 * 1852 / 3600
 	}
+	# Convert from knots to meters per second:
+	speed <- speed * 1852 / 3600
 	
 	# If given as nodes in the coordinate system of the Earth, convert to local nodes:
 	if(length(nodesEarth)){
@@ -235,10 +254,45 @@ echoIBM.getVesselPath <- function(
 	lonlat <- car2global(psxy, origin=origin)
 	
 	out <- list(ispv=ispv, psxv=psxy[,1], psyv=psxy[,2], pszv=heave, rtxv=rtxv, rtyv=rtyv, rtzv=rtzv, lonv=lonlat[,1], latv=lonlat[,2])
+	# Get sailed distance in nautical miles:
+	nmi <- 1852
+	sadv <- sqrt(diff(out$psxv)^2 + diff(out$psyv)^2) / nmi
+	out$sadv <- c(0, cumsum(sadv))
+	
 	out <- c(list(utim=utim, numt=numt), out, list(lon0=origin[1], lat0=origin[2]))
 	
 	# Repeat to maximum dimension:
 	out <- repToExtreme(out, ndim=1, skip.len=1)
 	
 	return(out)
+}
+addVesselOffset <- function(vessel, offset){
+	for(name in names(offset)){
+		vessel[[name]] <- vessel[[name]] + offset[[name]]
+	}
+	
+	# Update geographical positions:
+	lonlat <- car2global(cbind(vessel$psxv, vessel$psyv), origin=c(vessel$lon0[1], vessel$lat0[1]))
+	vessel$lonv <- lonlat[,1]
+	vessel$latv <- lonlat[,2]
+	
+	vessel
+}
+freezeVesselPosition <- function(vessel, freeze){
+	for(name in c("psxv", "psyv")){
+		# Repeat the specified time step:
+		numt <- length(vessel[[name]])
+		if(freeze>0 && freeze<1){
+			freeze <- freeze * numt
+		}
+		freeze <- round(freeze)
+		vessel[[name]] <- rep(vessel[[name]][freeze], length.out=numt)
+	}
+	
+	# Update geographical positions:
+	lonlat <- car2global(cbind(vessel$psxv, vessel$psyv), origin=c(vessel$lon0[1], vessel$lat0[1]))
+	vessel$lonv <- lonlat[,1]
+	vessel$latv <- lonlat[,2]
+	
+	vessel
 }

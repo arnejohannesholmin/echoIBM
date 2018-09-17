@@ -2,35 +2,39 @@
 #*********************************************
 #' Simulates echo sounder observations based on positions, orientations, sizes and other specifics of each fish in a known (simulated) school. The variables of the school, vessel, acoustic instrument and sea are given as files in the TSD format located in the directory specified by 'event'. More than one school may be given located in separate directories in 'event'. The simulated echogram will be stored as a TSD file in 'event'. The function includes an option to plot the vessel path relative to the centers of mass of the school. Schools can be given compactly in order to save space, in which case the individual fish information is generated on the fly (see "Example of compact schools in echoIBM.R").
 #'
-#' @param event  is a vector of strings, where the first is the path to the directory of the simulation files, and any additional stings are directories or files containing for example school files located elsewhere than the main directory given by the first string in 'event'. Additional schools must be given as directories in 'event', not as paths to individual files, as this implies that these files "belong" to any existing school located in event[1]. Files containing beam configuration, noise values, calibration values, ctd-values and vessel dynamics need to be given in the main directory! Also the directories need to be exact, and not directories above the actual directory, like in read.event(). School information may be given also ...???
-#' @param t  is a vector of the numbers of the pings to be simulated, as listed from 1 to the number of time steps of the simulated school. If t=="all", all time steps are simulated.
-#' @param adds  is an optional list of variables overriding the variables located in the 'event' directory.
-#' @param rph  is a matrix of two columns of length 3 representing the mean (column 1) and the standard deviation (column 2) of the roll values (rtxv), pitch values (rtyv) and heave values (przv) of the vessel, used in gaussian simulation of the roll, pitch and heave values.
-#' @param esnm  is the name of the acoustical instrument, given as a four character string. See sonR_implemented() for the implemented systems. May be given in 'data', and in lower case.
-#' @param TVG.exp  is the exponent of the eamotric spreading of the sound wave, theoretically 2 for Sv and 4 for TS.
-#' @param compensated  specifies which rotations are compensated for by the echo sounder:
-#' @param filesize  is the maximum size of the merged files.
-#' @param calibrate  is FALSE if calibration data are to be discarded if present.
-#' @param noise  See echoIBM.add.noise().
-#' @param mode  is one of "active" and "passive".
-#' @param tvessel  has two different interpretations depending on the option 'path': In the case that path==TRUE 'tvessel' is the UNIX time values to be written to the .vessel-file. When path==FALSE 'tvessel' is a vector of the index numbers of the time steps to assign to the simulated pings. If tvessel==NULL the school time points are used.
-#' @param scan.volume  is TRUE if the volume selected when path=TRUE is to be scanned to see if the school is inside the volume at each ping.
-#' @param margin  is a vector of the margins on either side of the span of 'x' (recycled if not of length 4).
-#' @param smooth  has one possible value "spline", smooths the x-values and the y-values of the generated vessel path separately using the spline function.
-#' @param max.memory  is the maximum amount of memory to allow for the function to occupy. The level of for loops is chosen according to this value, i.e. if the method using only two loops, one for the radial distances and one for the unique frequencies, demands more memory than 'max.memory', the method usint three for loops is chosen.
-#' @param ow  is TRUE if the user wish to overwrite existing file.
-#' @param origin  is a vector of two elements representing the origin of the global coordinate system (G), or the numbering index of the ping regarded as the origin of (G) (ignoring heave so that the x-y-plane of (G) is on the surface of the sea).
-#' @param recycle  can be given in a number of ways. If more than one school is to be simulated, 'recycle' must either be a list, or is converted to a list, of length equal to the number of schools / folders including school files. Each list element can be (1) a function selecting the appriopriate time steps, as indexed for each school (say if school nr. 2 has the time step indices 4, 5, 7 with respect to the time steps of the vessel, and the function is to alternate between the second and third time step, the result is 5, 7, 5, 7, and so on). A second possibility (2) is that 'recycle' is given as TRUE, to indicate recycling the first time step. Also (3) a vector of time step indices is accepted, which for the example above would be 2:3. If schools are given compactly (see "Example of compact schools in echoIBM.R"), 'recycle' can be given as a single numeric to freeze the schools at a specific time step.
-#' @param keep.temp  has two elements, where the first is TRUE if the temporary directory holding the noiseless data directory is to be kept, and where the second is TRUE if the noise-added data directory is to be kept.
-#' @param cores  is an integer specifying the number of cores to run the simulations over in parallel (should be lower than the number of cores in the computer).
-#' @param rand.sel  is a numeric specifying a random selection of the school to use in the simulations. If rand.sel>1, 1/rand.sel of the targets are selected, and the selected targets are scaled by 'rand.sel' to keep the original backscatter from the school. If given as a vector of length 2, the second element is regarded as the seed for the random selection.
-#' @param scls  is a factor by which the backscattering cross sectional area of the targets are scaled.
-#' @param method  is "closest" if the beam pattern value of the closest grid point is to be selected, and "linear" if linear interpolation should be used to extract the beam pattern value (time demanding and only available for 2D grids).
-#' @param ask  is TRUE if the used should be asked to for approval if the memory of the least memory demanding calculation method of the individual radial sampling intervals exceed the memory limit 'max.memory'.
-#' @param parlist  is a list of input parameters to the function echoIBM.add.noise(), which generates noise and randomness. See echoIBM.add.noise() for explaination of the possible variables. Important variables are seed and pre=TRUE to use pre-generated randomness.
-#' @param bptfile  is the name of the file to which 'sllf', 'rad1', 'rad2', 'pbp1' and 'pbp2' is written (use NULL for no writing).
-#' @param path  is TRUE to allow the user to select vessel positions interactively.
-#' @param pathnr  is the number of the vessel path drawn, to be used in the name of the ".vessel" file. If a new ".vessel" file is to be written, 'pathnr' must be different than the pathnr of existing files.
+#' @param event				is a vector of strings, where the first is the path to the directory of the simulation files, and any additional stings are directories or files containing for example school files located elsewhere than the main directory given by the first string in 'event'. Additional schools must be given as directories in 'event', not as paths to individual files, as this implies that these files "belong" to any existing school located in event[1]. Files containing beam configuration, noise values, calibration values, ctd-values and vessel dynamics need to be given in the main directory! Also the directories need to be exact, and not directories above the actual directory, like in read.event(). School information may be given also ...???
+#' @param t					is a vector of the numbers of the pings to be simulated, as listed from 1 to the number of time steps of the simulated school. If t=="all", all time steps are simulated.
+#' @param adds				is an optional list of variables overriding the variables located in the 'event' directory.
+#' @param rph				is a matrix of two columns of length 3 representing the mean (column 1) and the standard deviation (column 2) of the roll values (rtxv), pitch values (rtyv) and heave values (przv) of the vessel, used in gaussian simulation of the roll, pitch and heave values.
+#' @param esnm				is the name of the acoustical instrument, given as a four character string. See sonR_implemented() for the implemented systems. May be given in 'data', and in lower case.
+#' @param TVG.exp			is the exponent of the eamotric spreading of the sound wave, theoretically 2 for Sv and 4 for TS.
+#' @param compensated		specifies which rotations are compensated for by the echo sounder:
+#' @param filesize			is the maximum size of the merged files.
+#' @param calibrate			is FALSE if calibration data are to be discarded if present.
+#' @param noise				See echoIBM.add.noise().
+#' @param mode				is one of "active" and "passive".
+#' @param tvessel			has two different interpretations depending on the option 'path': In the case that path==TRUE 'tvessel' is the UNIX time values to be written to the .vessel-file. When path==FALSE 'tvessel' is a vector of the index numbers of the time steps to assign to the simulated pings. If tvessel==NULL the school time points are used.
+#' @param scan.volume		is TRUE if the volume selected when path=TRUE is to be scanned to see if the school is inside the volume at each ping.
+#' @param margin			is a vector of the margins on either side of the span of 'x' (recycled if not of length 4) (used only when path=TRUE).
+#' @param smooth			has one possible value "spline", smooths the x-values and the y-values of the generated vessel path separately using the spline function.
+#' @param max.memory		is the maximum amount of memory to allow for the function to occupy. The level of for loops is chosen according to this value, i.e. if the method using only two loops, one for the radial distances and one for the unique frequencies, demands more memory than 'max.memory', the method usint three for loops is chosen.
+#' @param ow				is TRUE if the user wish to overwrite existing file.
+#' @param origin			is a vector of two elements representing the origin of the global coordinate system (G), or the numbering index of the ping regarded as the origin of (G) (ignoring heave so that the x-y-plane of (G) is on the surface of the sea).
+#' @param recycle			can be given in a number of ways. If more than one school is to be simulated, 'recycle' must either be a list, or is converted to a list, of length equal to the number of schools / folders including school files. Each list element can be (1) a function selecting the appriopriate time steps, as indexed for each school (say if school nr. 2 has the time step indices 4, 5, 7 with respect to the time steps of the vessel, and the function is to alternate between the second and third time step, the result is 5, 7, 5, 7, and so on). A second possibility (2) is that 'recycle' is given as TRUE, to indicate recycling the first time step. Also (3) a vector of time step indices is accepted, which for the example above would be 2:3. If schools are given compactly (see "Example of compact schools in echoIBM.R"), 'recycle' can be given as a single numeric to freeze the schools at a specific time step.
+#' @param keep.temp			has two elements, where the first is TRUE if the temporary directory holding the noiseless data directory is to be kept, and where the second is TRUE if the noise-added data directory is to be kept.
+#' @param cores				is an integer specifying the number of cores to run the simulations over in parallel (should be lower than the number of cores in the computer).
+#' @param rand.sel			is a numeric specifying a random selection of the school to use in the simulations. If rand.sel>1, 1/rand.sel of the targets are selected, and the selected targets are scaled by 'rand.sel' to keep the original backscatter from the school. If given as a vector of length 2, the second element is regarded as the seed for the random selection.
+#' @param scls				is a factor by which the backscattering cross sectional area of the targets are scaled.
+#' @param method			is "closest" if the beam pattern value of the closest grid point is to be selected, and "linear" if linear interpolation should be used to extract the beam pattern value (time demanding and only available for 2D grids).
+#' @param ask 				is TRUE if the used should be asked to for approval if the memory of the least memory demanding calculation method of the individual radial sampling intervals exceed the memory limit 'max.memory'.
+#' @param parlist			is a list of input parameters to the function echoIBM.add.noise(), which generates noise and randomness. See echoIBM.add.noise() for explaination of the possible variables. Important variables are seed and pre=TRUE to use pre-generated randomness.
+#' @param bptfile			is the name of the file to which 'sllf', 'rad1', 'rad2', 'pbp1' and 'pbp2' is written (use NULL for no writing).
+#' @param path				is TRUE to allow the user to select vessel positions interactively.
+#' @param pathnr			is the number of the vessel path drawn, to be used in the name of the ".vessel" file. If a new ".vessel" file is to be written, 'pathnr' must be different than the pathnr of existing files.
+#' @param onlyMerge			Logical: If TRUE, do not simulate but only merge existing temporary simulated files.
+#' @param msg				Logical: If TRUE, show messages to the console and to dump files.
+#' @param discardOutside	A vector of three elements specifying the size of the margin around the -3 dB main beam, specifide in units of the range/angular resolution, inside which targets are considered. Using e.g. c(2, 3, 3) will discard targest outside of a volume extending three beam widths around the beam width of the system (and to 2 times the radial range beyond the maximum range). This may save process time, but is not recommended without testing, as higher order side lobes encounter a larger volume than lower order side lobes.
+#' @param fishReaction		A list of variables specifying the fish reaction to the vessel. Must contain the following variables: "magR", "mxrR", "mxdR", "facR". See info.TSD(c("magR", "mxrR", "mxdR", "facR")) for definition of these variables. 
 #'
 #' @return
 #'
@@ -44,7 +48,7 @@
 #' @export
 #' @rdname echoIBM
 #'
-echoIBM <- function(event, t=1, adds=NULL, rph=NULL, esnm=NULL, TVG.exp=2, compensated=c("pitch","roll"), filesize=3e8, calibrate=TRUE, noise=c("bg","cex"), mode=c("active","passive"), tvessel=NULL, scan.volume=TRUE, margin=500, smooth="spline", max.memory=1e9, ow=TRUE, origin=1, recycle=FALSE, keep.temp=c(TRUE,FALSE), dumpsize=10e6, cores=1, rand.sel=1, scls=1, method=c("closest","linear"), ask=FALSE, parlist=list(), bptfile=TRUE, max.radius=0.2, path=FALSE, pathnr=1, onlyMerge=FALSE, msg=FALSE){
+echoIBM <- function(event, t=1, adds=NULL, rph=NULL, esnm=NULL, TVG.exp=2, compensated=c("pitch","roll"), filesize=3e8, calibrate=TRUE, noise=c("bg","cex"), mode=c("active","passive"), tvessel=NULL, scan.volume=TRUE, margin=500, smooth="spline", max.memory=1e9, ow=TRUE, origin=1, recycle=FALSE, keep.temp=c(TRUE,FALSE), dumpsize=10e6, cores=1, rand.sel=1, scls=1, method=c("closest","linear"), ask=FALSE, parlist=list(), bptfile=TRUE, max.radius=0.2, path=FALSE, pathnr=1, onlyMerge=FALSE, msg=FALSE, discardOutside=c(r=Inf,az=Inf,el=Inf), fishReaction=list()){
 	
 	############ AUTHOR(S): ############
 	# Arne Johannes Holmin
@@ -430,14 +434,16 @@ echoIBM <- function(event, t=1, adds=NULL, rph=NULL, esnm=NULL, TVG.exp=2, compe
 	cores <- rep(cores, length.out=2)
 
 	# Move through the schools:
+	pingsfiles <- vector("list", length(schoolfiles))
 	if(!onlyMerge){
 		for(i in seq_along(schoolfiles)){
 			# Get the list of files for the current school (merging general files for the simulation with the school specific files located in the individual school directories):
 			files <- unique(c(filesanddir[!isdir],unlist(schoolfiles[i])))
 			# No noise, add afterwards:
-			echoIBM.oneschool(files=files, event=event[1], t=t, tvessel=tvessel, vesselutim=vesselutim, pingsSchool=pingsSchool[[i]], areCompact=areCompact[i], adds=adds, pingsdir=tempevent, pingsname=if(length(schooldirs)>1) paste(eventname,underevents[i],sep="_") else eventname, esnm=esnm, TVG.exp=TVG.exp, compensated=compensated, filesize=filesize, calibrate=calibrate, noise="", mode=mode, max.memory=max.memory, ow=ow, origin=origin, dumpfile=dumpfile, dumpsize=dumpsize, timedumpfile=timedumpfile, rand.sel=rand.sel, scls=scls, method=method, ask=ask, parlist=parlist, bptfile=bptfile, max.radius=max.radius, msg=msg, cores=cores[1])
+			pingsfiles[[i]] <- echoIBM.oneschool(files=files, event=event[1], t=t, tvessel=tvessel, vesselutim=vesselutim, pingsSchool=pingsSchool[[i]], areCompact=areCompact[i], adds=adds, pingsdir=tempevent, pingsname=if(length(schooldirs)>1) paste(eventname,underevents[i],sep="_") else eventname, esnm=esnm, TVG.exp=TVG.exp, compensated=compensated, filesize=filesize, calibrate=calibrate, noise="", mode=mode, max.memory=max.memory, ow=ow, origin=origin, dumpfile=dumpfile, dumpsize=dumpsize, timedumpfile=timedumpfile, rand.sel=rand.sel, scls=scls, method=method, ask=ask, parlist=parlist, bptfile=bptfile, max.radius=max.radius, msg=msg, discardOutside=discardOutside, fishReaction=fishReaction, cores=cores[1])
 		}
 	}
+	pingsfiles <- unlist(pingsfiles)
 
 	# Sum up the simulations and add noise:
 	cat("\n")
@@ -447,7 +453,7 @@ echoIBM <- function(event, t=1, adds=NULL, rph=NULL, esnm=NULL, TVG.exp=2, compe
 	# Merge the pings and add noise and randomness:
 	#echoIBM.merge(event=event[1], t=if(length(tvessel)==0) t else tvessel, beams0=beams0, ctd=ctd, TVG.in=TVGinout, TVG.out=TVGinout, TVG.exp=TVG.exp, filesize=filesize, noise=noise, ow=ow, parlist=parlist, cores=cores, keep.temp=keep.temp[2])
 	#echoIBM.add.noise.event(event=event[1], fileind=NULL, beams0=beams0, ctd=ctd, TVG.in=TVGinout, TVG.out=TVGinout, TVG.exp=TVG.exp, noisetypes=noise, scls=scls, ow=ow, parlist=parlist, cores=cores[2])
-	echoIBM.add.noise.event(event=event[1], fileind=NULL, beams0=beams0, ctd=ctd, TVG.in=TVGinout, TVG.out=TVGinout, TVG.exp=TVG.exp, noisetypes=noise, ow=ow, parlist=parlist, cores=cores[2])
+	echoIBM.add.noise.event(event=event[1], pingsfiles=pingsfiles, fileind=NULL, beams0=beams0, ctd=ctd, TVG.in=TVGinout, TVG.out=TVGinout, TVG.exp=TVG.exp, noisetypes=noise, ow=ow, parlist=parlist, cores=cores[2])
 		
 		
 	# Delete the temporary directory if required

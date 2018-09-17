@@ -27,7 +27,7 @@
 #' @export
 #' @rdname echoIBM.calibrate
 #'
-echoIBM.calibrate<-function(directory=NULL, cruise="S2009116", event=1, esnm="MS70", type=c("sv","ts"), dire=NULL, runs=1, add=30, N=1e5, j=100, sgbs=1e-6, max.memory=1e9, method=c("closest","linear"), max.radius=0.2, seed=0, cores=1, usemean=FALSE, nameadd=""){
+echoIBM.calibrate <- function(directory=NULL, cruise="S2009116", event=1, esnm="MS70", type=c("sv","ts"), dire=NULL, runs=1, add=30, N=1e5, j=100, sgbs=1e-6, max.memory=1e9, method=c("closest","linear"), max.radius=0.2, seed=0, cores=1, usemean=FALSE, nameadd=""){
 	
 	############ AUTHOR(S): ############
 	# Arne Johannes Holmin
@@ -46,28 +46,29 @@ echoIBM.calibrate<-function(directory=NULL, cruise="S2009116", event=1, esnm="MS
 	##################################################
 	##################################################
 	########## Preparation ##########
+	browser()
 	if(isTRUE(directory)){
-		directory = file.path(echoIBM_datasets_directory(), "Resources", "Calibration")
+		directory  <-  file.path(echoIBM_datasets_directory(), "Resources", "Calibration")
 	}
 	# 'beams' must be given, either as a list of beam configuration variables, or as the path to a beams configuration file:
-	data=read.event(var="beams",cruise=cruise,event=event,esnm=esnm)
+	data <- read.event(var="beams",cruise=cruise,event=event,esnm=esnm)
 	# Warning if 'data' is empty:
 	if(length(data)<2){
 		stop(paste0("No beams data in cruise ", cruise, ", event ", event))
 	}
 	
-	data$rres = soundbeam_range(data, "rres")
+	data$rres  <-  soundbeam_range(data, "rres")
 	if(j-2>min(data$lenb)){
 		stop(paste("The sampling interval index 'j' chosen too large for the minimum beam length ",min(data$lenb),sep=""))
 	}
 	# Get name of the acoustical instrument:
 	if(is.null(esnm)){
-		esnm=data$esnm
+		esnm <- data$esnm
 	}
-	esnm=toupper(esnm)
+	esnm <- toupper(esnm)
 	
 	# Get the number of beams:
-	Ni=length(data$dira)
+	Ni <- length(data$dira)
 		
 		
 	########## Execution and output ##########
@@ -76,15 +77,15 @@ echoIBM.calibrate<-function(directory=NULL, cruise="S2009116", event=1, esnm="MS
 		
 		### (1) Create the directory of the calibration simulation: ###
 		#if(length(directory)>0 && !identical(directory,FALSE)){
-			calname=paste("Calibration",esnm,"Cruise",cruise,"sv",sep="_")
+			calname <- paste("Calibration",esnm,"Cruise",cruise,"sv",sep="_")
 		#}
 		#else{
-		#	calname=paste("Calibration",esnm,"Cruise",cruise,"sv_TEST",sep="_")
+		#	calname <- paste("Calibration",esnm,"Cruise",cruise,"sv_TEST",sep="_")
 		#}
 		
 		
-		caldir = file.path(tempdir(), "Calibration", "Events", calname, esnm, "tsd")
-		#caldir = paste("~/Data/echoIBM/Calibration/Events/",calname,"/",esnm,"/tsd",sep="")
+		caldir  <-  file.path(tempdir(), "Calibration", "Events", calname, esnm, "tsd")
+		#caldir  <-  paste("~/Data/echoIBM/Calibration/Events/",calname,"/",esnm,"/tsd",sep="")
 		
 		### if(isTRUE(file.info(caldir)$isdir)){
 		### 	ans=readline(paste("The calibration case (",caldir,") alreaddy exists. Replace? (y/n)"))
@@ -124,55 +125,55 @@ echoIBM.calibrate<-function(directory=NULL, cruise="S2009116", event=1, esnm="MS
 		
 		### (3) Write the vessel data: ###
 		cat("Write the vessel data...\n")
-		vessel=list(psxv=zeros(runs),psyv=zeros(runs),pszv=zeros(runs),rtzv=zeros(runs),utim=sequence(runs)-1)
+		vessel <- list(psxv=zeros(runs),psyv=zeros(runs),pszv=zeros(runs),rtzv=zeros(runs),utim=sequence(runs)-1)
 		write.TSD(vessel, paste(caldir,"/",calname,".vessel",sep=""), numt=runs)
 		
 		
 		### (4) Write the static school data: ###
-		schoolstatic=list(pbpf="ps",sgbs=sgbs,obln=1,gamw=0,gaml=0)
+		schoolstatic <- list(pbpf="ps",sgbs=sgbs,obln=1,gamw=0,gaml=0)
 		cat("Write the static school data...\n")	
-		schoolstaticFile=paste(caldir,"/",calname,"_pointTargets_static.school",sep="")
+		schoolstaticFile <- paste(caldir,"/",calname,"_pointTargets_static.school",sep="")
 		write.TSD(schoolstatic, schoolstaticFile, numt=1)
 		
 		# If 'dire' is given, run through its elements and calibrate for each value, equal for all beams:
 		if(length(dire)>0){
 			
-			cali=NAs(Ni, length(dire))
+			cali <- NAs(Ni, length(dire))
 			for(k in seq_along(dire)){
 				cat("Calibration for tilt angle ",k," (of",length(dire),") ...\n")
 				
 				# Use the input elevation angle:
-				thisdire=list(dire=rep(dire[k],length(data$lenb)))
+				thisdire <- list(dire=rep(dire[k],length(data$lenb)))
 				
 				### (5) Generate the target positions and write the school file: ###
-				region=get.specs.esnm(c(thisdire, data), esnm=esnm, add=add)$region
-				#dr=data$asps*data$sint/2
-				r0=(j-2)*data$rres
-				r1=j*data$rres
+				region <- get.specs.esnm(c(thisdire, data), esnm=esnm, add=add)$region
+				#dr <- data$asps*data$sint/2
+				r0 <- (j-2)*data$rres
+				r1 <- j*data$rres
 				# Total volume in which the target positions are drawn. Also see appendix 2 of the documentation of echoIBM:
-				V=vol.sph(r=c(r0,r1),theta=region[,1],phi=region[,2])$volx
+				V <- vol.sph(r=c(r0,r1),theta=region[,1],phi=region[,2])$volx
 				# The true volume backscatter, equal to N*sigma_bs/V = N*A_0/V for spherical targets:
-				truesv=sgbs*N/V
+				truesv <- sgbs*N/V
 				
 				# Generate the target positions and write to the school file at each run:
 				cat("Write the dynamic school data...\n")
-				schooldynamicFile=paste(caldir,"/",calname,"_pointTargets_dynamic.school",sep="")
+				schooldynamicFile <- paste(caldir,"/",calname,"_pointTargets_dynamic.school",sep="")
 				
 				for(i in seq_len(runs)){
 					cat("Run ",i,":\t",sep="")
 					### Generate positions corresponding to uniformly distributed objects in space, from which to simulate observations from the MS70 sonar. See appendix 2 of the documentation of echoIBM: ###
-					xyz=runif.sph(N,r=c(r0,r1),theta=region[,1],phi=region[,2],sph.out=FALSE)
+					xyz <- runif.sph(N,r=c(r0,r1),theta=region[,1],phi=region[,2],sph.out=FALSE)
 					#plot3d(xyz,size=0.3)
 					
 					# Add transducer position and cut the positions above the sea level:
-					xyz[,3]=xyz[,3]+data$psze[1]
-					xyz=xyz[xyz[,3]<0,]
+					xyz[,3] <- xyz[,3]+data$psze[1]
+					xyz <- xyz[xyz[,3]<0,]
 					# Update 'N':
-					thisN=nrow(xyz)
+					thisN <- nrow(xyz)
 					cat(thisN,"point sources drawn\n")
 					
 					# Add the target information (all rotations left out because of points targets):
-					schooldynamic=list(psxf=xyz[,1],psyf=xyz[,2],pszf=xyz[,3],utim=i-1)
+					schooldynamic <- list(psxf=xyz[,1],psyf=xyz[,2],pszf=xyz[,3],utim=i-1)
 					
 					# Write the dynamic school data to file:
 					if(i==1){
@@ -188,30 +189,30 @@ echoIBM.calibrate<-function(directory=NULL, cruise="S2009116", event=1, esnm="MS
 				
 				
 				### (7) Read the simulated data: ###
-				sv=zeros(max(data$lenb),length(data$lenb))
+				sv <- zeros(max(data$lenb),length(data$lenb))
 				for(i in seq_len(runs)){
-					thissv=read.event(event=caldir,t=i,var="vbsc")$vbsc
-					sv=sv+thissv
+					thissv <- read.event(event=caldir,t=i,var="vbsc")$vbsc
+					sv <- sv+thissv
 				}	
 						
 				
 				### (8) Store the calibration factors of the current tilt: ###
-				cali[,k]=truesv/sv[j,]*runs
+				cali[,k] <- truesv/sv[j,]*runs
 			}
 			
 			### (9) Write and return the calibration data: ###
 			# Apply the mean of all beams if usemean==TRUE (omnidirectional sonars such as Simrad SX90):
 			if(usemean){
 				#out=c(list(cali=apply(cali,2,function(xx) rep(mean(xx),length(xx))), cal0=cali, grde=dire, ctim=unclass(Sys.time())), data[setdiff(names(data),c("dire","ftim","mtim","utim"))])
-				out=c(list(cali=apply(cali,2,function(xx) rep(mean(xx),length(xx))), cal0=cali, grde=dire, ctim=unclass(Sys.time())))
+				out <- c(list(cali=apply(cali,2,function(xx) rep(mean(xx),length(xx))), cal0=cali, grde=dire, ctim=unclass(Sys.time())))
 			}
 			else{
 				#out=c(list(cali=cali, grde=dire, ctim=unclass(Sys.time())), data[setdiff(names(data),c("dire","ftim","mtim","utim"))])
-				out=c(list(cali=cali, grde=dire, ctim=unclass(Sys.time())))
+				out <- c(list(cali=cali, grde=dire, ctim=unclass(Sys.time())))
 			}
 			# Write the calibration data:
 			if(length(directory)>0 && !identical(directory,FALSE)){
-				con = file.path(directory, paste("CalibrationTable_", toupper(esnm), "_Cruise_", cruise, if(nchar(nameadd)>0) "_", nameadd, "_sv.beams", sep=""))
+				con  <-  file.path(directory, paste("CalibrationTable_", toupper(esnm), "_Cruise_", cruise, if(nchar(nameadd)>0) "_", nameadd, "_sv.beams", sep=""))
 				write.TSD(out, con=con, numt=1)
 			}
 			# Return the calibration data:
@@ -219,34 +220,34 @@ echoIBM.calibrate<-function(directory=NULL, cruise="S2009116", event=1, esnm="MS
 		}
 		else{
 			### (5) Generate the target positions and write the school file: ###
-			region=get.specs.esnm(data, esnm=esnm, add=add)$region
+			region <- get.specs.esnm(data, esnm=esnm, add=add)$region
 			#dr=data$asps*data$sint/2
-			r0=(j-2)*data$rres
-			r1=j*data$rres
+			r0 <- (j-2)*data$rres
+			r1 <- j*data$rres
 			# Total volume in which the target positions are drawn. Also see appendix 2 of the documentation of echoIBM:
-			V=vol.sph(r=c(r0,r1),theta=region[,1],phi=region[,2])$volx
+			V <- vol.sph(r=c(r0,r1),theta=region[,1],phi=region[,2])$volx
 			# The true volume backscatter, equal to N*sigma_bs/V = N*A_0/V for spherical targets:
-			truesv=sgbs*N/V
+			truesv <- sgbs*N/V
 			
 			# Generate the target positions and write to the school file at each run:
 			cat("Write the dynamic school data...\n")
-			schooldynamicFile=paste(caldir,"/",calname,"_pointTargets_dynamic.school",sep="")
+			schooldynamicFile <- paste(caldir,"/",calname,"_pointTargets_dynamic.school",sep="")
 			
 			for(i in seq_len(runs)){
 				cat("Run ",i,":\t",sep="")
 				### Generate positions corresponding to uniformly distributed objects in space, from which to simulate observations from the MS70 sonar. See appendix 2 of the documentation of echoIBM: ###
-				xyz=runif.sph(N,r=c(r0,r1),theta=region[,1],phi=region[,2],sph.out=FALSE)
+				xyz <- runif.sph(N,r=c(r0,r1),theta=region[,1],phi=region[,2],sph.out=FALSE)
 				#plot3d(xyz,size=0.3)
 				
 				# Add transducer position and cut the positions above the sea level:
-				xyz[,3]=xyz[,3]+data$psze[1]
-				xyz=xyz[xyz[,3]<0,]
+				xyz[,3] <- xyz[,3]+data$psze[1]
+				xyz <- xyz[xyz[,3]<0,]
 				# Update 'N':
-				thisN=nrow(xyz)
+				thisN <- nrow(xyz)
 				cat(thisN,"point sources drawn\n")
 				
 				# Add the target information (all rotations left out because of points targets):
-				schooldynamic=list(psxf=xyz[,1],psyf=xyz[,2],pszf=xyz[,3],utim=i-1)
+				schooldynamic <- list(psxf=xyz[,1],psyf=xyz[,2],pszf=xyz[,3],utim=i-1)
 				
 				# Write the dynamic school data to file:
 				if(i==1){
@@ -262,29 +263,29 @@ echoIBM.calibrate<-function(directory=NULL, cruise="S2009116", event=1, esnm="MS
 			
 			
 			### (7) Read the simulated data: ###
-			sv=zeros(max(data$lenb),length(data$lenb))
+			sv <- zeros(max(data$lenb),length(data$lenb))
 			for(i in seq_len(runs)){
-				thissv=read.event(event=caldir,t=i,var="vbsc")$vbsc
-				sv=sv+thissv
+				thissv <- read.event(event=caldir,t=i,var="vbsc")$vbsc
+				sv <- sv+thissv
 			}	
 					
 			
 			### (8) Write the calibration data if required: ###
-			calfact=truesv/sv[j,]*runs
+			calfact <- truesv/sv[j,]*runs
 			
 			### (9) Write and return the calibration data: ###
 			# Apply the mean of all beams if usemean==TRUE (omnidirectional sonars such as Simrad SX90):
 			if(usemean){
 				#out=c(list(cali=rep(mean(calfact),length(calfact)), cal0=calfact, ctim=unclass(Sys.time())), data[setdiff(names(data),c("ftim","mtim","utim"))])
-				out=c(list(cali=rep(mean(calfact),length(calfact)), cal0=calfact, ctim=unclass(Sys.time())))
+				out <- c(list(cali=rep(mean(calfact),length(calfact)), cal0=calfact, ctim=unclass(Sys.time())))
 			}
 			else{
 				#out=c(list(cali=calfact, ctim=unclass(Sys.time())), data[setdiff(names(data),c("ftim","mtim","utim"))])
-				out=c(list(cali=calfact, ctim=unclass(Sys.time())))
+				out <- c(list(cali=calfact, ctim=unclass(Sys.time())))
 			}
 			# Write the calibration data:
 			if(length(directory)>0 && !identical(directory,FALSE)){
-				con=file.path(directory,paste("CalibrationTable_",toupper(esnm),"_Cruise_",cruise,if(nchar(nameadd)>0) "_",nameadd,"_sv.beams",sep=""))
+				con <- file.path(directory,paste("CalibrationTable_",toupper(esnm),"_Cruise_",cruise,if(nchar(nameadd)>0) "_",nameadd,"_sv.beams",sep=""))
 				write.TSD(out, con=con, numt=1)
 			}
 			# Return the calibration data:
@@ -297,23 +298,23 @@ echoIBM.calibrate<-function(directory=NULL, cruise="S2009116", event=1, esnm="MS
 		
 		### (1) Create the directory of the calibration simulation: ###
 		if(length(directory)>0 && !identical(directory,FALSE)){
-			calname=paste("Calibration",esnm,"Cruise",cruise,"sigma_bs",sep="_")
+			calname <- paste("Calibration",esnm,"Cruise",cruise,"sigma_bs",sep="_")
 		}
 		else{
-			calname=paste("Calibration",esnm,"Cruise",cruise,"sigma_bs_TEST",sep="_")
+			calname <- paste("Calibration",esnm,"Cruise",cruise,"sigma_bs_TEST",sep="_")
 		}
 		
-		caldir=paste("~/Data/echoIBM/Calibration/Events/",calname,"/",esnm,"/tsd",sep="")
+		caldir <- paste("~/Data/echoIBM/Calibration/Events/",calname,"/",esnm,"/tsd",sep="")
 		if(is.na(file.info(caldir)$isdir)){
 			dir.create(caldir,recursive=TRUE)
 		}
 		else{
-			ans=readline("The calibration case alreaddy exists. Replace? (y/n)")
+			ans <- readline("The calibration case alreaddy exists. Replace? (y/n)")
 			if(!identical(ans,"y")){
 				stop("Calibration terminated")
 			}
 			else{
-				tempdir=paste("~/Data/echoIBM/Calibration/Events/",calname,"/",esnm,"/temp",sep="")
+				tempdir <- paste("~/Data/echoIBM/Calibration/Events/",calname,"/",esnm,"/temp",sep="")
 				if(isTRUE(file.info(tempdir)$isdir)){
 					unlink(tempdir, recursive = TRUE)
 				}
@@ -329,33 +330,33 @@ echoIBM.calibrate<-function(directory=NULL, cruise="S2009116", event=1, esnm="MS
 		
 		### (3) Write the vessel data: ###
 		cat("Write the vessel data...\n")
-		vessel=list(psxv=zeros(Ni),psyv=zeros(Ni),pszv=zeros(Ni),rtzv=zeros(Ni),utim=sequence(Ni)-1)
+		vessel <- list(psxv=zeros(Ni),psyv=zeros(Ni),pszv=zeros(Ni),rtzv=zeros(Ni),utim=sequence(Ni)-1)
 		write.TSD(vessel,paste(caldir,"/",calname,".vessel",sep=""),numt=Ni)
 		
 		
 		### (4) Write the static school data: ###
-		schoolstatic=list(pbpf="ps",sgbs=sgbs,obln=1,gamw=0,gaml=0)
+		schoolstatic <- list(pbpf="ps",sgbs=sgbs,obln=1,gamw=0,gaml=0)
 		cat("Write the static school data...\n")	
-		schooldynamicFile=paste(caldir,"/",calname,"_pointTargets_static.school",sep="")
+		schooldynamicFile <- paste(caldir,"/",calname,"_pointTargets_static.school",sep="")
 		write.TSD(schoolstatic, schooldynamicFile, numt=1)
 		
 		
 		# If 'dire' is given, run through its elements and calibrate for each value, equal for all beams:
 		if(length(dire)>0){
-			cali=NAs(Ni, length(dire))
+			cali <- NAs(Ni, length(dire))
 			for(k in seq_along(dire)){
 				cat("Calibration for tilt angle ",k," (of",length(dire),") ...\n")
 				
 				# Use the input elevation angle:
-				thisdire=list(dire=rep(dire[k],length(data$lenb)))
+				thisdire <- list(dire=rep(dire[k],length(data$lenb)))
 				
 				### (5) Generate the target positions and write the school file: ###
-				rthph=cbind((j-1)*data$rres, data$dira, thisdire$dire)
-				xyz=sph2car(rthph)
-				xyz[,3]=xyz[,3]+data$psze[1]
-				schooldynamic=list(psxf=xyz[,1],psyf=xyz[,2],pszf=xyz[,3],utim=sequence(Ni)-1)
+				rthph <- cbind((j-1)*data$rres, data$dira, thisdire$dire)
+				xyz <- sph2car(rthph)
+				xyz[,3] <- xyz[,3]+data$psze[1]
+				schooldynamic <- list(psxf=xyz[,1],psyf=xyz[,2],pszf=xyz[,3],utim=sequence(Ni)-1)
 				cat("Write the dynamic school data...\n")
-				schooldynamicFile=paste(caldir,"/",calname,"_pointTargets_dynamic.school",sep="")
+				schooldynamicFile <- paste(caldir,"/",calname,"_pointTargets_dynamic.school",sep="")
 				write.TSD(schooldynamic, schooldynamicFile, numt=Ni)
 					
 				
@@ -364,30 +365,30 @@ echoIBM.calibrate<-function(directory=NULL, cruise="S2009116", event=1, esnm="MS
 				
 				
 				### (7) Read the simulated data: ###
-				thiscali=zeros(Ni)
+				thiscali <- zeros(Ni)
 				for(i in seq_len(Ni)){
-					thissv=read.event(event=caldir,t=i,var="vbsc")$vbsc
-					thiscali[i] = sum(thissv[,i])
+					thissv <- read.event(event=caldir,t=i,var="vbsc")$vbsc
+					thiscali[i]  <-  sum(thissv[,i])
 				}	
 						
 				
 				### (8) Store the calibration factors of the current tilt: ###
-				cali[,k]=sgbs/thiscali
+				cali[,k] <- sgbs/thiscali
 			}
 			
 			### (9) Write and return the calibration data: ###
 			# Apply the mean of all beams if usemean==TRUE (omnidirectional sonars such as Simrad SX90):
 			if(usemean){
 				#out=c(list(cali=apply(cali,2,function(xx) rep(mean(xx),length(xx))), cal0=cali, grde=dire, ctim=unclass(Sys.time())), data[setdiff(names(data),c("dire","ftim","mtim","utim"))])
-				out=c(list(cali=apply(cali,2,function(xx) rep(mean(xx),length(xx))), cal0=cali, grde=dire, ctim=unclass(Sys.time())))
+				out <- c(list(cali=apply(cali,2,function(xx) rep(mean(xx),length(xx))), cal0=cali, grde=dire, ctim=unclass(Sys.time())))
 			}
 			else{
 				#out=c(list(cali=cali, grde=dire, ctim=unclass(Sys.time())), data[setdiff(names(data),c("dire","ftim","mtim","utim"))])
-				out=c(list(cali=cali, grde=dire, ctim=unclass(Sys.time())))
+				out <- c(list(cali=cali, grde=dire, ctim=unclass(Sys.time())))
 			}
 			# Write the calibration data:
 			if(length(directory)>0 && !identical(directory,FALSE)){
-				con=file.path(directory,paste("CalibrationTable_",toupper(esnm),"_Cruise_",cruise,if(nchar(nameadd)>0) "_",nameadd,"_sigma_bs.beams",sep=""))
+				con <- file.path(directory,paste("CalibrationTable_",toupper(esnm),"_Cruise_",cruise,if(nchar(nameadd)>0) "_",nameadd,"_sigma_bs.beams",sep=""))
 				write.TSD(out, con=con, numt=1)
 			}
 			# Return the calibration data:
@@ -395,12 +396,12 @@ echoIBM.calibrate<-function(directory=NULL, cruise="S2009116", event=1, esnm="MS
 		}
 		else{
 			### (5) Generate the target positions and write the school file: ###
-			rthph=cbind((j-1)*data$rres, data$dira, data$dire)
-			xyz=sph2car(rthph)
-			xyz[,3]=xyz[,3]+data$psze[1]
-			schooldynamic=list(psxf=xyz[,1],psyf=xyz[,2],pszf=xyz[,3],utim=sequence(Ni)-1)
+			rthph <- cbind((j-1)*data$rres, data$dira, data$dire)
+			xyz <- sph2car(rthph)
+			xyz[,3] <- xyz[,3]+data$psze[1]
+			schooldynamic <- list(psxf=xyz[,1],psyf=xyz[,2],pszf=xyz[,3],utim=sequence(Ni)-1)
 			cat("Write the dynamic school data...\n")
-			schooldynamicFile=paste(caldir,"/",calname,"_pointTargets_dynamic.school",sep="")
+			schooldynamicFile <- paste(caldir,"/",calname,"_pointTargets_dynamic.school",sep="")
 			write.TSD(schooldynamic, schooldynamicFile, numt=Ni)
 			
 			### (6) Run the simulation: ###
@@ -408,29 +409,29 @@ echoIBM.calibrate<-function(directory=NULL, cruise="S2009116", event=1, esnm="MS
 			
 			
 			### (7) Read the simulated data: ###
-			cali=zeros(Ni)
+			cali <- zeros(Ni)
 			for(i in seq_len(Ni)){
-				thissv=read.event(event=caldir,t=i,var="vbsc")$vbsc
-				cali[i] = sum(thissv[,i])
+				thissv <- read.event(event=caldir,t=i,var="vbsc")$vbsc
+				cali[i]  <-  sum(thissv[,i])
 			}	
 			
 			
 			### (8) Write the calibration data if required: ###
-			calfact=sgbs/cali
+			calfact <- sgbs/cali
 			
 			# Apply the mean of all beams if usemean==TRUE (omnidirectional sonars such as Simrad SX90):
 			if(usemean){
 				#out=c(list(cali=rep(mean(calfact),length(calfact)), cal0=calfact, ctim=unclass(Sys.time())), data[setdiff(names(data),c("ftim","mtim","utim"))])
-				out=c(list(cali=rep(mean(calfact),length(calfact)), cal0=calfact, ctim=unclass(Sys.time())))
+				out <- c(list(cali=rep(mean(calfact),length(calfact)), cal0=calfact, ctim=unclass(Sys.time())))
 			}
 			else{
 				#out=c(list(cali=calfact, ctim=unclass(Sys.time())), data[setdiff(names(data),c("ftim","mtim","utim"))])
 				#out=c(list(cali=calfact, ctim=unclass(Sys.time())), data[setdiff(names(data),c("ftim","mtim","utim"))])
-				out=c(list(cali=calfact, ctim=unclass(Sys.time())))
+				out <- c(list(cali=calfact, ctim=unclass(Sys.time())))
 			}
 			# Write the calibration data:
 			if(length(directory)>0 && !identical(directory,FALSE)){
-				con=file.path(directory,paste("CalibrationTable_",toupper(esnm),"_Cruise_",cruise,if(nchar(nameadd)>0) "_",nameadd,"_sigma_bs.beams",sep=""))
+				con <- file.path(directory,paste("CalibrationTable_",toupper(esnm),"_Cruise_",cruise,if(nchar(nameadd)>0) "_",nameadd,"_sigma_bs.beams",sep=""))
 				write.TSD(out, con=con, numt=1)
 			}
 			# Return the calibration data:

@@ -19,19 +19,11 @@
 #'
 echoIBM.oneping.j2 <- function(j, data){
 	
-	############ AUTHOR(S): ############
-	# Arne Johannes Holmin
-	############ LANGUAGE: #############
-	# English
 	############### LOG: ###############
 	# Start: 2008-03-10 - Clean version.
 	# Update: 2011-02-20 - Changed to use beamPattern.TSD() which takes as input a list of inputs named by the convencional TSD-names. Thus the parameter "mod" as a list element of the beam pattern function is no longer neede.
 	# Update: 2012-02-07 - Changes to the treatment of sonar beam patterns, and added the side lobe level factors 'sllf' used for adjusting side lobe levels to the desired level.
 	# Last: 2012-11-29 - Expanded the dump.
-	########### DESCRIPTION: ###########
-	# Simulates one radial sphere (sample interval) 'j' of one echo sounder observation based on positions, orientations, sizes and other specifics of each fish in a known (simulated) school. Two for loops used (for each frequency and each beam).
-	########## DEPENDENCIES: ###########
-	# zeros(), rotate3D()
 	############ VARIABLES: ############
 	# ---j--- is the sampling interval index.
 	# ---data--- is the list of data for the simulation, containing all of the following elements:
@@ -82,10 +74,10 @@ echoIBM.oneping.j2 <- function(j, data){
 	nsig <- zeros(data$numb)
 	
 	# Declare the dump data to return:
-	dumpdata <- NAs(7)
-	names(dumpdata) <- c("etaj", "B_L", "etaa", "epss", "epsl", "chi", "sigma0mode")
+	dumpdata <- NAs(8)
+	names(dumpdata) <- c("etaj", "B_L", "etaa", "epss", "epsl", "chi", "sigma0mode", "withoutetaj")
 
-	# If more than 0 fishes are to be treated:
+	# If more than 0 fish are to be treated:
 	if(data$lthesel>0){
 		
 		# The radial weighting due to the time interval of the incoming sound (to the receiver):
@@ -93,7 +85,7 @@ echoIBM.oneping.j2 <- function(j, data){
 		# Dump 'etaj':
 		dumpdata[1] <- sum(thisdata$etaj, na.rm=TRUE)
 		
-		# Extracting the positions of the fish in (T):
+		# Extracting the positions of the fish in the coordinate system of the vessel (V):
 		thisdata$fishposV <- rotate3D(
 			cbind(data$psxf[data$thesel], data$psyf[data$thesel], data$pszf[data$thesel]) - matrix(c(data$psxv,data$psyv,data$pszv), ncol=3, nrow=data$lthesel, byrow=TRUE), 
 			by="zxy", 
@@ -106,7 +98,7 @@ echoIBM.oneping.j2 <- function(j, data){
 		
 		# Assure that data$ssil has the apropriate dimension:
 		if(!is.null(data$ssil) && any(data$sigma0mode %in% 3:4)){
-			data$ssil <- matrix(rep(data$ssil,length.out=max(data$thesel)*length(data$uniquek)), nrow=max(data$thesel), ncol=length(data$uniquek))
+			data$ssil <- matrix(rep(data$ssil, length.out=max(data$thesel) * length(data$uniquek)), nrow=max(data$thesel), ncol=length(data$uniquek))
 			}
 		
 		# For loop through the frequencies:
@@ -160,7 +152,6 @@ echoIBM.oneping.j2 <- function(j, data){
 					thisdata$B_T2_i[,iii] <- thisdata$B_T1_i[,iii]
 					}
 				else{
-					# Beam pattern on emission from the trasducer:
 					if(data$pbp2=="circularPiston_ellipticRadius_sidelobefit"){
 						# Use as input the 'dira' [lthesel], 'dire' [lthesel], 'wnsz' [1,2] and 'sllf' [1,2]:
 						thisdata$B_T2_i[,iii] <- data$bpt2(list(dira=thisdata$fishdirT[,2],  dire=thisdata$fishdirT[,3],  wnsz=data$uniquek[i]*data$rad2[ii,,drop=FALSE],  sllf=data$sllf[ii,,drop=FALSE]), appr=circularPiston_appr)
@@ -192,10 +183,10 @@ echoIBM.oneping.j2 <- function(j, data){
 			if(any(data$sigma0mode %in% 3:4)){
 				if(is.null(data$ssil)){
 					if(length(data$grsf)==1){
-						thisdata$chi <- suppressWarnings(approx(data$grsf, data$ssif, data$uniquek[i]*data$lenl[data$thesel], method="constant", rule=2)$y)
+						thisdata$chi <- suppressWarnings(approx(data$grsf, data$ssif, data$uniquek[i] * data$lenl[data$thesel], method="constant", rule=2)$y)
 						}
 					else{
-						thisdata$chi <- suppressWarnings(approx(data$grsf, data$ssif, data$uniquek[i]*data$lenl[data$thesel], method="linear", rule=2)$y)
+						thisdata$chi <- suppressWarnings(approx(data$grsf, data$ssif, data$uniquek[i] * data$lenl[data$thesel], method="linear", rule=2)$y)
 						}
 					}
 				else{
@@ -274,6 +265,7 @@ echoIBM.oneping.j2 <- function(j, data){
 				# Dump 'espl':
 				dumpdata[5] <- sum(dumpdata[5], thisdata$epsl, na.rm=TRUE)
 				}
+			dumpdata[8] <- sum(dumpdata[8], withoutetaj, na.rm=TRUE)
 			} # End of for(i in seq_along(data$uniquek)).
 		# Dump:
 		# Detailed information about the school ("etaj","B_L","etaa","epss","epsl","chi"):
@@ -283,6 +275,7 @@ echoIBM.oneping.j2 <- function(j, data){
 		dumpdata[4] <- dumpdata[4] / length(data$wavenumber)
 		dumpdata[5] <- dumpdata[5] / length(data$wavenumber)
 		dumpdata[6] <- dumpdata[6] / data$lthesel / length(data$wavenumber)
+		dumpdata[8] <- dumpdata[8] / length(data$wavenumber)
 		} # End of if(data$lthesel>0).
 	
 	# Return:
