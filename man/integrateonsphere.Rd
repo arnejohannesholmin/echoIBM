@@ -4,8 +4,8 @@
 \alias{integrateonsphere}
 \title{Numerical calculation of the surface integral of the function 'fun' on (parts of) the unit sphere.}
 \usage{
-integrateonsphere(fun, ndim = 2, theta = c(0, 2 * pi), phi = c(0, pi),
-  R = 1, pres = 1e-06, l = c(100, 100), incriment = 2,
+integrateonsphere(fun, ndim = 2, theta = c(0, 2 * pi), phi = c(0,
+  pi), R = 1, pres = 1e-06, l = c(100, 100), incriment = 2,
   equal.size = TRUE, max.cells = 1e+06, print = TRUE)
 }
 \arguments{

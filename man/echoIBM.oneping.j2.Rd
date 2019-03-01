@@ -3,7 +3,6 @@
 %   R/echoIBM.oneping.j2_temp.R, R/echoIBM_setB_T.R
 \name{echoIBM.oneping.j2}
 \alias{echoIBM.oneping.j2}
-\alias{echoIBM.oneping.j2}
 \alias{echoIBM_setB_T}
 \title{Simulates one radial sphere (sample interval) 'j' of one echo sounder observation based on positions, orientations, sizes and other specifics of each fish in a known (simulated) school. Two for loops used (for each frequency and each beam).}
 \usage{

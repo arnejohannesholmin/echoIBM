@@ -6,7 +6,8 @@
 \usage{
 echoIBM.default.oneschool(data, esnm = "MS70", compensated = c("pitch",
   "roll"), max.radius = 0.2, pres = 1e-06, max.cells = 1e+07,
-  method = c("closest", "linear"), dumpfile = "dump.txt", bptfile = NULL)
+  method = c("closest", "linear"), dumpfile = "dump.txt",
+  bptfile = NULL)
 }
 \arguments{
 \item{data}{is a list of data as read by echoIBM.oneschool().}

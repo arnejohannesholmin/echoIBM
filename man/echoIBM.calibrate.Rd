@@ -12,9 +12,10 @@ echoIBM.calibrate(directory = NULL, cruise = "S2009116", event = 1,
   cores = 1, usemean = FALSE, nameadd = "")
 
 echoIBM.calibrate2(directory = NULL, event = 1, type = c("sv", "ts"),
-  dire = NULL, runs = 1, add = 30, N = 1e+05, j = 100, sgbs = 1e-06,
-  max.memory = 1e+09, method = c("closest", "linear"), max.radius = 0.2,
-  seed = 0, cores = 1, usemean = FALSE, nameadd = "")
+  dire = NULL, runs = 1, add = 30, N = 1e+05, j = 100,
+  sgbs = 1e-06, max.memory = 1e+09, method = c("closest", "linear"),
+  max.radius = 0.2, seed = 0, cores = 1, usemean = FALSE,
+  nameadd = "")
 }
 \arguments{
 \item{directory}{the path to the directory in which to put the calibration file (use TRUE for the default directory file.path(echoIBM_datasets_directory(), "Resources", "Calibration")).}

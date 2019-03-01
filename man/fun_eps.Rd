@@ -4,7 +4,8 @@
 \alias{fun_eps}
 \title{Returns a function for the echo ability 'eps*' equal to the optimal acoustic cross sectional area of a target divided by the length of the target to the desired power (usually squared). The function fun_eps() has 2 methods depending on the type of the input object 'data'.}
 \usage{
-fun_eps(data = NULL, Nl = 1, method = c("closest", "linear", "constant"))
+fun_eps(data = NULL, Nl = 1, method = c("closest", "linear",
+  "constant"))
 }
 \arguments{
 \item{data}{may be of 2 different types.}

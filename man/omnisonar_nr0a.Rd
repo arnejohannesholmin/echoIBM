@@ -4,8 +4,8 @@
 \alias{omnisonar_nr0a}
 \title{Generates close range noise in active mode to be used for fishery sonar. The noise is generated in non-TVG-amplified mode such that when TVG-amplified, the noise follows a pure log r-relationship, i.e., m * log(r). The term "close range noise" is here used somewhat misleading, since it is merely used to mimic the background level of a fishery sonar, which includes surface reverberation and possibly other backscattering which does not fall into the definition of noise in this system (all energy not backscattered from objects).}
 \usage{
-omnisonar_nr0a(beams, SNref = -65, rref = 600, SN0 = -25, rjoin = 20,
-  m = 2, TVG.exp = 2)
+omnisonar_nr0a(beams, SNref = -65, rref = 600, SN0 = -25,
+  rjoin = 20, m = 2, TVG.exp = 2)
 }
 \arguments{
 \item{beams}{is a list of beam configuration data, specifically (1) the average speed of sound "asps", (2) sampling interval "sint", (3) beam length "lenb", (4) number of beams "numb", (5) and absorption coefficient in units of dB re 1 m^-1 "absr".}

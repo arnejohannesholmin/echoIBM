@@ -4,8 +4,8 @@
 \alias{write.ssif}
 \title{Calculates and (optionally) writes to file the spherical surface integral of a beam pattern from acoustic fish models at radius 1 meter, for the grid of the product 'kL' of wavenumber and size of the acoustic model.}
 \usage{
-write.ssif(x = NULL, outfile = NULL, pres = 1e-06, max.cells = 1e+06,
-  onlyssif.out = TRUE)
+write.ssif(x = NULL, outfile = NULL, pres = 1e-06,
+  max.cells = 1e+06, onlyssif.out = TRUE)
 }
 \arguments{
 \item{x}{is either a list of the data ('grsf' (grid of the product of wavenumber and size of the acoustic model) and 'ebpf' (empirical beam pattern table) and at least one of 'graf' (grid azimuth angle) and 'gref' (grid elevation angle)) or a path to the TSD file holding the empirical beam pattern.}

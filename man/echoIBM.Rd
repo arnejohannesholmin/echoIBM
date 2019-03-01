@@ -7,14 +7,15 @@
 \usage{
 echoIBM(event, t = 1, adds = NULL, rph = NULL, esnm = NULL,
   TVG.exp = 2, compensated = c("pitch", "roll"), filesize = 3e+08,
-  calibrate = TRUE, noise = c("bg", "cex"), mode = c("active", "passive"),
-  tvessel = NULL, scan.volume = TRUE, margin = 500, smooth = "spline",
-  max.memory = 1e+09, ow = TRUE, origin = 1, recycle = FALSE,
-  keep.temp = c(TRUE, FALSE), dumpsize = 1e+07, cores = 1, rand.sel = 1,
-  scls = 1, method = c("closest", "linear"), ask = FALSE,
-  parlist = list(), bptfile = TRUE, max.radius = 0.2, path = FALSE,
-  pathnr = 1, onlyMerge = FALSE, msg = FALSE, discardOutside = c(r =
-  Inf, az = Inf, el = Inf), fishReaction = list())
+  calibrate = TRUE, noise = c("bg", "cex"), mode = c("active",
+  "passive"), tvessel = NULL, scan.volume = TRUE, margin = 500,
+  smooth = "spline", max.memory = 1e+09, ow = TRUE, origin = 1,
+  recycle = FALSE, keep.temp = c(TRUE, FALSE), dumpsize = 1e+07,
+  cores = 1, rand.sel = 1, scls = 1, method = c("closest",
+  "linear"), ask = FALSE, parlist = list(), bptfile = TRUE,
+  max.radius = 0.2, path = FALSE, pathnr = 1, onlyMerge = FALSE,
+  msg = FALSE, discardOutside = c(r = Inf, az = Inf, el = Inf),
+  fishReaction = list())
 
 echoIBM.add.noise.event(event, pingsfiles = NULL, fileind = NULL,
   beams0 = NULL, ctd = NULL, TVG.in = TRUE, TVG.out = TRUE,

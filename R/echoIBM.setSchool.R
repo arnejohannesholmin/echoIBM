@@ -392,9 +392,15 @@ echoIBM.setSchool <- function(
 				schoolCount <- newSchoolCount
 			}
 		}
-		# Add the survey region to the statis school file:
-		schoolStatic$surv <- surveyRegion
+		
 	
+		### (1) Position: 
+		# Generate the school positions:
+		if(identical(tolower(schools[1]), "flat")){
+			schools[1] <- "flatxyz"
+		}
+		# Set the positions of the schools as uniformly or regularly distributed in x, y and z dimension:
+		# Here, if both "flat" and "x", "y" or "z" is present in schools[1], the regular distribution is used along that dimension. Otherwise uniform distribution.
 		drawPosSchoolOneDim <- function(dim="x", schools, schoolCount, surveyRegion){
 			if(grepl(dim, schools[1], ignore.case=TRUE) && grepl("flat", schools[1], ignore.case=TRUE)){
 				out <- seq(surveyRegion[[dim]][1], surveyRegion[[dim]][2], length.out=schoolCount)
@@ -406,14 +412,6 @@ echoIBM.setSchool <- function(
 			out
 		}
 	
-	
-		### (1) Position: 
-		# Generate the school positions:
-		if(identical(tolower(schools[1]), "flat")){
-			schools[1] <- "flatxyz"
-		}
-		# Set the positions of the schools as uniformly or regularly distributed in x, y and z dimension:
-		# Here, if both "flat" and "x", "y" or "z" is present in schools[1], the regular distribution is used along that dimension. Otherwise uniform distribution.
  		psxS <- drawPosSchoolOneDim(dim="x", schools=schools, schoolCount=schoolCount, surveyRegion=surveyRegion)
 		psyS <- drawPosSchoolOneDim(dim="y", schools=schools, schoolCount=schoolCount, surveyRegion=surveyRegion)
 		pszS <- drawPosSchoolOneDim(dim="z", schools=schools, schoolCount=schoolCount, surveyRegion=surveyRegion)
@@ -522,6 +520,8 @@ echoIBM.setSchool <- function(
 		stop(paste0("School type ", tolower(schools[1]), " not implemented"))
 	}
 	
+	# Add the survey region to the statis school file:
+	schoolStatic$surv <- surveyRegion
 	
 	# Add the data into the schoolDynamic:
 	schoolDynamic <- c(

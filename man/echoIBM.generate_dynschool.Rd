@@ -4,8 +4,8 @@
 \alias{echoIBM.generate_dynschool}
 \title{Generates the dynamic variables of schools positioned close enough to enter the sampling volume of the sonar.}
 \usage{
-echoIBM.generate_dynschool(data, t = 1, vesselutim = NULL, adds = list(),
-  margin = 0, dumpfile = NULL)
+echoIBM.generate_dynschool(data, t = 1, vesselutim = NULL,
+  adds = list(), margin = 0, dumpfile = NULL)
 }
 \arguments{
 \item{data}{is a list containing the necessary data.}

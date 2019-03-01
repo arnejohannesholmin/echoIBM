@@ -8,13 +8,13 @@
 \usage{
 echoIBM.oneping.oneschool(data, esnm = NULL, TVG.exp = 2,
   compensated = c("pitch", "roll"), calibrate = TRUE, noise = c("nr",
-  "bg", "ex"), max.memory = 1e+09, dumpfile = "dump.txt", ask = FALSE,
-  parlist = list(), msg = FALSE)
+  "bg", "ex"), max.memory = 1e+09, dumpfile = "dump.txt",
+  ask = FALSE, parlist = list(), msg = FALSE)
 
 echoIBM.oneping.oneschool_old(data, esnm = NULL, TVG.exp = 2,
   compensated = c("pitch", "roll"), calibrate = TRUE, noise = c("nr",
-  "bg", "ex"), max.memory = 1e+09, dumpfile = "dump.txt", ask = FALSE,
-  parlist = list(), msg = FALSE)
+  "bg", "ex"), max.memory = 1e+09, dumpfile = "dump.txt",
+  ask = FALSE, parlist = list(), msg = FALSE)
 }
 \arguments{
 \item{data}{see below.}

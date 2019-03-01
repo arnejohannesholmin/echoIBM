@@ -4,8 +4,8 @@
 \alias{echoIBM.add.noise}
 \title{Adds noise to an array of sv-values for the ping 'indt', given the noise data present in 'data'.}
 \usage{
-echoIBM.add.noise(sv, indt, noisetypes = c("bg", "pn", "ms"), data = NULL,
-  parlist = list())
+echoIBM.add.noise(sv, indt, noisetypes = c("bg", "pn", "ms"),
+  data = NULL, parlist = list())
 }
 \arguments{
 \item{sv}{is an array dimension [lenb,numb] (or a vector of the same length) of sv-values.}

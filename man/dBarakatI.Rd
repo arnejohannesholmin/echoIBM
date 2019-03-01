@@ -4,8 +4,8 @@
 \alias{dBarakatI}
 \title{Calculates the probability density function of the total intensity (square of pressure amplitude) from a finite number of sine waves of arbitrary individual amplitudes, given in Equation 64 of Barakat 1974, using the terminology of that paper.}
 \usage{
-dBarakatI(h, beta_n2, magn = 1, N = 100, betadistr = c("seq", "flat"),
-  max.memory = 1e+09)
+dBarakatI(h, beta_n2, magn = 1, N = 100, betadistr = c("seq",
+  "flat"), max.memory = 1e+09)
 }
 \arguments{
 \item{h}{is the argument (superimposed intensity).}

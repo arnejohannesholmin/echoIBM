@@ -20,8 +20,9 @@
 \usage{
 echoIBM.getPath(starttime = "2015-01-01 00:00:00", origin = NULL,
   heading = NULL, distance = NULL, speed = NULL, duration = NULL,
-  nodesLocal = NULL, nodesEarth = NULL, utim = NULL, pingduration = 1,
-  heave = 0, rtx = 0, rty = 0, rtz = NULL, type = "v")
+  nodesLocal = NULL, nodesEarth = NULL, utim = NULL,
+  pingduration = 1, heave = 0, rtx = 0, rty = 0, rtz = NULL,
+  type = "v")
 
 echoIBM.readFile(path, ext = "vessel", t = 1)
 
@@ -34,29 +35,32 @@ echoIBM.setCalibration(event, files = NULL, ...)
 
 echoIBM.setNoise(event, files = NULL, nr0a = list(), ...)
 
-echoIBM.setSchool(event, surveyRegion = NULL, expandSurveyRegion = NULL,
-  target = c("herring", "mackerel", "point"), schools = c("layer",
-  "uniform", "flat"), schoolSize = list(x = 100, y = 100, z = 20, type =
-  "Weibull", shape = 5, cor = 0.4), schoolDens = 1852^-2, schoolDist = NULL,
+echoIBM.setSchool(event, surveyRegion = NULL,
+  expandSurveyRegion = NULL, target = c("herring", "mackerel",
+  "point"), schools = c("layer", "uniform", "flat"),
+  schoolSize = list(x = 100, y = 100, z = 20, type = "Weibull", shape =
+  5, cor = 0.4), schoolDens = 1852^-2, schoolDist = NULL,
   schoolCount = NULL, fillSurveyRegion = TRUE, seed = 0,
   depthRange = c(-100, 0), onlyFirstEvent = FALSE, ...)
 
-echoIBM.setVessel(event, starttime = "2015-01-01 00:00:00", utim = NULL,
-  origin = c(0, 0), heading = 0, distance = NULL, duration = 1,
-  speed = NULL, nodesLocal = NULL, nodesEarth = NULL, pingduration = 1,
-  numt = NULL, heave = 0, rtxv = 0, rtyv = 0, rtzv = 0,
-  offset = NULL, freeze = NULL, ...)
+echoIBM.setVessel(event, starttime = "2015-01-01 00:00:00",
+  utim = NULL, origin = c(0, 0), heading = 0, distance = NULL,
+  duration = 1, speed = NULL, nodesLocal = NULL, nodesEarth = NULL,
+  pingduration = 1, numt = NULL, heave = 0, rtxv = 0, rtyv = 0,
+  rtzv = 0, offset = NULL, freeze = NULL, ...)
 
 echoIBM.getVesselPath(starttime = "2015-01-01 00:00:00", origin = NULL,
   heading = NULL, distance = NULL, speed = NULL, duration = NULL,
-  nodesLocal = NULL, nodesEarth = NULL, utim = NULL, pingduration = 1,
-  numt = NULL, heave = 0, rtxv = 0, rtyv = 0, rtzv = 0)
+  nodesLocal = NULL, nodesEarth = NULL, utim = NULL,
+  pingduration = 1, numt = NULL, heave = 0, rtxv = 0, rtyv = 0,
+  rtzv = 0)
 
-echoIBM.setVessel_old(events, eventName, starttime = "2015-01-01 00:00:00",
-  origin = NULL, heading = NULL, distance = NULL, speed = NULL,
-  duration = NULL, nodesLocal = NULL, nodesEarth = NULL, utim = NULL,
-  numt = 1, pingduration = 1, heave = 0, rtxv = 0, rtyv = 0,
-  rtzv = NULL, ...)
+echoIBM.setVessel_old(events, eventName,
+  starttime = "2015-01-01 00:00:00", origin = NULL, heading = NULL,
+  distance = NULL, speed = NULL, duration = NULL,
+  nodesLocal = NULL, nodesEarth = NULL, utim = NULL, numt = 1,
+  pingduration = 1, heave = 0, rtxv = 0, rtyv = 0, rtzv = NULL,
+  ...)
 
 plslTable(range = NULL, mode = "CWNormal")
 
@@ -209,20 +213,6 @@ replaceKeepDim(x, replacement, esnm, ...)
 
 }
 \description{
-Returns a list of the following strings: (1) the path to the event, (2) the event name, (3) the event number, (4) the path to the cruise, and (5) the cruise name.
-
-Returns a list of the following strings: (1) the path to the event, (2) the event name, (3) the event number, (4) the path to the cruise, and (5) the cruise name.
-
-Writes beams files to simulation events based on resource files.
-
-Writes CTD files to simulation events based on resource files.
-
-Writes calibration files to simulation events based on resource files.
-
-Writes noise files to simulation events based on resource files.
-
-Returns a list of the following strings: (1) the path to the event, (2) the event name, (3) the event number, (4) the path to the cruise, and (5) the cruise name.
-
 The vessel information can be given in 4 ways: 
 \itemize{
 \item nodesEarth + speed
@@ -230,12 +220,6 @@ The vessel information can be given in 4 ways:
 \item origin + heading + distance + speed
 \item origin + heading + duration + speed
 }
-
-Returns a list of the following strings: (1) the path to the event, (2) the event name, (3) the event number, (4) the path to the cruise, and (5) the cruise name.
-
-Gets pulse duration from the max range of the sonar.
-
-Replaces values in a list but keeping dimension
 }
 \examples{
 \dontrun{}
