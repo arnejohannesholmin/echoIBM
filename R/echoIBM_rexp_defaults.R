@@ -19,35 +19,12 @@
 #'
 echoIBM_rexp_defaults<-function(noisetypes="ms", indt=NULL, data=list(), parlist=list()){
 	
-	############ AUTHOR(S): ############
-	# Arne Johannes Holmin
-	############ LANGUAGE: #############
-	# English
 	############### LOG: ###############
 	# Start: 2012-02-28 - Clean version.
 	# Update: 2012-11-12 - Changed to read default overlap values only if missing in the data.
 	# Update: 2013-09-26 - Fundamental restructuring and implementation of sub-functions.
 	# Last: 2013-11-05 - Changed to also return the input characters representing the type of overlap between the voxels ('input_olpn' and 'input_olps').
-	########### DESCRIPTION: ###########
-	# Creates a list of default settings for noise generation methods used in echoIBM, specifically the Multiple Sines - method ("ms"), the rearrangement method of uniform independent variables resulting in correlated and autocorrelated beams, and the simple independent exponential distribution (in which case only 'ssed' is defaulted).
-	########## DEPENDENCIES: ###########
-	# 
-	############ VARIABLES: ############
-	# ---noisetypes--- is a vector of character strings of length 2, specifying which types of noise to apply to the data:
-	##		"bg" - Background noise
-	##		"pn" - Periodic noise
-	##		"hi" - High intensity noise
-	##		"nr", "np", "cp" - Near-range noise generated in passive mode
-	##		"na", "ca" - Near-range noise generated in passive mode, opossibly originating from echo in the vessel
-	##		"ex" - Independent exponential noise due to acoustic interference (applied on the near range noise / reverberation noise ("nr"), background noise ("bg") and the simulated echo)
-	##		"acex", "aex", "cex" - Correlated exponential noise due to acoustic interference (applied on the near range noise / reverberation noise ("nr"), background noise ("bg") and the simulated echo). Generated using the rearrangement method developed by Holmin and Tjøstheim, in which independent uniformly distributed variables are drawn, and rearranged so that among the next 'l' voxels of a vector, the voxel following position 'k' is chosen to resemble the k'th voxel. This method has the ability to include both autocorrelation along vectors and correlation between vectors, because the voxel following the k'th voxel can be chosen according to a proximity criterion to the k'th voxel in several vector simulatneously, given specific weights that result in correlation between vectors. Of cource this method of rearrangement is ad-hoc and limited in which autororrelation and correlation structures that are achievable
-	##		"ms" - Multiple sine waves: In this noise generation method the process of superimposed sine waves that occur when multiple targets scatter sound back to the receiver, is mimiced in order to produce the randomness present in real acoustic data. This method is more time consuming and depend on the number of targets contributing to each voxel (constant in this function), the  length of the sound pulse (affecting the autocorrelation along vectors) and the overlap between neighboring vectors, whereas the number of sample points and the number of preiods of the sine waves for each voxel affect the accuracy of the noise simulation. An advantage of this method is that the non-rayleigh distribution occuring when the number of targets is low can be acheived, but generally, in the simulations the number of targets is chosen high to produce exponentially distributed acoustical intensity
-	# ---data--- is a list of the required beam configuration information, including length 'lenb' of the beams, number 'numb' of beams and the frequency 'freq' of the beams, as well as the sonar/echosounder type 'esnm'.
-	# ---parlist--- is a list of input parameters to the function echoIBM.add.noise(), which generates noise and randomness. See echoIBM.add.noise() for explaination of the possible variables.
 	
-	
-	##################################################
-	##################################################
 	########## Preparation ##########
 	### Functions: ###
 	# A function for extracting overlap values for the signal or noise for the MS70 sonar (type="n" refers to noise, and type="s" refers to signal):
@@ -221,7 +198,7 @@ echoIBM_rexp_defaults<-function(noisetypes="ms", indt=NULL, data=list(), parlist
 				}
 			# ME70 multibeam echosounder:
 			else if(sonR_implemented(data$esnm[1], type=c("MBE"))){
-				# Assume pulselength ≈ 2 ms and sampleinterval duration 0.128 ms, giving w = 2 /0.125 * 3/4 = 12:
+				# Assume pulselength approx 2 ms and sampleinterval duration 0.128 ms, giving w = 2 / 0.125 * 3/4 = 12:
 				parlist$w <- rep(12,parlist$nuqf)
 				}
 			# MS70 multibeam sonar:
@@ -327,6 +304,4 @@ echoIBM_rexp_defaults<-function(noisetypes="ms", indt=NULL, data=list(), parlist
 	
 	########## Output ##########
 	parlist
-	##################################################
-	##################################################
-	}
+}

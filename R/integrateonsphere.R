@@ -24,32 +24,9 @@
 #'
 integrateonsphere<-function(fun,ndim=2,theta=c(0,2*pi),phi=c(0,pi),R=1,pres=1e-6,l=c(100,100),incriment=2,equal.size=TRUE,max.cells=1e6,print=TRUE){
 	
-	############ AUTHOR(S): ############
-	# Arne Johannes Holmin
-	############ LANGUAGE: #############
-	# English
 	############### LOG: ###############
 	# Start: 2010-01-26 - Clean version.
-	########### DESCRIPTION: ###########
-	# Numerical calculation of the surface integral of the function 'fun' on (parts of) the unit sphere.
-	########## DEPENDENCIES: ###########
-	# get.grid_phi()
-	############ VARIABLES: ############
-	# ---fun--- is the input function to integrate. Must take a column matrix of theta- and phi-values, or a vector of phi-values as input, and return a vector for the paris of 'theta' and 'phi'.
-	# ---ndim--- is the number of dimensions of the input to 'fun'.
-	# ---theta--- is a vector of two elements representing the lower and upper bounds of theta (azimuth angle). Only needed if ndim==2.
-	# ---phi--- is a vector of two elements representing the lower and upper bounds of the phi (elevation angle).
-	# ---R--- is the radius of the sphere.
-	# ---pres--- is the desired presition of the integration.
-	# ---l--- is the initial lengths of the theta and phi grid.
-	# ---incriment--- is the factor to multiply the lengths of the grids by.
-	# ---equal.size--- is TRUE if all cells are to have equal size (speeds up function) and FALSE if the anglular incriment is to be equal.
-	# ---max.cells--- is the maximum number of cells in the grid.
-	# ---print--- is TRUE if the improvement of the iteration is to be printed.
 	
-	
-	##################################################
-	##################################################
 	##### Preparation #####
 	# 'iter' is the number of iterations:
 	iter=0
@@ -87,7 +64,7 @@ integrateonsphere<-function(fun,ndim=2,theta=c(0,2*pi),phi=c(0,pi),R=1,pres=1e-6
 				phi=get.grid_phi(from,to,area=c(0.5,double(l[1]-1)+1,0.5))[1:l[1]+1]
 				deltaA=totalarea/l[1]
 				}
-			# Less sensitive to complex structure of 'fun' at the poles (phi≈0,pi):
+			# Less sensitive to complex structure of 'fun' at the poles (phi approx 0,pi):
 			else{
 				# In this case 'deltaphi' is constant, while the areas 'deltaA' vary:
 				deltaphi=(to-from)/l[1]
@@ -131,7 +108,7 @@ integrateonsphere<-function(fun,ndim=2,theta=c(0,2*pi),phi=c(0,pi),R=1,pres=1e-6
 				phi=get.grid_phi(from[2],to[2],area=c(0.5,double(l[2]-1)+1,0.5))[1:l[2]+1]
 				deltaA=totalarea/prod(l)
 				}
-			# Less sensitive to complex structure of 'fun' at the poles (phi≈0,pi):
+			# Less sensitive to complex structure of 'fun' at the poles (phi approx 0,pi):
 			else{
 				# In this case 'deltaphi' is constant, while the areas 'deltaA' vary:
 				deltaphi=(to[2]-from[2])/l[2]
@@ -158,6 +135,4 @@ integrateonsphere<-function(fun,ndim=2,theta=c(0,2*pi),phi=c(0,pi),R=1,pres=1e-6
 	
 	##### Output #####
 	list(out=out,iter=iter)
-	##################################################
-	##################################################
-	}
+}

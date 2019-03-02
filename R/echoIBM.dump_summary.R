@@ -71,7 +71,7 @@ echoIBM.dump_summary <- function(data, dumpfile, type=c("beams", "ctd", "vessel"
 	"scale",			"The expectation of the exponential variables, estimated in \"Test_of_rexp_MultSines.R\" in the \"extdata\" directory of the echoIBM package",
 	"rate",				"(cex) The parameter in the exponential distribution",
 	"prob",				"(cex) The probability values assigned to each of the consecutive values sorted by their proximity to the prevoius value. If w = 3 and prob = [0.7,0.5,0,5] the closest value will be assigned to the current position with probability 0.7, and if this fails, the second closest value will be assigned to the current position with probability 0.5, and so on. Used to tune the impact of the rearrangement and reducing autocorrelation",
-	"l",				"(cex) The number of values included when randomly rearranging the values not assigned to the current position. We may include more values than 'w' too reduce the effect of nevative autocorrelation at lags ≈ 5",
+	"l",				"(cex) The number of values included when randomly rearranging the values not assigned to the current position. We may include more values than 'w' too reduce the effect of nevative autocorrelation at lags approx 5",
 	"rho",				"(cex) A vector of correlation values defining the dependence of a vector to its neighbor vectors on both sides. The reference vector is in the middle of 'rho' (usually having value 1) and the length of 'rho' must be odd",
 	"w",				"(cex) The number of consecutive values including the present value. If w=2, the method choses between the current and the next value depending on the proximity to the prevoius values",
 	"wC",				"(cex) The number of significant vectors correlated to each vector, used to deduce Cind. Must be an odd number",

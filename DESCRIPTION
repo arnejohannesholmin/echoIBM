@@ -20,7 +20,4 @@ Imports:
 		pbapply,
 		TSD,
 		SimradRaw,
-		sonR,
-		akima,
-		fBasics,
-		gsl
+		sonR

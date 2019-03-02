@@ -17,28 +17,12 @@
 #' @export
 #' @rdname vol.sph
 #'
-vol.sph<-function(r=c(0,1),theta=c(0,2*pi),phi=c(0,pi),var=c("volx", "harx")){
+vol.sph <- function(r=c(0,1), theta=c(0,2*pi), phi=c(0,pi), var=c("volx", "harx")){
 		
-	############ AUTHOR(S): ############
-	# Arne Johannes Holmin
-	############ LANGUAGE: #############
-	# English
 	############### LOG: ###############
 	# Start: 2011-06-26 - Clean version.
 	# Last: 2011-09-23 - Added support for multiple volumes, given as two columen matrices or as vectors where the intervals are between consecutive points.
-	########### DESCRIPTION: ###########
-	# Calculates the (volume) size of the spherical volume segment defined by 'r', 'theta' and 'phi'.
-	########## DEPENDENCIES: ###########
-	# repm()
-	############ VARIABLES: ############
-	# ---r--- is range of radial coordinates, given as a vector of interval values (in which case length(r)-1 spherical segemnts are treated) or as a two column matrix where the first column represents the lower limit of the sperical segments, and the second column represents the upper limit.
-	# ---theta--- is the range of azimuth angles in radians, given in the same way as 'r'.
-	# ---phi--- is the range of elevation angles in radians, given in the same way as 'r.
-	# ---var--- is a vector of the variables to return. Currently implemented are "volx" for volumes of the voxels and "harx" for horizontal area of the voxels.
 	
-	
-	##################################################
-	##################################################
 	##### Preparation #####
 	# Warnings for values not in r>=0, theta = (0,2*pi) or phi = (0,pi):
 	if(length(r) && min(r,na.rm=TRUE)<0){
@@ -91,8 +75,8 @@ vol.sph<-function(r=c(0,1),theta=c(0,2*pi),phi=c(0,pi),var=c("volx", "harx")){
 	out=list()
 	if(strff("volx", var[1])){
 		# The volume of the spherical segments, calculated by the following argument:
-		# Volume of an open spherical sector (see http://mathworld.wolfram.com/SphericalSector.html), is 2 pi r^3(cos(phi1) − cos(phi2))/3, where 'r' is the radial distance to the edge of the sphere, and 'theta' and 'phi' are the azimuth and elevation angles, respectively. Subtracting for two radial distances and subsetting the resulting strip by theta relative to 2*pi gives: 
-		# (theta2−theta1) (cos(phi1) −cos(phi2))(r2^3 −r1^3) / 3:
+		# Volume of an open spherical sector (see http://mathworld.wolfram.com/SphericalSector.html), is 2 pi r^3(cos(phi1) - cos(phi2))/3, where 'r' is the radial distance to the edge of the sphere, and 'theta' and 'phi' are the azimuth and elevation angles, respectively. Subtracting for two radial distances and subsetting the resulting strip by theta relative to 2*pi gives: 
+		# (theta2-theta1) (cos(phi1) -cos(phi2))(r2^3 - r1^3) / 3:
 		out$volx = (theta[,2]-theta[,1])/3 * (cos(phi[,1])-cos(phi[,2])) * (r[,2]^3-r[,1]^3)
 		}
 	if(strff("harx", var[1])){
@@ -103,6 +87,4 @@ vol.sph<-function(r=c(0,1),theta=c(0,2*pi),phi=c(0,pi),var=c("volx", "harx")){
 	
 	##### Output #####
 	out
-	##################################################
-	##################################################
-	}
+}
