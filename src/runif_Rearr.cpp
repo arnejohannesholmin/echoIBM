@@ -46,7 +46,8 @@ extern "C" {
 		int f = 0;
 		double thisrand;
 		// Define the sum of the difference between the proceding elements along the beam and the current elements across the beams, weighted by C. 'd' is the sum of the differences and 's' will be the sorted version of 'd':
-		double d[*w], s[*w];
+		std::vector<double> d(*w);
+		std::vector<double> s(*w);
 		
 		// Set the random seed:
 		srand(*seed);
@@ -91,7 +92,10 @@ extern "C" {
 				{
 					s[i3] = d[i3];
 				} // End of for i3
-				sort(s, s + *w);
+				//sort(s, s + *w);
+				std::sort( std::begin(s), std::end(s) );
+				
+				
 				
 				// Move through 'd' and switch if 'prob' is satified:
 				int pos = 0;
@@ -120,7 +124,7 @@ extern "C" {
 					else if(thisrand < prob[pos])
 					{
 						// Create a temporary array of length 'l' to hold the uniform values and insert from this array below:
-						double temp[*l];
+						std::vector<double> temp(*l);
 						for (int i5 = 0; i5 < *l; i5++){
 							temp[i5] = U[runif_Rearr_ind(i1+i5,i2,*n)];
 						}

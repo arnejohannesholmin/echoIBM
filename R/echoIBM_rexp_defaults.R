@@ -44,7 +44,7 @@ echoIBM_rexp_defaults<-function(noisetypes="ms", indt=NULL, data=list(), parlist
 		# "b" - variable correlation between neighboring beams  
 		# "v" - variable correlation between neighboring beams for each voxel
 		# "p" - variable correlation between neighboring beams for each voxel and each ping (used with periodic noise)
-		if(sonR_implemented(esnm, type=c("MBE"))){
+		if(sonR_implemented(esnm, type=c("MBE"))[1]){
 			if(strff("n",type)){
 				legal <- c("c","b","v")
 			}
@@ -56,7 +56,7 @@ echoIBM_rexp_defaults<-function(noisetypes="ms", indt=NULL, data=list(), parlist
 			}
 		}
 		# Other sonars:
-		else if(sonR_implemented(esnm, type=c("MBE","SBE","OFS"))){
+		else if(sonR_implemented(esnm, type=c("MBE","SBE","OFS"))[1]){
 			legal <- c("c")
 		}
 		else{
@@ -67,14 +67,14 @@ echoIBM_rexp_defaults<-function(noisetypes="ms", indt=NULL, data=list(), parlist
 			
 		# Defaults if not given, or not numeric and not in c(legal,"p"):
 		if(length(parlist$olpn)==0 || (!is.numeric(parlist$olpn) && !any(strff(c(legal,"p"),parlist$olpn)))){
-			if(sonR_implemented(esnm, type=c("MBS"))){
+			if(sonR_implemented(esnm, type=c("MBS"))[1]){
 				parlist$olpn <- "v"
 			}
-			else if(sonR_implemented(esnm, type=c("OFS"))){
+			else if(sonR_implemented(esnm, type=c("OFS"))[1]){
 				#parlist$olpn <- "b" # Should be used, but requires estimation of the coorelation between beams from real data with little or no signal (preferably passive data), which is currently unavailable:
 				parlist$olpn <- "c"
 			}
-			else if(sonR_implemented(esnm, type=c("MBE","SBE"))){
+			else if(sonR_implemented(esnm, type=c("MBE","SBE"))[1]){
 				parlist$olpn <- "c"
 			}
 			else{
@@ -95,13 +95,13 @@ echoIBM_rexp_defaults<-function(noisetypes="ms", indt=NULL, data=list(), parlist
 		# Constant correlation for all voxels:
 		if(strff("c",parlist$olpn) && "c" %in% legal){
 			# See "Test_of_rexp_MultSines.R in the "extdata" directory of the echoIBM package.
-			if(sonR_implemented(esnm, type="MBS")){
+			if(sonR_implemented(esnm, type="MBS")[1]){
 				parlist$olpn <- c(0.46,1,0.46)
 			}
-			else if(sonR_implemented(esnm, type="OFS")){
+			else if(sonR_implemented(esnm, type="OFS")[1]){
 				parlist$olpn <- c(0.3,1,1,1,0.3)
 			}
-			else if(sonR_implemented(esnm, type=c("MBE","SBE"))){
+			else if(sonR_implemented(esnm, type=c("MBE","SBE"))[1]){
 				parlist$olpn <- 1
 			}
 			else{
@@ -185,7 +185,7 @@ echoIBM_rexp_defaults<-function(noisetypes="ms", indt=NULL, data=list(), parlist
 		### (3d) Get the duration of the sine waves: ###
 		if(is.null(parlist$w)){
 			# EK60 multifrequency echosounder:
-			if(sonR_implemented(data$esnm[1], type=c("SBE"))){
+			if(sonR_implemented(data$esnm[1], type=c("SBE"))[1]){
 				# Get lengths of the sine waves in the multisine-method for EK60 (correlations found in Holmin et al. (2013)):
 				#corEK60 <- c(0.31,0.18,0.12,0.02,-0.06,0.15) # Old 2013-09-18
 				corEK60 <- c(0.31,0.18,0.12,0,0,0)
@@ -197,17 +197,17 @@ echoIBM_rexp_defaults<-function(noisetypes="ms", indt=NULL, data=list(), parlist
 				parlist$w <- w
 				}
 			# ME70 multibeam echosounder:
-			else if(sonR_implemented(data$esnm[1], type=c("MBE"))){
+			else if(sonR_implemented(data$esnm[1], type=c("MBE"))[1]){
 				# Assume pulselength approx 2 ms and sampleinterval duration 0.128 ms, giving w = 2 / 0.125 * 3/4 = 12:
 				parlist$w <- rep(12,parlist$nuqf)
 				}
 			# MS70 multibeam sonar:
-			else if(sonR_implemented(data$esnm[1], type=c("MBS"))){
+			else if(sonR_implemented(data$esnm[1], type=c("MBS"))[1]){
 				# Set the length of the pulses in units of sample intervals. In reality this is set to be 4, but the autocorrelation estimates of the MS70 sonar suggest 3:
 				parlist$w <- rep(3,parlist$nuqf)
 				}
 			# SX90 multibeam sonar:
-			else if(sonR_implemented(data$esnm[1], type=c("OFS"))){
+			else if(sonR_implemented(data$esnm[1], type=c("OFS"))[1]){
 				# From the experience with simulations of the MS70 sonar, which normally has 2 ms pulselength and 1/2 ms sampling interval, which should imply w=4, the value w=3 was more appropriate. Thus we propose to estimate 'w' by plsl/sint * 3/4:
 				if(all(c("plsl","sint") %in% names(data))){
 					parlist$w <- rep(data$plsl[1] / data$sint[1] * 3/4, parlist$nuqf)
@@ -256,7 +256,7 @@ echoIBM_rexp_defaults<-function(noisetypes="ms", indt=NULL, data=list(), parlist
 		parlist$buffer <- 100
 		
 		# Sonar/echosounder specific parameters. See "Test_of_rexp_MultSines.R":
-		if(sonR_implemented(data$esnm[1], type=c("MBS"))){
+		if(sonR_implemented(data$esnm[1], type=c("MBS"))[1]){
 			if(is.null(parlist$rho)){
 				parlist$rho <- c(1,1,1)
 				}

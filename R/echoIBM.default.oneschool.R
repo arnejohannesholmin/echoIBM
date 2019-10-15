@@ -232,7 +232,7 @@ echoIBM.default.oneschool <- function(data, esnm="MS70", compensated=c("pitch","
 	# Default the side lobe level factor for adjusting the side lobe level to the desired values:
 	if(length(data$sllf)==0){
 		#bptfile=c(bptfile,"new")
-		if(sonR_implemented(esnm, "MBS")){
+		if(sonR_implemented(esnm, "MBS")[1]){
 			echoIBM.warnings_warninglist <- c(echoIBM.warnings_warninglist,paste("'data$sllf' was defaulted by",default.sllf_MS70))
 			data$sllf <- matrix(default.sllf_MS70,nrow=data$Ni,ncol=2,byrow=TRUE)
 			}
@@ -246,7 +246,7 @@ echoIBM.default.oneschool <- function(data, esnm="MS70", compensated=c("pitch","
 	# If 'data$pbp1' (parametric beam pattern) is missing, it is defaulted according to the type of acoustical instrument:
 	if(length(data$pbp1)==0){
 		#bptfile <- c(bptfile,"new")
-		if(sonR_implemented(esnm)){
+		if(sonR_implemented(esnm)[1]){
 			data$pbp1 <- "circularPiston_ellipticRadius_sidelobefit"
 			}
 		else if(strff("ms70_highsidelobe",data$esnm[1])){
@@ -264,7 +264,7 @@ echoIBM.default.oneschool <- function(data, esnm="MS70", compensated=c("pitch","
 	# If 'data$pbp1' (parametric beam pattern) is missing, it is defaulted according to the type of acoustical instrument:
 	if(length(data$pbp2)==0){
 		#bptfile <- c(bptfile,"new")
-		if(sonR_implemented(esnm)){
+		if(sonR_implemented(esnm)[1]){
 			data$pbp2 <- "circularPiston_ellipticRadius_sidelobefit"
 			}
 		else if(strff("ms70_highsidelobe",data$esnm[1])){

@@ -11,10 +11,10 @@
 #'
 sonR_implemented_ind <- function(ind){
 	if(is.character(ind)){
-		if(sonR_implemented(ind, c("sbe", "mbe", "mbs"))){
+		if(sonR_implemented(ind, c("sbe", "mbe", "mbs"))[1]){
 			list(-(1:100),NULL)
 			}
-		else if(sonR_implemented(ind, "ofs")){
+		else if(sonR_implemented(ind, "ofs")[1]){
 			list(-(1:300),-(32:34))
 			}
 		}

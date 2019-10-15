@@ -1,0 +1,22 @@
+# echoIBM version: 1.1 (latest beta, 2019-10-15)
+# R version: 3.5
+
+
+# This R package provides utilities for simulating multibeam sonar data (echosounder, fishery sonar, 3D-sonar). Writes simulated data in the TSD format
+
+
+# Install the latest developer version
+devtools::install_github("StoXProject/echoIBM")
+
+
+# Release notes for echoIBM_1.1:
+
+# 1. Stable version simplifying simulation for the user is under construction. 
+
+# 2. Moved development to GitHub.
+
+
+
+# For historical release notes see https://github.com/StoXProject/echoIBM/blob/master/NEWS
+
+

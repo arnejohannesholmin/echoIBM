@@ -116,19 +116,19 @@ extern "C" {
 			X[i] = 0.0;
 		}
 		// Initialize the vector of the summed echo for each voxel [N,I]:
-		double S[lS];
+		std::vector<double> S(lS);
 		for(int i = 0; i < lS; i++)
 		{
 			S[i] = 0.0;
 		}
 		// Initialize the vector of phases [W*L,I]:
-		double phis[lphis];
+		std::vector<double> phis(lphis);
 		for(int i = 0; i < lphis; i++)
 		{
 			phis[i] = -1000.0;
 		}
 		// Initialize the vector of sine values [N,J]:
-		double s[lphis];
+		std::vector<double> s(lphis);
 		for(int i = 0; i < lphis; i++)
 		{
 			s[i] = 0.0;
@@ -237,7 +237,7 @@ extern "C" {
 		for(int j = 1; j < *J; j++)
 		{
 			// Clean up the array 'S':
-			double S[lS];
+			std::vector<double> S(lS);
 			for(int i = 0; i < lS; i++)
 			{
 				S[i] = 0.0;

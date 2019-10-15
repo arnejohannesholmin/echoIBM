@@ -3,8 +3,8 @@ echoIBM R package
 
 This R package provides utilities for simulating multibeam sonar data (echosounder, fishery sonar, 3D-sonar). Writes simulated data in the TSD format
 
-Version: 1.2
-Required R version: 3.4
+Version: 1.1
+Required R version: 3.4.4
 
 Installation
 =====
