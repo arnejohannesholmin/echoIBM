@@ -41,7 +41,6 @@ echoIBM.setup <- function(
 	globalVar <- list(event=event)
 	
 	
-	
 	#######################
 	##### C1. Vessel: #####
 	#######################
@@ -64,7 +63,22 @@ echoIBM.setup <- function(
 	##### C2. School: #####
 	#######################
 	if(!identical(school, FALSE)){
-		files$school <- do.call(echoIBM.setSchool, c(globalVar, school))
+		if(is.list(school[[1]])) {
+			# Make sure that the schoolName is included in each list element (each school):
+			if(length(school[[1]]$schoolName) == 0) {
+				schoolNames <- names(school)
+				for(ind in seq_along(school)) {
+					school[[ind]]$schoolName <- schoolNames[ind]
+				}	
+			}
+			
+			# Set each school:
+			files$school <- lapply(school, function(thisSchool) do.call(echoIBM.setSchool, c(globalVar, thisSchool)))
+		}
+		else {
+			files$school <- do.call(echoIBM.setSchool, c(globalVar, school))
+		}
+		
 	}
 	#######################
 	

@@ -285,9 +285,15 @@ echoIBM.oneschool <- function(files, event, t=1, tvessel, vesselutim, pingsSchoo
 	
 	
 	
+	
+	
+	
 	simulateWrite <- function(thist_vec, data, pingsSchool, event, vesselfiles, origin, mode, dynschoolfiles, adds, dynschoolnames, staticschoolnames, dumpfile, tempdump, nchart, esnm, TVG.exp, compensated, calibrate, noise, parlist, rand.sel, max.memory, lt, tvessel, scls, discardOutside, fishReaction){
 		# Define the name of the file to which the simulated data are written (containing the first time step index):
-		pingfile <- file.path(pingsdir, paste(pingsname, "_", esnm, "_T", zeropad(thist_vec[1], nchar(lt)), ".pings", sep=""))
+		tempdir <- file.path(pingsdir, pingsname)
+		dir.create(tempdir, showWarnings = FALSE)
+		#pingfile <- file.path(pingsdir, paste(pingsname, "_", esnm, "_T", zeropad(thist_vec[1], nchar(lt)), ".pings", sep=""))
+		pingfile <- file.path(tempdir, paste(pingsname, "_", esnm, "_T", zeropad(thist_vec[1], nchar(lt)), ".pings", sep=""))
 		# Run through the time steps:
 		outputWarn <- lapply(thist_vec, simulateWriteOne, thist_vec=thist_vec, data=data, pingsSchool=pingsSchool, pingfile=pingfile, event=event, vesselfiles=vesselfiles, origin=origin, mode=mode, dynschoolfiles=dynschoolfiles, adds=adds, dynschoolnames=dynschoolnames, staticschoolnames=staticschoolnames, dumpfile=dumpfile, tempdump=tempdump, nchart=nchart, esnm=esnm, TVG.exp=TVG.exp, compensated=compensated, calibrate=calibrate, noise=noise, parlist=parlist, rand.sel=rand.sel, max.memory=max.memory, lt=lt, tvessel=tvessel, scls=scls, discardOutside=discardOutside, fishReaction=fishReaction)
 		# Return the warnings:
@@ -436,7 +442,7 @@ echoIBM.oneschool <- function(files, event, t=1, tvessel, vesselutim, pingsSchoo
 		else{
 			cat("Simulating:\n")
 		}
-		out <- pblapply(t, simulateWrite, data=data, pingsSchool=pingsSchool, event=event, vesselfiles=filegroups$vessel, origin=origin, mode=mode, dynschoolfiles=dynschoolfiles, adds=adds, dynschoolnames=dynschoolnames, staticschoolnames=staticschoolnames, dumpfile=dumpfile, tempdump=tempdump, nchart=max(nchar(unlist(t))), esnm=esnm, TVG.exp=TVG.exp, compensated=compensated, calibrate=calibrate, noise=noise, parlist=parlist, rand.sel=rand.sel, max.memory=max.memory, lt=maxt, tvessel=tvessel, scls=scls, discardOutside=discardOutside, fishReaction=fishReaction, cl=cores)	
+		out <- unlist(pblapply(t, simulateWrite, data=data, pingsSchool=pingsSchool, event=event, vesselfiles=filegroups$vessel, origin=origin, mode=mode, dynschoolfiles=dynschoolfiles, adds=adds, dynschoolnames=dynschoolnames, staticschoolnames=staticschoolnames, dumpfile=dumpfile, tempdump=tempdump, nchart=max(nchar(unlist(t))), esnm=esnm, TVG.exp=TVG.exp, compensated=compensated, calibrate=calibrate, noise=noise, parlist=parlist, rand.sel=rand.sel, max.memory=max.memory, lt=maxt, tvessel=tvessel, scls=scls, discardOutside=discardOutside, fishReaction=fishReaction, cl=cores))
 		if(parallel){
 			stopCluster(cores)
 		}

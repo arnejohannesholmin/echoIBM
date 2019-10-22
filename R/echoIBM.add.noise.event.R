@@ -36,9 +36,23 @@ echoIBM.add.noise.event <- function(event, pingsfiles=NULL, fileind=NULL, beams0
 	### Functions ###
 	# (1) Function for reading simulated noiseless and deterministic school data and summing them up:
 	readAddNoiseWrite <- function(fileind, pingsfiles, indtlist, beams0, ctd, noise, noisetypes, TVG.exp, parlist){
-		thisdata <- read.TSD(pingsfiles[fileind], t="all", drop.out=FALSE)
-		thisdata <- read.event_unzip_vbsc(thisdata, pad=TRUE, split=TRUE, filename=pingsfiles[fileind], t="all", fill=0)
-		thisdata[["vxIX"]] <- NULL
+		#thisdata <- read.TSD(pingsfiles[fileind], t="all", drop.out=FALSE)
+		#thisdata <- read.event_unzip_vbsc(thisdata, pad=TRUE, split=TRUE, filename=pingsfiles[fileind], t="all", fill=0)
+		#thisdata[["vxIX"]] <- NULL
+		thisPingsFiles <- sapply(pingsfiles, "[[", fileind)
+		#thisdata <- read.TSDs(pingsfiles[fileind], t="all", drop.out=FALSE)
+		thisdata <- read.TSDs(thisPingsFiles, t="all", drop.out=FALSE, clean = NULL)
+		
+		# Expand the pings:
+		#thisdata <- read.event_unzip_vbsc(thisdata, pad=TRUE, split=TRUE, filename=pingsfiles[fileind], t="all", fill=0)
+		thisdata <- lapply(thisdata, read.event_unzip_vbsc, pad=TRUE, split=TRUE, filename=pingsfiles[[1]][fileind], t="all", fill=0)
+		# Sum the data:
+		vbscList <- lapply(thisdata, "[[", "vbsc")
+		vbsc <- do.call("+", vbscList)
+		
+		thisdata <- thisdata[[1]]
+		thisdata$vbsc <- vbsc
+		thisdata$vxIX <- NULL
 		
 		# Remove TVG if TVG compensation is applied to the input data:
 		if(TVG.in){
@@ -63,7 +77,7 @@ echoIBM.add.noise.event <- function(event, pingsfiles=NULL, fileind=NULL, beams0
 		}
 		
 		# Write the data to file:
-		pingfileWithNoise <- file.path(dirname(dirname(pingsfiles[fileind])), "tsd", basename(pingsfiles[fileind]))
+		pingfileWithNoise <- file.path(dirname(dirname(dirname(pingsfiles[[1]][fileind]))), "tsd", basename(pingsfiles[[1]][fileind]))
 		numt <- tail(dim(thisdata$vbsc), 1)
 		bytes <- TSD::write.TSD(con=pingfileWithNoise, x=thisdata, numt=numt, ow=ow, keep.null=TRUE)
 	}	
@@ -118,12 +132,14 @@ echoIBM.add.noise.event <- function(event, pingsfiles=NULL, fileind=NULL, beams0
 	if(length(pingsfiles)==0){
 		warning(paste0("There are no pings-files in the directory of temp-files ", tempevent))
 	}
-	if(length(fileind)){
-		pingsfiles <- pingsfiles[fileind]
-	}
+	#if(length(fileind)){
+	#	pingsfiles <- pingsfiles[fileind]
+	#}
+	
 	
 	# First a quick test to see if there are an equal number of files as time steps, and file names correspond to a continuous sequence of time steps:
-	utim <- read.TSDs(pingsfiles, var="utim", t="all", clean=FALSE)
+	#utim <- read.TSDs(pingsfiles, var="utim", t="all", clean=FALSE)
+	utim <- read.TSDs(pingsfiles[[1]], var="utim", t="all", clean=FALSE)
 	utim <- utim[names(utim)=="utim"]
 	uniqeutim <- unique(unlist(utim))
 	# Get the time step indexes of the files located in the temp-directory:
@@ -162,18 +178,18 @@ echoIBM.add.noise.event <- function(event, pingsfiles=NULL, fileind=NULL, beams0
 		echoIBM.dump_summary(c(parlist, noise), dumpfile, type="noise", append=TRUE)
 	}
 	
-	
 	# Parallel processing using the pblapply() function in the pbapply package:
 	parallel <- cores > 1
 	# Parallel processing using the pblapply() function in the pbapply package:
 	if(parallel){
 		# Detect the number of cores and use the minimum of this and the number of requested cores:	
-		cores = min(cores, length(pingsfiles), detectCores())
+		cores = min(cores, length(pingsfiles[[1]]), detectCores())
 		cores <- makeCluster(cores)
 	}
 	# Progress bar parallel processing (if cores>1):
 	cat("Adding noise to simulated data:\n")
-	out <- pblapply(seq_along(pingsfiles), readAddNoiseWrite, pingsfiles=pingsfiles, indtlist=indtlist, beams0=beams0, ctd=ctd, noise=noise, noisetypes=noisetypes, TVG.exp=TVG.exp, parlist=parlist, cl=cores)
+	pingsFileSequence <- seq_along(pingsfiles[[1]])
+	out <- pblapply(pingsFileSequence, readAddNoiseWrite, pingsfiles=pingsfiles, indtlist=indtlist, beams0=beams0, ctd=ctd, noise=noise, noisetypes=noisetypes, TVG.exp=TVG.exp, parlist=parlist, cl=cores)
 	
 	if(parallel){
 		stopCluster(cores)

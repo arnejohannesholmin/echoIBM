@@ -35,9 +35,9 @@ echoIBM.setCalibration(event, files = NULL, ...)
 
 echoIBM.setNoise(event, files = NULL, nr0a = list(), ...)
 
-echoIBM.setSchool(event, surveyRegion = NULL,
+echoIBM.setSchool(event, schoolName = "School", surveyRegion = NULL,
   expandSurveyRegion = NULL, target = c("herring", "mackerel",
-  "point"), schools = c("layer", "uniform", "flat"),
+  "point"), schoolDistribution = c("layer", "uniform", "flat"),
   schoolSize = list(x = 100, y = 100, z = 20, type = "Weibull", shape =
   5, cor = 0.4), schoolDens = 1852^-2, schoolDist = NULL,
   schoolCount = NULL, fillSurveyRegion = TRUE, seed = 0,
@@ -109,13 +109,13 @@ replaceKeepDim(x, replacement, esnm, ...)
 
 \item{target}{A code word defining the target. One of "herring", "mackerel" and "point".}
 
-\item{schools}{A code word defining the distribution of schools. One of "layer", "uniform" (equal probability of encountering a school in all directions but the z direction, corresponding to a homogenious Poisson point process in the x-y-plane), "flat" (random ordering of schools sequenced between the survey bounds).}
+\item{schoolDistribution}{A code word defining the distribution of schools. One of "layer", "uniform" (equal probability of encountering a school in all directions but the z direction, corresponding to a homogenious Poisson point process in the x-y-plane), "flat" (random ordering of schools sequenced between the survey bounds).}
 
 \item{schoolSize}{Definition of the school sizes, either given as a list of dimensions in the x, y and z direction (repeated to the number of schools), or a list of dimensions added a type of random generator for the sizes, such as type = "weibull", indicating correlated Weibull distributed sizes, where the shape and correlation are specified by 'shape' and 'cor'. Alternatively schoolSize can be a list to be used as input the a function schoolSize$type, which must be a function including the ... argument to avoid errors. For correlated Weibull distributed sizes use e.g. list(x = 100, y = 100, z = 20, type = "Weibull", shape = 5, cor = 0.4), where 0.4 is the maximum available correlation. For correlated uniform variables use e.g. list(x = c(30, 300), y = c(30, 300), z = c(30, 300) / 5, type = "Uniform", cor = 0.5), where 0.5 is the maximum available correlation. For schoolSize$type=="Uniform", if schoolSize$x is given as a single numeric, this is interpreted as uniform between 0 and 2 * x.}
 
 \item{schoolDens}{The area reserved for each school.}
 
-\item{schoolDist}{The mean distance betseen schools. Use rather schoolDens.}
+\item{schoolDist}{The mean distance between schools. Use rather schoolDens.}
 
 \item{schoolCount}{The number of schools.}
 

@@ -32,7 +32,13 @@ replaceKeepDim <- function(x, replacement, esnm, ...){
 				thisdim <- dim_all(x[[inreplacement[i]]])
 				# If a funciton of the dimension, run this, with additional parameters given in the '...':
 				if(is.function(this)){
-					x[[inreplacement[i]]]  <- this(thisdim, ...)
+					# Change made on 2010-10-18, to ensure that functions are replaced are they are:
+					if(is.function(x[[inreplacement[i]]])) {
+						x[[inreplacement[i]]]  <- this
+					}
+					else {
+						x[[inreplacement[i]]]  <- this(thisdim, ...)
+					}
 				}
 				else{
 					# Otherwese repeat to a vector or an array:

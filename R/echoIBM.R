@@ -432,10 +432,11 @@ echoIBM <- function(event, t=1, adds=NULL, rph=NULL, esnm=NULL, TVG.exp=2, compe
 	
 	# The number of cores can be given separate for simulation and noise:
 	cores <- rep(cores, length.out=2)
-
+	
 	# Move through the schools:
-	pingsfiles <- vector("list", length(schoolfiles))
+	#pingsfiles <- vector("list", length(schoolfiles))
 	if(!onlyMerge){
+		pingsfiles <- list()
 		for(i in seq_along(schoolfiles)){
 			# Get the list of files for the current school (merging general files for the simulation with the school specific files located in the individual school directories):
 			files <- unique(c(filesanddir[!isdir],unlist(schoolfiles[i])))
@@ -443,7 +444,10 @@ echoIBM <- function(event, t=1, adds=NULL, rph=NULL, esnm=NULL, TVG.exp=2, compe
 			pingsfiles[[i]] <- echoIBM.oneschool(files=files, event=event[1], t=t, tvessel=tvessel, vesselutim=vesselutim, pingsSchool=pingsSchool[[i]], areCompact=areCompact[i], adds=adds, pingsdir=tempevent, pingsname=if(length(schooldirs)>1) paste(eventname,underevents[i],sep="_") else eventname, esnm=esnm, TVG.exp=TVG.exp, compensated=compensated, filesize=filesize, calibrate=calibrate, noise="", mode=mode, max.memory=max.memory, ow=ow, origin=origin, dumpfile=dumpfile, dumpsize=dumpsize, timedumpfile=timedumpfile, rand.sel=rand.sel, scls=scls, method=method, ask=ask, parlist=parlist, bptfile=bptfile, max.radius=max.radius, msg=msg, discardOutside=discardOutside, fishReaction=fishReaction, cores=cores[1])
 		}
 	}
-	pingsfiles <- unlist(pingsfiles)
+	else {
+		pingsfiles <- NULL
+	}
+	#pingsfiles <- unlist(pingsfiles)
 
 	# Sum up the simulations and add noise:
 	cat("\n")

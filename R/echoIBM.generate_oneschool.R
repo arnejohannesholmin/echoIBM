@@ -109,6 +109,13 @@ echoIBM.generate_oneschool <- function(data, school=1, seed=NULL, dumpfile=NULL,
 		grid <- grid[inside,]
 	}
 	
+	# The new oazS and oezS override the rotation angles:
+	if(length(data$oazS)) {
+		data$rtzS <- data$oazS
+	}
+	if(length(data$oezS)) {
+		data$rtxzS <- data$oezS
+	}
 	# Rotate the school:
 	if(length(data$rtzS) && !all(data$rtzS==0)){
 		grid <- rotate3D(grid, by="z", ang=data$rtzS)
