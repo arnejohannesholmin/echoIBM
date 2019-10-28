@@ -22,22 +22,8 @@
 #'
 echoIBM.generate_dynschool <- function(data, t=1, vesselutim=NULL, adds=list(), margin=0, dumpfile=NULL){
 	
-	############ AUTHOR(S): ############
-	# Arne Johannes Holmin
-	############ LANGUAGE: #############
-	# English
 	############### LOG: ###############
 	# Start: 2014-02-05 - First version.
-	########### DESCRIPTION: ###########
-	# Generates the dynamic variables of schools positioned close enough to enter the sampling volume of the sonar.
-	########## DEPENDENCIES: ###########
-	#
-	############ VARIABLES: ############
-	# ---data--- is a list containing the necessary data.
-	# ---t--- is the current time step.
-	# ---vesselutim--- is a vector of the vessel utim points (all time steps in the event)
-	# ---margin--- is an extra margin to add, so that the school is detected outside of (positive value) or or inside of (negative value) of the sampling volume.
-	
 	
 	##################################################
 	##################################################

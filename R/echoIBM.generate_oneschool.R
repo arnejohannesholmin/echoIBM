@@ -19,27 +19,9 @@
 #'
 echoIBM.generate_oneschool <- function(data, school=1, seed=NULL, dumpfile=NULL, aboveSurface=c("cut","force")){
 	
-	############ AUTHOR(S): ############
-	# Arne Johannes Holmin
-	############ LANGUAGE: #############
-	# English
 	############### LOG: ###############
 	# Start: 2014-02-05 - First version.
 	# Last: 2014-07-01 - Changed to generate noise on positions and orientation of fish separately.
-	########### DESCRIPTION: ###########
-	# Generates the position variables of one school. The fish are first put on an iso grid defined by the packing density. Then noise is added to these positions by the Gaussian distribution with mean 0 and standard deviation specified the inputs 'SDxf', 'SDyf', 'SDzf', (repeated to length 3 and defaulted to 1 if missing), all in units of the grid size. Finally, the orientations of the fish is set independently of the positions, by generating two sets of positions which are gridded positions separated by one grid unit in the x-direction and added noise by a standard deviation producing the desired polarization (by a pre-generated table).
-	########## DEPENDENCIES: ###########
-	#
-	############ VARIABLES: ############
-	# ---data--- is a list containing the necessary data: 
-	#	One of 'nbfS' or 'rhoS', 
-	#	all of 'szxS', 'szyS', 'szzS', 
-	#	'psxS', 'psyS', 'pszS', 
-	#	'nbfS', 'SDxf', 'SDyf', 'SDzf', 
-	#	'thtS', 'phiS', 
-	#	and optionally 'plHS'.
-	# ---school--- is the index number of the school.
-	
 	
 	##################################################
 	##################################################
@@ -118,6 +100,7 @@ echoIBM.generate_oneschool <- function(data, school=1, seed=NULL, dumpfile=NULL,
 	}
 	# Rotate the school:
 	if(length(data$rtzS) && !all(data$rtzS==0)){
+		print(summary(data$rtzS))
 		grid <- rotate3D(grid, by="z", ang=data$rtzS)
 	}		
 	if(length(data$rtxS) && !all(data$rtxS==0)){
