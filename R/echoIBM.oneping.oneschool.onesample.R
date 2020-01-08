@@ -186,17 +186,23 @@ echoIBM.oneping.oneschool.onesample <- function(j, data, split=FALSE){
 				withoutetaj <- fish * B_T1 * B_L * B_T2 * etaa
 			}
 			else if(data$sigma0mode==2){
-				# Include the echo ability 'epss' as a function of frequency:
+			    frequency <- data$uniquek[i] * data$asps / (2*pi)
+			    # Include the echo ability 'epss' as a function of frequency:
 				if(is.function(data$epss)){
-					epss <- data$epss(data$uniquek[i] * data$asps / (2*pi))
+				    epss <- data$epss(frequency)
 					withoutetaj <- fish * B_T1 * B_L * B_T2 * etaa * epss
 				}
-				# Include the echo ability 'epss' as a vector:
-				else{
-					epss <- data$epss[data$thesel]
-					withoutetaj <- fish * B_T1 * B_L * B_T2 * etaa * epss
-				}
-				# Dump 'esps':
+			    # Include the echo ability 'epss' as from a table of frequency and response:
+			    else if(length(dim(data$epss)) == 2){
+			        epss <- approx(data$epss, xout = frequency)$y
+			        withoutetaj <- fish * B_T1 * B_L * B_T2 * etaa * epss
+			    }
+			    # Include the echo ability 'epss' as a vector of the same length as the number of fish:
+			    else{
+			        epss <- data$epss[data$thesel]
+			        withoutetaj <- fish * B_T1 * B_L * B_T2 * etaa * epss
+			    }
+			    # Dump 'esps':
 				#dumpdata$epss <- c(dumpdata$epss, mean(epss, na.rm=TRUE))
 				dumpdata <- addMeanMaxToDumpdata("epss", dumpdata)
 			}

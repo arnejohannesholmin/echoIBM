@@ -2,7 +2,7 @@
 #*********************************************
 #' Returns a function for the echo ability 'eps*' equal to the optimal acoustic cross sectional area of a target divided by the length of the target to the desired power (usually squared). The function fun_eps() has 2 methods depending on the type of the input object 'data'.
 #'
-#' @param data  may be of 2 different types.
+#' @param data  may be of 2 different types: (1) a function of 1 argument representing the acoustic cross sectional area of the target as a function of frequency, and (2) a list representing the empirical acoustic cross sectional area of a source in intervals or at points of the arguments. Names for the elements of the list adopted from read.TSD(): [['grff']] - A vector of arbitrary length representing the grid vector of acoustic frequency, and [['eps*']] - A vector no shorter than length(grff) holding the echo ability 'eps*' corresponding to the frequency grid vector 'grff'.
 #' @param Nl  is the number of targets from which the echo is simulated.
 #' @param method  defines the interpolation method.
 #'
@@ -18,28 +18,9 @@
 #'
 fun_eps<-function(data=NULL,Nl=1,method=c("closest","linear","constant")){
 	
-	############ AUTHOR(S): ############
-	# Arne Johannes Holmin
-	############ LANGUAGE: #############
-	# English
 	############### LOG: ###############
 	# Start: 2009-10-19 - Clean version, adapted from beamPattern().
 	# Last: 2011-08-06 - Changed to return NULL if data==NULL and a repreate 'data' to the length 'Nl' if 'data' is a numeric vector. Also changed the name to fun_eps, and the function no accepts all variables starting with 'eps' in the list 'data' as the echo ability.
-	########### DESCRIPTION: ###########
-	# Returns a function for the echo ability 'eps*' equal to the optimal acoustic cross sectional area of a target divided by the length of the target to the desired power (usually squared). The function fun_eps() has 2 methods depending on the type of the input object 'data'.
-	########## DEPENDENCIES: ###########
-	# 
-	############ VARIABLES: ############
-	# ---data--- may be of 2 different types.
-	#
-	#	(1)	a function of 1 argument representing the acoustic cross sectional area of the target as a function of frequency:
-	#
-	#	(2) a list representing the empirical acoustic cross sectional area of a source in intervals or at points of the arguments. Names for the elements of the list adopted from read.TSD():
-	#
-	#		[['grff']] - A vector of arbitrary length representing the grid vector of acoustic frequency.
-	#		[['eps*']] - A vector no shorter than length(grff) holding the echo ability 'eps*' corresponding to the frequency grid vector 'grff'.
-	# ---Nl--- is the number of targets from which the echo is simulated.
-	# ---method--- defines the interpolation method.
 		
 
 	##################################################
