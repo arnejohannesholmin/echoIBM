@@ -10,7 +10,7 @@ Depends: R (>= 3.5)
 BugReports: https://github.com/arnejohannesholmin/echoIBM/issues
 License: LGPL-3
 LazyData: true
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.2
 Imports:
 		akima,
 		fBasics,

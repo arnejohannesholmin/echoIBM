@@ -8,25 +8,61 @@
 \alias{echoIBM-package}
 \title{Simulates echo sounder observations based on positions, orientations, sizes and other specifics of each fish in a known (simulated) school. The variables of the school, vessel, acoustic instrument and sea are given as files in the TSD format located in the directory specified by 'event'. More than one school may be given located in separate directories in 'event'. The simulated echogram will be stored as a TSD file in 'event'. The function includes an option to plot the vessel path relative to the centers of mass of the school. Schools can be given compactly in order to save space, in which case the individual fish information is generated on the fly (see "Example of compact schools in echoIBM.R").}
 \usage{
-echoIBM(event, t = 1, adds = NULL, rph = NULL, esnm = NULL,
-  TVG.exp = 2, compensated = c("pitch", "roll"), filesize = 3e+08,
-  calibrate = TRUE, noise = c("bg", "cex"), mode = c("active",
-  "passive"), tvessel = NULL, scan.volume = TRUE, margin = 500,
-  smooth = "spline", max.memory = 1e+09, ow = TRUE, origin = 1,
-  recycle = FALSE, keep.temp = c(TRUE, FALSE), dumpsize = 1e+07,
-  cores = 1, rand.sel = 1, scls = 1, method = c("closest",
-  "linear"), ask = FALSE, parlist = list(), bptfile = TRUE,
-  max.radius = 0.2, path = FALSE, pathnr = 1, onlyMerge = FALSE,
-  msg = FALSE, discardOutside = c(r = Inf, az = Inf, el = Inf),
-  fishReaction = list())
+echoIBM(
+  event,
+  t = 1,
+  adds = NULL,
+  rph = NULL,
+  esnm = NULL,
+  TVG.exp = 2,
+  compensated = c("pitch", "roll"),
+  filesize = 3e+08,
+  calibrate = TRUE,
+  noise = c("bg", "cex"),
+  mode = c("active", "passive"),
+  tvessel = NULL,
+  scan.volume = TRUE,
+  margin = 500,
+  smooth = "spline",
+  max.memory = 1e+09,
+  ow = TRUE,
+  origin = 1,
+  recycle = FALSE,
+  keep.temp = c(TRUE, FALSE),
+  dumpsize = 1e+07,
+  cores = 1,
+  rand.sel = 1,
+  scls = 1,
+  method = c("closest", "linear"),
+  ask = FALSE,
+  parlist = list(),
+  bptfile = TRUE,
+  max.radius = 0.2,
+  path = FALSE,
+  pathnr = 1,
+  onlyMerge = FALSE,
+  msg = FALSE,
+  discardOutside = c(r = Inf, az = Inf, el = Inf),
+  fishReaction = list()
+)
 
-echoIBM.add.noise.event(event, pingsfiles = NULL, fileind = NULL,
-  beams0 = NULL, ctd = NULL, TVG.in = TRUE, TVG.out = TRUE,
-  TVG.exp = 2, noisetypes = c("nr", "bg", "cex"), ow = TRUE,
-  parlist = list(), cores = 1)
+echoIBM.add.noise.event(
+  event,
+  pingsfiles = NULL,
+  fileind = NULL,
+  beams0 = NULL,
+  ctd = NULL,
+  TVG.in = TRUE,
+  TVG.out = TRUE,
+  TVG.exp = 2,
+  noisetypes = c("nr", "bg", "cex"),
+  ow = TRUE,
+  parlist = list(),
+  cores = 1
+)
 }
 \arguments{
-\item{event}{is a vector of strings, where the first is the path to the directory of the simulation files, and any additional stings are directories or files containing for example school files located elsewhere than the main directory given by the first string in 'event'. Additional schools must be given as directories in 'event', not as paths to individual files, as this implies that these files "belong" to any existing school located in event[1]. Files containing beam configuration, noise values, calibration values, ctd-values and vessel dynamics need to be given in the main directory! Also the directories need to be exact, and not directories above the actual directory, like in read.event(). School information may be given also ...???}
+\item{event}{is the path to the directory of the simulated files. If the length of 'event' is 2, the second string is the path to the temp-directory holding the files to merge, while the first is the directory in which to put the merged files.}
 
 \item{t}{is a vector of the numbers of the pings to be simulated, as listed from 1 to the number of time steps of the simulated school. If t=="all", all time steps are simulated.}
 
@@ -36,7 +72,7 @@ echoIBM.add.noise.event(event, pingsfiles = NULL, fileind = NULL,
 
 \item{esnm}{is the name of the acoustical instrument, given as a four character string. See sonR_implemented() for the implemented systems. May be given in 'data', and in lower case.}
 
-\item{TVG.exp}{is the exponent of the eamotric spreading of the sound wave, theoretically 2 for Sv and 4 for TS.}
+\item{TVG.exp}{is the exponent in the TVG amplification (usually 2 for Sv and 4 for TS).}
 
 \item{compensated}{specifies which rotations are compensated for by the echo sounder:}
 
@@ -58,7 +94,7 @@ echoIBM.add.noise.event(event, pingsfiles = NULL, fileind = NULL,
 
 \item{max.memory}{is the maximum amount of memory to allow for the function to occupy. The level of for loops is chosen according to this value, i.e. if the method using only two loops, one for the radial distances and one for the unique frequencies, demands more memory than 'max.memory', the method usint three for loops is chosen.}
 
-\item{ow}{is TRUE if the user wish to overwrite existing file.}
+\item{ow}{is TRUE if the user wish to overwrite existing file(s).}
 
 \item{origin}{is a vector of two elements representing the origin of the global coordinate system (G), or the numbering index of the ping regarded as the origin of (G) (ignoring heave so that the x-y-plane of (G) is on the surface of the sea).}
 
@@ -76,7 +112,7 @@ echoIBM.add.noise.event(event, pingsfiles = NULL, fileind = NULL,
 
 \item{ask}{is TRUE if the used should be asked to for approval if the memory of the least memory demanding calculation method of the individual radial sampling intervals exceed the memory limit 'max.memory'.}
 
-\item{parlist}{is a list of input parameters to the function echoIBM.add.noise(), which generates noise and randomness. See echoIBM.add.noise() for explaination of the possible variables. Important variables are seed and pre=TRUE to use pre-generated randomness.}
+\item{parlist}{is a list of input parameters to the function echoIBM.add.noise(), which generates noise and randomness. See echoIBM.add.noise() for explaination of the possible variables.}
 
 \item{bptfile}{is the name of the file to which 'sllf', 'rad1', 'rad2', 'pbp1' and 'pbp2' is written (use NULL for no writing).}
 
@@ -101,14 +137,6 @@ echoIBM.add.noise.event(event, pingsfiles = NULL, fileind = NULL,
 \item{TVG.out}{is TRUE if Time Varied Gain compensation should be applied to the output.}
 
 \item{noisetypes}{See echoIBM.add.noise().}
-
-\item{event}{is the path to the directory of the simulated files. If the length of 'event' is 2, the second string is the path to the temp-directory holding the files to merge, while the first is the directory in which to put the merged files.}
-
-\item{TVG.exp}{is the exponent in the TVG amplification (usually 2 for Sv and 4 for TS).}
-
-\item{ow}{is TRUE if the user wish to overwrite existing file(s).}
-
-\item{parlist}{is a list of input parameters to the function echoIBM.add.noise(), which generates noise and randomness. See echoIBM.add.noise() for explaination of the possible variables.}
 }
 \value{
 

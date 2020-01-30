@@ -4,11 +4,26 @@
 \alias{ARsim_school}
 \title{Generates and writes to file, fish positions which are AR(1) but not interacting, by the model in Holmin et al. 2012, "Simulations of multi-beam sonar echos from schooling individual fish in a quiet environment".}
 \usage{
-ARsim_school(con = NULL, size = c(30, 20, 10), shape = c("e", "cc"),
-  pd = 1, pol = 16.9, sd = NULL, vel = c(0.5, 0, 0),
-  current = c(0, 0, 0), T = 100, dt = 1, t0 = unclass(Sys.time()),
-  pre = 10, x0 = c(0, 0, 0), gamma = c(0.8, 0.8, 0.8),
-  spacing = NULL, seed = NULL, form = NULL, maxfilesize = 3e+08)
+ARsim_school(
+  con = NULL,
+  size = c(30, 20, 10),
+  shape = c("e", "cc"),
+  pd = 1,
+  pol = 16.9,
+  sd = NULL,
+  vel = c(0.5, 0, 0),
+  current = c(0, 0, 0),
+  T = 100,
+  dt = 1,
+  t0 = unclass(Sys.time()),
+  pre = 10,
+  x0 = c(0, 0, 0),
+  gamma = c(0.8, 0.8, 0.8),
+  spacing = NULL,
+  seed = NULL,
+  form = NULL,
+  maxfilesize = 3e+08
+)
 }
 \arguments{
 \item{con}{is a the path to the directory in which to put the files.}

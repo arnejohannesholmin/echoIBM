@@ -4,12 +4,19 @@
 \alias{echoIBM.oneping.oneschool.passive}
 \title{Simulates one echo sounder observation of based on positions, orientations, sizes and other specifics of each fish in one known (simulated) school.}
 \usage{
-echoIBM.oneping.oneschool.passive(data, esnm, TVG.exp = 2,
-  compensated = c("pitch", "roll"), calibrate = TRUE, noise = c("nr",
-  "bg", "ex"), dumpfile = "dump.txt", parlist = list())
+echoIBM.oneping.oneschool.passive(
+  data,
+  esnm,
+  TVG.exp = 2,
+  compensated = c("pitch", "roll"),
+  calibrate = TRUE,
+  noise = c("nr", "bg", "ex"),
+  dumpfile = "dump.txt",
+  parlist = list()
+)
 }
 \arguments{
-\item{data}{see below.}
+\item{data}{is the list of input parameters giving the information about the school consisting of 'Nl' fish.}
 
 \item{TVG.exp}{is the exponent of the eamotric spreading of the sound wave, theoretically 2 for Sv and 4 for TS.}
 
@@ -22,8 +29,6 @@ echoIBM.oneping.oneschool.passive(data, esnm, TVG.exp = 2,
 \item{dumpfile}{is the name of the file to which information and warnings about the simulation is written.}
 
 \item{parlist}{is a list of input parameters to the function echoIBM.add.noise(), which generates noise and randomness. See echoIBM.add.noise() for explaination of the possible variables.}
-
-\item{data}{is the list of input parameters giving the information about the school consisting of 'Nl' fish.}
 }
 \value{
 

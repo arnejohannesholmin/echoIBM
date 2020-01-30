@@ -15,53 +15,6 @@ echoIBM_setB_T(data, direction = 1, beamnr = 1)
 \arguments{
 \item{j}{is the sampling interval index.}
 
-\item{data}{is the list of data for the simulation, containing all of the following elements:}
-
-\item{direction}{Integer: 1 is emision and 2 is reception.}
-
-\item{j}{is the sampling interval index.}
-
-\item{data}{is the list of data for the simulation, containing all of the following elements:
-\itemize{
-  \item numb
-  \item lthesel
-  \item transducerposL
-  \item thesel
-  \item rres
-  \item validr
-  \item psxf
-  \item psyf
-  \item pszf
-  \item psxv
-  \item psyv
-  \item pszv
-  \item rtzv
-  \item rtxv
-  \item rtyv
-  \item psze
-  \item ssil
-  \item sigma0mode
-  \item uniquek
-  \item wavenumber
-  \item dira
-  \item dire
-  \item rad1
-  \item bpt1
-  \item indi
-  \item equalbp_em_re
-  \item rad2
-  \item bpt2
-  \item bptf
-  \item lenl
-  \item ssif
-  \item grsf
-  \item absr
-  \item fish
-  \item asps
-  \item epss
-  \item epsl
-}}
-
 \item{data}{is the list of data for the simulation, containing all of the following elements:
 \itemize{
   \item fishdirT
@@ -76,6 +29,8 @@ echoIBM_setB_T(data, direction = 1, beamnr = 1)
   \item rad*
   \item pbp*
 }}
+
+\item{direction}{Integer: 1 is emision and 2 is reception.}
 }
 \value{
 

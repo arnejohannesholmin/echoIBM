@@ -4,8 +4,12 @@
 \alias{echoIBM.dump_summary}
 \title{Writes a summary of a variable used by echoIBM() to the dumpfile.}
 \usage{
-echoIBM.dump_summary(data, dumpfile, type = c("beams", "ctd", "vessel",
-  "staticschool", "dynschool", "freqschool", "noise"), append = TRUE)
+echoIBM.dump_summary(
+  data,
+  dumpfile,
+  type = c("beams", "ctd", "vessel", "staticschool", "dynschool", "freqschool", "noise"),
+  append = TRUE
+)
 }
 \arguments{
 \item{data}{is a variable of which to write summary to the dumpfile.}

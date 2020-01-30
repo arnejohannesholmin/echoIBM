@@ -4,10 +4,13 @@
 \alias{echoIBM.getFileTypes}
 \title{Reads the header of all files in an event and classifies into the following file types: beams (beam configuration), ctd, vessel, pings, school, tsd, other.}
 \usage{
-echoIBM.getFileTypes(files, ext = list(beams = "beams", ctd = "ctd",
-  pings = "pings", school = "school", vessel = "vessel", noise = NULL),
-  labl = list(beams = c("cali"), noise = c("bgns", "nrns", "nr0a",
-  "nr0p")), recursive = TRUE)
+echoIBM.getFileTypes(
+  files,
+  ext = list(beams = "beams", ctd = "ctd", pings = "pings", school = "school", vessel =
+    "vessel", noise = NULL),
+  labl = list(beams = c("cali"), noise = c("bgns", "nrns", "nr0a", "nr0p")),
+  recursive = TRUE
+)
 }
 \arguments{
 \item{files}{list of files for which file type should be detemined.}

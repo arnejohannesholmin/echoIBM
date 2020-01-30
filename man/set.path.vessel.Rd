@@ -4,9 +4,18 @@
 \alias{set.path.vessel}
 \title{Interactive function for selecting the path and speed of an object based on reference points 'x', intended for use in echoIBM().}
 \usage{
-set.path.vessel(x, n = nrow(x), t = NULL, ref = NULL,
-  maxspeed = 15, margin = 500, maxn = 100, path.col = "blue",
-  grid = TRUE, smooth = "spline")
+set.path.vessel(
+  x,
+  n = nrow(x),
+  t = NULL,
+  ref = NULL,
+  maxspeed = 15,
+  margin = 500,
+  maxn = 100,
+  path.col = "blue",
+  grid = TRUE,
+  smooth = "spline"
+)
 }
 \arguments{
 \item{x}{are the reference points.}

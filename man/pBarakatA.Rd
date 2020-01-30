@@ -4,8 +4,14 @@
 \alias{pBarakatA}
 \title{Calculates the cummulative probability function of the pressure amplitude from a finite number of sine waves of arbitrary individual amplitudes, given (for the upper probability) in Equation 59 of Barakat 1974, using the terminology of that paper.}
 \usage{
-pBarakatA(r_0, beta_n, magn = 1, N = 100, betadistr = c("seq",
-  "flat"), max.memory = 1e+09)
+pBarakatA(
+  r_0,
+  beta_n,
+  magn = 1,
+  N = 100,
+  betadistr = c("seq", "flat"),
+  max.memory = 1e+09
+)
 }
 \arguments{
 \item{r_0}{is the argument (superimposed pressure amplitude).}

@@ -4,9 +4,19 @@
 \alias{echoIBM.setup}
 \title{Prepare for simulation of underwater acoustic data using \code{\link{echoIBM}}.}
 \usage{
-echoIBM.setup(event, dir = NULL, esnm = "EK60", t = "all",
-  pre = TRUE, vessel = list(), school = list(), ctd = FALSE,
-  beams = list(), noise = list(), calibration = list())
+echoIBM.setup(
+  event,
+  dir = NULL,
+  esnm = "EK60",
+  t = "all",
+  pre = TRUE,
+  vessel = list(),
+  school = list(),
+  ctd = FALSE,
+  beams = list(),
+  noise = list(),
+  calibration = list()
+)
 }
 \arguments{
 \item{event}{The name of the event, or the path to all sub events event/esnm/"tsd", in which case \code{dir} is ignored.}

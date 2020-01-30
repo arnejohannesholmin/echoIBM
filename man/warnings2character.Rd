@@ -4,8 +4,13 @@
 \alias{warnings2character}
 \title{Returns the warning messages stored in 'x' which is an object of type "warnings" as retunred from warnings().}
 \usage{
-warnings2character(x = warnings(), numbering = TRUE, header = TRUE,
-  width.cutoff = 50L, nlines = 2L)
+warnings2character(
+  x = warnings(),
+  numbering = TRUE,
+  header = TRUE,
+  width.cutoff = 50L,
+  nlines = 2L
+)
 }
 \arguments{
 \item{x}{is the warnings-object to translate to character string vector.}

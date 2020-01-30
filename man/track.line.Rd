@@ -4,9 +4,19 @@
 \alias{track.line}
 \title{Returns a list of x-values and y-values of points defined by the fractions 'w' along the partial linear path defined by the points (x,y). Cumulative lengths of the path are also returned.}
 \usage{
-track.line(x, y = NULL, w = NULL, dw = NULL, speed = NULL,
-  start = NULL, alongx = FALSE, normalized = FALSE,
-  list.out = TRUE, plot = FALSE, ...)
+track.line(
+  x,
+  y = NULL,
+  w = NULL,
+  dw = NULL,
+  speed = NULL,
+  start = NULL,
+  alongx = FALSE,
+  normalized = FALSE,
+  list.out = TRUE,
+  plot = FALSE,
+  ...
+)
 }
 \arguments{
 \item{x}{is the input x-variable.}

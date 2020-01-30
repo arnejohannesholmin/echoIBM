@@ -4,8 +4,12 @@
 \alias{echoIBM_rexp_defaults}
 \title{Creates a list of default settings for noise generation methods used in echoIBM, specifically the Multiple Sines - method ("ms"), the rearrangement method of uniform independent variables resulting in correlated and autocorrelated beams, and the simple independent exponential distribution (in which case only 'ssed' is defaulted).}
 \usage{
-echoIBM_rexp_defaults(noisetypes = "ms", indt = NULL, data = list(),
-  parlist = list())
+echoIBM_rexp_defaults(
+  noisetypes = "ms",
+  indt = NULL,
+  data = list(),
+  parlist = list()
+)
 }
 \arguments{
 \item{noisetypes}{is a vector of character strings of length 2, specifying which types of noise to apply to the data:}

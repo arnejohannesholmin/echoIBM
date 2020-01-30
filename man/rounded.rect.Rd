@@ -4,8 +4,17 @@
 \alias{rounded.rect}
 \title{Draws a rounded rectangle.}
 \usage{
-rounded.rect(origin = 0, w = 1, h = 1, r = 0.1, n = 100,
-  plot = TRUE, adjust = FALSE, by = "hw", ...)
+rounded.rect(
+  origin = 0,
+  w = 1,
+  h = 1,
+  r = 0.1,
+  n = 100,
+  plot = TRUE,
+  adjust = FALSE,
+  by = "hw",
+  ...
+)
 }
 \arguments{
 \item{origin}{is the origin of the rounded rectangle.}

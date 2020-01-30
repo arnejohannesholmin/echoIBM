@@ -6,18 +6,36 @@
 \alias{echoIBM.oneping.oneschool_old}
 \title{Simulates one echo sounder observation of based on positions, orientations, sizes and other specifics of each fish in one known (simulated) school.}
 \usage{
-echoIBM.oneping.oneschool(data, esnm = NULL, TVG.exp = 2,
-  compensated = c("pitch", "roll"), calibrate = TRUE, noise = c("nr",
-  "bg", "ex"), max.memory = 1e+09, dumpfile = "dump.txt",
-  ask = FALSE, parlist = list(), msg = FALSE)
+echoIBM.oneping.oneschool(
+  data,
+  esnm = NULL,
+  TVG.exp = 2,
+  compensated = c("pitch", "roll"),
+  calibrate = TRUE,
+  noise = c("nr", "bg", "ex"),
+  max.memory = 1e+09,
+  dumpfile = "dump.txt",
+  ask = FALSE,
+  parlist = list(),
+  msg = FALSE
+)
 
-echoIBM.oneping.oneschool_old(data, esnm = NULL, TVG.exp = 2,
-  compensated = c("pitch", "roll"), calibrate = TRUE, noise = c("nr",
-  "bg", "ex"), max.memory = 1e+09, dumpfile = "dump.txt",
-  ask = FALSE, parlist = list(), msg = FALSE)
+echoIBM.oneping.oneschool_old(
+  data,
+  esnm = NULL,
+  TVG.exp = 2,
+  compensated = c("pitch", "roll"),
+  calibrate = TRUE,
+  noise = c("nr", "bg", "ex"),
+  max.memory = 1e+09,
+  dumpfile = "dump.txt",
+  ask = FALSE,
+  parlist = list(),
+  msg = FALSE
+)
 }
 \arguments{
-\item{data}{see below.}
+\item{data}{is the list of input parameters giving the information about the school consisting of 'Nl' fish.}
 
 \item{esnm}{is the name of the echo sounder. Currently implemented are "MS70", "ME70", "EK60", "MS70_circular" (may be given in lover case)}
 
@@ -36,32 +54,6 @@ echoIBM.oneping.oneschool_old(data, esnm = NULL, TVG.exp = 2,
 \item{ask}{is TRUE if the used should be asked to for approval if the memory of the least memory demanding calculation method of the individual radial sampling intervals exceed the memory limit 'max.memory'.}
 
 \item{parlist}{is a list of input parameters to the function echoIBM.add.noise(), which generates noise and randomness. See echoIBM.add.noise() for explaination of the possible variables.}
-
-\item{data}{is the list of input parameters giving the information about the school consisting of 'Nl' fish.}
-
-\item{Dynamic}{variables  NA}
-
-\item{data}{see below.}
-
-\item{esnm}{is the name of the echo sounder. Currently implemented are "MS70", "ME70", "EK60", "MS70_circular" (may be given in lover case)}
-
-\item{TVG.exp}{is the exponent of the eamotric spreading of the sound wave, theoretically 2 for Sv and 4 for TS.}
-
-\item{compensated}{specifies which rotations are compensated for by the echo sounder. Legal values are "pitch" and "roll", which are both compensated for in the MS70 sonar.}
-
-\item{calibrate}{is FALSE if calibration data are to be discarded if present.}
-
-\item{noise}{is a vector of character strings of length 2, specifying which types of noise to apply to the data:}
-
-\item{max.memory}{is the maximum amount of memory to allow for the function to occupy. The level of for loops is chosen according to this value, i.e. if the method using only two loops, one for the radial distances and one for the unique frequencies, demands more memory than 'max.memory', the method usint three for loops is chosen.}
-
-\item{dumpfile}{is the name of the file to which information and warnings about the simulation is written.}
-
-\item{parlist}{is a list of input parameters to the function echoIBM.add.noise(), which generates noise and randomness. See echoIBM.add.noise() for explaination of the possible variables.}
-
-\item{data}{is the list of input parameters giving the information about the school consisting of 'Nl' fish.}
-
-\item{ask}{is TRUE if the used should be asked to for approval if the memory of the least memory demanding calculation method of the individual radial sampling intervals exceed the memory limit 'max.memory'.}
 
 \item{Dynamic}{variables  NA}
 }

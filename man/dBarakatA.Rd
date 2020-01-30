@@ -4,8 +4,14 @@
 \alias{dBarakatA}
 \title{Calculates the probability density function of the pressure amplitude from a finite number of sine waves of arbitrary individual amplitudes, given in Equation 56 of Barakat 1974, using the terminology of that paper.}
 \usage{
-dBarakatA(r, beta_n, magn = 1, N = 100, betadistr = c("seq", "flat"),
-  max.memory = 1e+09)
+dBarakatA(
+  r,
+  beta_n,
+  magn = 1,
+  N = 100,
+  betadistr = c("seq", "flat"),
+  max.memory = 1e+09
+)
 }
 \arguments{
 \item{r}{is the argument (superimposed pressure amplitude).}

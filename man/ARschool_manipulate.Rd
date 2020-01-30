@@ -4,10 +4,14 @@
 \alias{ARschool_manipulate}
 \title{Generates and writes to file, fish positions which are AR(1) but not interacting, by the model in Holmin et al. 2012, "Simulations of multi-beam sonar echos from schooling individual fish in a quiet environment".}
 \usage{
-ARschool_manipulate(con, t = "all", t_offset = 0, par = list(t0 =
-  ftim2utim(20140101), x0 = 0, y0 = 0, z0 = 0, xI = 0, yI = 0, zI = 0, Rx =
-  12, Ry = 3, Rz = 2, vx = 1, vy = 1, vz = 1, edger = 1, edget = 0.2),
-  dir = c(0, pi/2))
+ARschool_manipulate(
+  con,
+  t = "all",
+  t_offset = 0,
+  par = list(t0 = ftim2utim(20140101), x0 = 0, y0 = 0, z0 = 0, xI = 0, yI = 0, zI = 0,
+    Rx = 12, Ry = 3, Rz = 2, vx = 1, vy = 1, vz = 1, edger = 1, edget = 0.2),
+  dir = c(0, pi/2)
+)
 }
 \arguments{
 \item{con}{is a the path to the directory in which the school files to be modified are located.}

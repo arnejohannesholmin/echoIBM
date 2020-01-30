@@ -4,10 +4,17 @@
 \alias{echoIBM.default.oneschool}
 \title{Performs default handeling of the echoIBM acoustic simulator.}
 \usage{
-echoIBM.default.oneschool(data, esnm = "MS70", compensated = c("pitch",
-  "roll"), max.radius = 0.2, pres = 1e-06, max.cells = 1e+07,
-  method = c("closest", "linear"), dumpfile = "dump.txt",
-  bptfile = NULL)
+echoIBM.default.oneschool(
+  data,
+  esnm = "MS70",
+  compensated = c("pitch", "roll"),
+  max.radius = 0.2,
+  pres = 1e-06,
+  max.cells = 1e+07,
+  method = c("closest", "linear"),
+  dumpfile = "dump.txt",
+  bptfile = NULL
+)
 }
 \arguments{
 \item{data}{is a list of data as read by echoIBM.oneschool().}
@@ -30,11 +37,7 @@ echoIBM.default.oneschool(data, esnm = "MS70", compensated = c("pitch",
 
 \item{Static}{variables  NA}
 
-\item{Beam}{pattern  NA}
-
 \item{Configuring}{variables  NA}
-
-\item{Beam}{pattern at emission  NA}
 
 \item{Beam}{pattern at reception  NA}
 }

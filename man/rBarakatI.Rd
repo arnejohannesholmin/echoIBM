@@ -4,8 +4,15 @@
 \alias{rBarakatI}
 \title{Calculates the cummulative probability function of the total intensity (square of pressure amplitude) from a finite number of sine waves of arbitrary individual amplitudes, given (for the upper probability) in Equation 65 of Barakat 1974, using the terminology of that paper. NOTE: The expression in Equation 65 in Barakat 1974 an error. The argument h_0 should be sqrt(h_0).}
 \usage{
-rBarakatI(n, beta_n2 = NULL, magn = 1, nsig = NULL, N = 100,
-  betadistr = c("seq", "flat"), max.memory = 1e+09)
+rBarakatI(
+  n,
+  beta_n2 = NULL,
+  magn = 1,
+  nsig = NULL,
+  N = 100,
+  betadistr = c("seq", "flat"),
+  max.memory = 1e+09
+)
 }
 \arguments{
 \item{n}{is the number of observations to draw.}

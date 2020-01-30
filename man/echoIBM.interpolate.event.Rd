@@ -4,11 +4,23 @@
 \alias{echoIBM.interpolate.event}
 \title{Runs through segmentation data and interpolates between pings, calculating the probability that voxels in neighboring pings, corresponding to each voxel included in the segmentation mask at a time step, are occupied by the school as well.}
 \usage{
-echoIBM.interpolate.event(event = 1, t = 1, cruise = 2009116,
-  adds = NULL, esnm = "MS70", type = c("le", "lg", "e", "g", "emax"),
-  bw = 0.9, thr = NULL, kernelthr = 0.1, ind = list(-(1:30), NULL),
-  range = list(), subset = NULL, segpar = list(), spar = NULL,
-  TOV = 0)
+echoIBM.interpolate.event(
+  event = 1,
+  t = 1,
+  cruise = 2009116,
+  adds = NULL,
+  esnm = "MS70",
+  type = c("le", "lg", "e", "g", "emax"),
+  bw = 0.9,
+  thr = NULL,
+  kernelthr = 0.1,
+  ind = list(-(1:30), NULL),
+  range = list(),
+  subset = NULL,
+  segpar = list(),
+  spar = NULL,
+  TOV = 0
+)
 }
 \arguments{
 \item{event}{is the identifier of the event, either given as the number of the event, a string contained in the name of the event, or the path of the event directory.}

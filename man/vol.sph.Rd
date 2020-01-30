@@ -4,8 +4,12 @@
 \alias{vol.sph}
 \title{Calculates the (volume) size of the spherical volume segment defined by 'r', 'theta' and 'phi'.}
 \usage{
-vol.sph(r = c(0, 1), theta = c(0, 2 * pi), phi = c(0, pi),
-  var = c("volx", "harx"))
+vol.sph(
+  r = c(0, 1),
+  theta = c(0, 2 * pi),
+  phi = c(0, pi),
+  var = c("volx", "harx")
+)
 }
 \arguments{
 \item{r}{is range of radial coordinates, given as a vector of interval values (in which case length(r)-1 spherical segemnts are treated) or as a two column matrix where the first column represents the lower limit of the sperical segments, and the second column represents the upper limit.}

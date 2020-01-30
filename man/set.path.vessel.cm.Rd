@@ -4,8 +4,23 @@
 \alias{set.path.vessel.cm}
 \title{Wrapper for the method of drawing vessel positions based on school centres of mass, given as an option to the fundtion echoIBM (specifying path=TRUE). set.path.vessel.cm() uses the function set.path.vessel() to select the vessel positions. The input variables in this function are especially selected for the single purpose of being used in echoIBM(), and are thus not user friendly for any othr use.}
 \usage{
-set.path.vessel.cm(schooldirs, dynschoolfiles, recycle, t, tvessel, numt,
-  smooth, margin, scan.volume, beams, ctd, rph, event, eventname, pathnr)
+set.path.vessel.cm(
+  schooldirs,
+  dynschoolfiles,
+  recycle,
+  t,
+  tvessel,
+  numt,
+  smooth,
+  margin,
+  scan.volume,
+  beams,
+  ctd,
+  rph,
+  event,
+  eventname,
+  pathnr
+)
 }
 \arguments{
 \item{schooldirs}{is a vector of the directories of the schools to be simulated.}

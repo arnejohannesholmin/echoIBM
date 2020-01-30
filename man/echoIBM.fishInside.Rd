@@ -7,23 +7,31 @@
 \alias{echoIBM.fishInside2}
 \title{Discards fish outside of the sampling region of the sonar/echosounder.}
 \usage{
-echoIBM.extraxtRandSel(dynschool, data, rand.sel, dynschoolnames,
-  staticschoolnames)
+echoIBM.extraxtRandSel(
+  dynschool,
+  data,
+  rand.sel,
+  dynschoolnames,
+  staticschoolnames
+)
 
-echoIBM.fishInside(dynschool, data, dumpfile, discardOutside = c(r = Inf,
-  az = Inf, el = Inf), rand.sel = 1)
+echoIBM.fishInside(
+  dynschool,
+  data,
+  dumpfile,
+  discardOutside = c(r = Inf, az = Inf, el = Inf),
+  rand.sel = 1
+)
 
-echoIBM.fishInside2(data, dumpfile, discardOutside = c(r = Inf, az = Inf,
-  el = Inf), rand.sel = 1)
+echoIBM.fishInside2(
+  data,
+  dumpfile,
+  discardOutside = c(r = Inf, az = Inf, el = Inf),
+  rand.sel = 1
+)
 }
 \arguments{
 \item{dynschool}{is a list of the dynamic fish information to be subsetted.}
-
-\item{data}{is a list holding the variables 'esnm', and vessel spesifications.}
-
-\item{dynschool}{is a list of the dynamic fish information to be subsetted.}
-
-\item{data}{is a list holding the variables 'esnm', and vessel spesifications.}
 
 \item{data}{is a list holding the variables 'esnm', and vessel spesifications.}
 }

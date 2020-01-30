@@ -4,8 +4,7 @@
 \alias{echoIBM_rexp_MultSines}
 \title{Calls the function rexp_MultSines(), which generates correlated vectors of autocorrelated exponential/Barakat variables. Only one time step is generated.}
 \usage{
-echoIBM_rexp_MultSines(parlist = list(), data = list(), Npre = 1000,
-  shape = 1)
+echoIBM_rexp_MultSines(parlist = list(), data = list(), Npre = 1000, shape = 1)
 }
 \arguments{
 \item{parlist}{is a list of input parameters:}
