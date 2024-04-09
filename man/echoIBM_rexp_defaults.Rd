@@ -18,9 +18,6 @@ echoIBM_rexp_defaults(
 
 \item{parlist}{is a list of input parameters to the function echoIBM.add.noise(), which generates noise and randomness. See echoIBM.add.noise() for explaination of the possible variables.}
 }
-\value{
-
-}
 \description{
 Creates a list of default settings for noise generation methods used in echoIBM, specifically the Multiple Sines - method ("ms"), the rearrangement method of uniform independent variables resulting in correlated and autocorrelated beams, and the simple independent exponential distribution (in which case only 'ssed' is defaulted).
 }

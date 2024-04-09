@@ -11,9 +11,6 @@ echoIBM.distToPeak(data, indt = NULL)
 
 \item{indt}{is the time step index.}
 }
-\value{
-
-}
 \description{
 Calculates the distance to the nearest peak of the periodic noise for time step 'indt'.
 }

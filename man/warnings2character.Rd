@@ -23,9 +23,6 @@ warnings2character(
 
 \item{nlines}{is an integer giving the maximum number of lines to produce. Negative values indicate no limit.}
 }
-\value{
-
-}
 \description{
 Returns the warning messages stored in 'x' which is an object of type "warnings" as retunred from warnings().
 }

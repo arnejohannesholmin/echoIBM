@@ -4,15 +4,14 @@
 \name{besselJ1_appr_angmax}
 \alias{besselJ1_appr_angmax}
 \title{Function used for approximating the beam pattern of the beam pattern from a circular piston. The values past the 8 side lobe is approximated by a line (see examples).}
-\format{An object of class \code{numeric} of length 1.}
+\format{
+An object of class \code{numeric} of length 1.
+}
 \usage{
 besselJ1_appr_angmax
 }
 \arguments{
 \item{x}{is a vector.}
-}
-\value{
-
 }
 \description{
 Function used for approximating the beam pattern of the beam pattern from a circular piston. The values past the 8 side lobe is approximated by a line (see examples).

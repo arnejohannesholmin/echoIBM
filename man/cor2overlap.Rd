@@ -9,9 +9,6 @@ cor2overlap(cor)
 \arguments{
 \item{cor}{is a vector or matrix of correlation values.}
 }
-\value{
-
-}
 \description{
 Transforms from correlation values to overlap values used in rexp_MultSines().
 }

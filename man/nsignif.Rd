@@ -9,9 +9,6 @@ nsignif(x, na.rm = TRUE)
 \arguments{
 \item{x}{is a numeric vector.}
 }
-\value{
-
-}
 \description{
 Returns an estimate of the number of significant values in 'x', where the significance of the values are measured as the fractional magnitude relative to the maximum value.
 }

@@ -46,7 +46,6 @@ echoIBM.calibrate <- function(directory=NULL, cruise="S2009116", event=1, esnm="
 	##################################################
 	##################################################
 	########## Preparation ##########
-	browser()
 	if(isTRUE(directory)){
 		directory  <-  file.path(echoIBM_datasets_directory(), "Resources", "Calibration")
 	}

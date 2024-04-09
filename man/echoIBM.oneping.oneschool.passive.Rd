@@ -30,9 +30,6 @@ echoIBM.oneping.oneschool.passive(
 
 \item{parlist}{is a list of input parameters to the function echoIBM.add.noise(), which generates noise and randomness. See echoIBM.add.noise() for explaination of the possible variables.}
 }
-\value{
-
-}
 \description{
 Simulates one echo sounder observation of based on positions, orientations, sizes and other specifics of each fish in one known (simulated) school.
 }

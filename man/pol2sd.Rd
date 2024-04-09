@@ -15,9 +15,6 @@ pol2sd(pol, speed = 1, dt = 1, gamma = 0.8, type = "h")
 
 \item{type}{see pol.school().}
 }
-\value{
-
-}
 \description{
 Gets the standard deviation to apply to the function ARsim_school().
 }

@@ -13,9 +13,6 @@ repToExtreme(x, ndim = 2, skip.len = 1)
 
 \item{skip.len}{The length of arrays to leave be.}
 }
-\value{
-
-}
 \description{
 Repeats all elements of the list \code{x} to the
 }

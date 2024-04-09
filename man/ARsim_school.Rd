@@ -56,9 +56,6 @@ ARsim_school(
 
 \item{maxfilesize}{is the maximum size of the files.}
 }
-\value{
-
-}
 \description{
 Generates and writes to file, fish positions which are AR(1) but not interacting, by the model in Holmin et al. 2012, "Simulations of multi-beam sonar echos from schooling individual fish in a quiet environment".
 }

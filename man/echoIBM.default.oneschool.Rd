@@ -41,9 +41,6 @@ echoIBM.default.oneschool(
 
 \item{Beam}{pattern at reception  NA}
 }
-\value{
-
-}
 \description{
 Performs default handeling of the echoIBM acoustic simulator.
 }

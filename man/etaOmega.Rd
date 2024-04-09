@@ -11,9 +11,6 @@ etaOmega(data, pbpf = c("ls", "pr", "ps"))
 
 \item{pbpf}{is a string naming the theoretical acoustical model of the target (may be included in 'data').}
 }
-\value{
-
-}
 \description{
 The aspect factor (cross sectional area relative to the maximum cross sectional area) of a cylindrical object of rounded ends, a prolate spheroid or a point source (circular). See the documentation of echoIBM for details (Section 3.1.4).
 }

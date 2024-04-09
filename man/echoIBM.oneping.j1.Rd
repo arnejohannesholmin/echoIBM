@@ -11,9 +11,6 @@ echoIBM.oneping.j1(j, data)
 
 \item{data}{is the list of data for the simulation, containing all of the following elements:}
 }
-\value{
-
-}
 \description{
 Simulates one radial sphere of one echo sounder observation based on positions, orientations, sizes and other specifics of each fish in a known (simulated) school. One for loop used (for each frequency).
 }

@@ -15,9 +15,6 @@ echoIBM.addwarnings(event, warn = NULL, pre = "\\n\\n", post = "")
 
 \item{post}{is a string to be written on the line following the warnings.}
 }
-\value{
-
-}
 \description{
 Writes warning messages to the end of a echoIBM-dumpfile.
 }

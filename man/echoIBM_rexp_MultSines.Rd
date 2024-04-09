@@ -11,9 +11,6 @@ echoIBM_rexp_MultSines(parlist = list(), data = list(), Npre = 1000, shape = 1)
 
 \item{data}{is a list of beam configuration data, used to extract defaults if 'parlist' is not given.}
 }
-\value{
-
-}
 \description{
 Calls the function rexp_MultSines(), which generates correlated vectors of autocorrelated exponential/Barakat variables. Only one time step is generated.
 }

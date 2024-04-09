@@ -214,29 +214,6 @@ replaceKeepDim(x, replacement, esnm, ...)
 
 \item{dir.type}{is the name of the directory holding the data files (usually one of "tsd" and "raw")}
 }
-\value{
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}
 \description{
 The vessel information can be given in 4 ways: 
 \itemize{

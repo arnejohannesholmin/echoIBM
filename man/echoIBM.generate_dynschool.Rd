@@ -22,9 +22,6 @@ echoIBM.generate_dynschool(
 
 \item{margin}{is an extra margin to add, so that the school is detected outside of (positive value) or or inside of (negative value) of the sampling volume.}
 }
-\value{
-
-}
 \description{
 Generates the dynamic variables of schools positioned close enough to enter the sampling volume of the sonar.
 }

@@ -15,9 +15,6 @@ coltrace(n = 20, ref = NULL, coldens = 20, ...)
 
 \item{...}{methods passed on to sub-functions (not used, but allowing for unused arguments).}
 }
-\value{
-
-}
 \description{
 Draws a color spectrum on which the user can assign points with the mouse pointer defining a color trace of desired length.
 }

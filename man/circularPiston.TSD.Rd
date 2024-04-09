@@ -11,9 +11,6 @@ circularPiston.TSD(data, appr = NULL)
 
 \item{appr}{is an approximating function used to replace the expression (2*besselJ(ang,1)/ang)^2.}
 }
-\value{
-
-}
 \description{
 Returns the theoretical far field approximation of the acoustic intensity from a circular baffled source (circular piston) of radius 'b', as a function of incidence data$direle 'data$dire'.
 }

@@ -20,9 +20,6 @@ vol.sph(
 
 \item{var}{is a vector of the variables to return. Currently implemented are "volx" for volumes of the voxels and "harx" for horizontal area of the voxels.}
 }
-\value{
-
-}
 \description{
 Calculates the (volume) size of the spherical volume segment defined by 'r', 'theta' and 'phi'.
 }

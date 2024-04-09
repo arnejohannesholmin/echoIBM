@@ -13,9 +13,6 @@ get.grid_phi(from = 0, to = pi, area = 100)
 
 \item{area}{is the length of the grid vector if length(area)==1, and the relative sizes of the cells, if a vector of length > 1 is given (less useful).}
 }
-\value{
-
-}
 \description{
 Calculates the grid of elevation angle phi, used in integrateonsphere() to make all cells have the same area.
 }

@@ -11,9 +11,6 @@ echoIBM.is.schoolfiles(files, names)
 
 \item{names}{is a vector of four character strings representing static and dynamic school valiable names.}
 }
-\value{
-
-}
 \description{
 Simple function for recognizing and returning school files from a vector of paths to files.
 }

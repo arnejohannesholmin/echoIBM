@@ -17,9 +17,6 @@ echoIBM.generate_oneschool(
 
 \item{school}{is the index number of the school.}
 }
-\value{
-
-}
 \description{
 Generates the position variables of one school. The fish are first put on an iso grid defined by the packing density. Then noise is added to these positions by the Gaussian distribution with mean 0 and standard deviation specified the inputs 'SDxf', 'SDyf', 'SDzf', (repeated to length 3 and defaulted to 1 if missing), all in units of the grid size. Finally, the orientations of the fish is set independently of the positions, by generating two sets of positions which are gridded positions separated by one grid unit in the x-direction and added noise by a standard deviation producing the desired polarization (by a pre-generated table).
 }

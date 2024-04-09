@@ -32,13 +32,6 @@ echoIBM_setB_T(data, direction = 1, beamnr = 1)
 
 \item{direction}{Integer: 1 is emision and 2 is reception.}
 }
-\value{
-
-
-
-
-
-}
 \description{
 Simulates one radial sphere (sample interval) 'j' of one echo sounder observation based on positions, orientations, sizes and other specifics of each fish in a known (simulated) school. Two for loops used (for each frequency and each beam).
 

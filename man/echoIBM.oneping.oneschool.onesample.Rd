@@ -51,9 +51,6 @@ echoIBM.oneping.oneschool.onesample(j, data, split = FALSE)
 
 \item{split}{Logical: If TRUE, do the calculation of the transducer beam patterns for each beam, and not for all beams of the same frequency. This saves memory, but increases process time.}
 }
-\value{
-
-}
 \description{
 Simulates one radial sphere of one echo sounder observation based on positions, orientations, sizes and other specifics of each fish in a known (simulated) school. One for loop used (for each frequency).
 }
