@@ -35,9 +35,6 @@ rounded.rect(
 
 \item{...}{are parameters like 'col' and 'border' used in polygon().}
 }
-\value{
-
-}
 \description{
 Draws a rounded rectangle.
 }

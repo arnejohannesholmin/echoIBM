@@ -65,7 +65,7 @@ echoIBM.add.noise <- function(sv, indt, noisetypes=c("bg","pn","ms"), data=NULL,
 		
 		# Add correlated exponential noise by multiple sines:
 		if(any(c("ms") %in% noisetypes)){
-			# Define the overlap array if the phase angles are different for each time step:
+		    # Define the overlap array if the phase angles are different for each time step:
 			if("pn" %in% noisetypes && is.character(parlist$olpn) && strff("p", parlist$olpn)){
 				parlist$olpn <- echoIBM.olpt(data, indt=indt)$olpt
 				dim(parlist$olpn) <- c(dim(parlist$olpn)[1:2], parlist$luqf, parlist$nuqf)
@@ -84,7 +84,9 @@ echoIBM.add.noise <- function(sv, indt, noisetypes=c("bg","pn","ms"), data=NULL,
 				#thisexp <- thisexp^parlist$Wshp[seq_len(parlist$J),] / gamma(1+1/parlist$Wshp[seq_len(parlist$J),])
 				
 				# Insert the exponentially distributed values in the correct rows:
-				sv[valid,] <- sv[valid,]*thisexp
+				if(length(thisexp)) {
+				    sv[valid,] <- sv[valid,] * thisexp
+				}
 			}
 			
 			#thisexp <- echoIBM_rexp_MultSines(parlist)$noise
@@ -167,7 +169,7 @@ echoIBM.add.noise <- function(sv, indt, noisetypes=c("bg","pn","ms"), data=NULL,
 	
 	### (1) Add background noise: ###
 	if("bg" %in% noisetypes){
-		beta <- beta + getNoiseOnePing(data, "bgns")
+		beta <- beta + c(getNoiseOnePing(data, "bgns"))
 	}
 	
 	

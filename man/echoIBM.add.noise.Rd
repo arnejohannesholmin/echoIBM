@@ -23,9 +23,6 @@ echoIBM.add.noise(
 
 \item{parlist}{is a list of input parameters to the noise generation method specified by 'noisetypes'. Use echoIBM_rexp_defaults() to generate defaul values. Must include a seed vector of at least the same length as the maximum indt value to be used.}
 }
-\value{
-
-}
 \description{
 Adds noise to an array of sv-values for the ping 'indt', given the noise data present in 'data'.
 }

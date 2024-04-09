@@ -11,9 +11,6 @@ hist_simple(x, breaks = 10)
 
 \item{breaks}{is the number of breaks (in which case pretty() is used), or a vector of breaks.}
 }
-\value{
-
-}
 \description{
 Histogram without plot, faster.
 }

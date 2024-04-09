@@ -15,11 +15,6 @@ echoIBM.fishReaction(data)
 
 \item{grsd_plHS}{A list or data frame linking standard deviations and polarization values. If not given, this is read by grsd_plHS <- read.TSD(system.file("extdata", "grsd_plHS.TSD", package="echoIBM")).}
 }
-\value{
-
-
-
-}
 \description{
 This function adds randomness in the fish positions and to the fish velocities (given by the polarization).
 

@@ -41,9 +41,6 @@ integrateonsphere(
 
 \item{print}{is TRUE if the improvement of the iteration is to be printed.}
 }
-\value{
-
-}
 \description{
 Numerical calculation of the surface integral of the function 'fun' on (parts of) the unit sphere.
 }

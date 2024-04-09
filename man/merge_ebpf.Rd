@@ -9,9 +9,6 @@ merge_ebpf(files, con = NULL)
 \arguments{
 \item{files}{is a vector of strings representing the paths to the files to merge, or a single string representing the directory in which the files are located.}
 }
-\value{
-
-}
 \description{
 Merges empirical beam patterns located in separate TSD-files. If duplicated 'grsf' values are present the first is allways chosen.
 }

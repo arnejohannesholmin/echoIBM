@@ -20,9 +20,6 @@ echoIBM.dump_summary(
 
 \item{append}{is used in write.}
 }
-\value{
-
-}
 \description{
 Writes a summary of a variable used by echoIBM() to the dumpfile.
 }

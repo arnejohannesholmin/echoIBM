@@ -57,11 +57,6 @@ echoIBM.oneping.oneschool_old(
 
 \item{Dynamic}{variables  NA}
 }
-\value{
-
-
-
-}
 \description{
 Simulates one echo sounder observation of based on positions, orientations, sizes and other specifics of each fish in one known (simulated) school.
 

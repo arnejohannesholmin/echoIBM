@@ -96,9 +96,6 @@ echoIBM.oneschool(
 
 \item{fishReaction}{A list of variables specifying the fish reaction to the vessel. Must contain the following variables: "magR", "mxrR", "mxdR", "facR". See info.TSD(c("magR", "mxrR", "mxdR", "facR")) for definition of these variables.}
 }
-\value{
-
-}
 \description{
 Simulates echo sounder observations based on positions, orientations, sizes and other specifics of each fish in a known (simulated) school.
 }

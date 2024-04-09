@@ -23,9 +23,6 @@ write.ssif(
 
 \item{onlyssif.out}{is TRUE if the output should be only 'ssif', not the entire list read, added 'ssif'.}
 }
-\value{
-
-}
 \description{
 Calculates and (optionally) writes to file the spherical surface integral of a beam pattern from acoustic fish models at radius 1 meter, for the grid of the product 'kL' of wavenumber and size of the acoustic model.
 }

@@ -41,9 +41,6 @@ track.line(
 
 \item{...}{are parameters to be passed on to plot() if plot==TRUE.}
 }
-\value{
-
-}
 \description{
 Returns a list of x-values and y-values of points defined by the fractions 'w' along the partial linear path defined by the points (x,y). Cumulative lengths of the path are also returned.
 }

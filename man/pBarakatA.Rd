@@ -22,9 +22,6 @@ pBarakatA(
 
 \item{max.memory}{is the maximum memory occupied by the function before splitting into a loop for each value of 'r'.}
 }
-\value{
-
-}
 \description{
 Calculates the cummulative probability function of the pressure amplitude from a finite number of sine waves of arbitrary individual amplitudes, given (for the upper probability) in Equation 59 of Barakat 1974, using the terminology of that paper.
 }

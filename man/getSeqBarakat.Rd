@@ -11,9 +11,6 @@ getSeqBarakat(beta_n, betadistr = c("seq", "flat"))
 
 \item{betadistr}{is an identifier specifying how to generate 'beta_n' in the case that 'beta_n' is a single numeric.}
 }
-\value{
-
-}
 \description{
 Generates 'beta_n' used in dBarakatA(), pBarakatA(), dBarakatI(), pBarakatI(), rBarakatA(), rBarakatI().
 }

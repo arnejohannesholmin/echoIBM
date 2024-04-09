@@ -11,9 +11,6 @@ xy2ab(x, y = NULL, ang.out = FALSE)
 
 \item{ang.out}{is TRUE if angles are to be returned instead of slope.}
 }
-\value{
-
-}
 \description{
 Parametrizes the piecewise linear trace given by the input. For vertical lines, $Inf$ is returned.
 }

@@ -23,9 +23,6 @@ echoIBM.setup(
 
 \item{dir}{Directory in which to place the event.}
 }
-\value{
-
-}
 \description{
 Prepare for simulation of underwater acoustic data using \code{\link{echoIBM}}.
 }

@@ -9,9 +9,6 @@ lineSource.TSD(data)
 \arguments{
 \item{data}{is a list containing the elements 'dire' (elevarion angle in radians [0,pi/2]) and 'wnsz' (product of wave number and size), and optionally 'dira' (azimuth angle in radians [0,pi/2]), 'indi' (index of the fish / transducer element)-}
 }
-\value{
-
-}
 \description{
 Returns the theoretical far field approximation of the acoustic intensity from a line source of length 'L', as a function of incidence data$direle 'data$dire'.
 }

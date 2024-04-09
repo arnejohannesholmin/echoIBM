@@ -11,9 +11,6 @@ echoIBM.olpt(data, indt = NULL)
 
 \item{adds}{is a list of variables required in the function but not read from the data stored in noise.path(). This is used primarily when creating the file of overlap values, in which case 'crb1' and 'crp1' are needed.}
 }
-\value{
-
-}
 \description{
 Calculates the one step (to the adjacet voxel of the same sampling interval) overlap matrix given by the background noise and the periodic noise for the given time step index. The output is a matrix with the overlap values alont the columns, and one column for each voxel of each beam.
 }

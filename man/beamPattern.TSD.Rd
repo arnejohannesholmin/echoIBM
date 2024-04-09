@@ -11,9 +11,6 @@ beamPattern.TSD(data, method = c("closest", "linear"))
 
 \item{method}{is "closest" if the beam pattern value of the closest grid point is to be selected, and "linear" if linear interpolation should be used to extract the beam pattern value (time demanding and only available for 2D grids).}
 }
-\value{
-
-}
 \description{
 Returns a function for the beam pattern of an acoustic source. The function beamPattern() has 3 methods depending on the type of the input object 'data'. Inputs are prioritized as (1) functions, (2) NULL, (3) empirical tables, (4) character strings naming functions.
 }

@@ -70,11 +70,6 @@ echoIBM.calibrate2(
 
 \item{filetag}{is a string to add to the file name.}
 }
-\value{
-
-
-
-}
 \description{
 Calibrates (and writes the calibration data to file) the simulation of observations from the MS70 sonar performed by echoIBM(). Not used in any of the other echoIBM code files.
 

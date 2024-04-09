@@ -53,9 +53,6 @@ set.path.vessel.cm(
 
 \item{pathnr}{is the number of the vessel path drawn, to be used in the name of the ".vessel" file. If a new ".vessel" file is to be written, 'pathnr' must be different than the pathnr of existing files.}
 }
-\value{
-
-}
 \description{
 Wrapper for the method of drawing vessel positions based on school centres of mass, given as an option to the fundtion echoIBM (specifying path=TRUE). set.path.vessel.cm() uses the function set.path.vessel() to select the vessel positions. The input variables in this function are especially selected for the single purpose of being used in echoIBM(), and are thus not user friendly for any othr use.
 }

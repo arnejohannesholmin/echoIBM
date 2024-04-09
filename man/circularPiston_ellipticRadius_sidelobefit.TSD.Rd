@@ -11,9 +11,6 @@ circularPiston_ellipticRadius_sidelobefit.TSD(data, appr = NULL)
 
 \item{appr}{is an approximating function used to replace the expression (2*besselJ(ang,1)/ang)^2.}
 }
-\value{
-
-}
 \description{
 Returns the theoretical far field approximation of the acoustic intensity from a circular baffled source (circular piston) of radius as an elliptical function of azimuth angle 'ang1' given the radii along the x-axis, kb[,1], and along the y-axis, kb[,2], as a function of incidence angle 'ang2'.
 }

@@ -17,9 +17,6 @@ get.transducerRadius2.TSD(data)
 
 \item{twoway}{is TRUE if the beampattern is to be squared, corresponding to a two way beam forming. I.e., if the beam widths are given as two-way angles bwtl=4 degrees, the one way beam width is actually 4*sqrt(2)=5.656854, and twoway should be TRUE to account for this.}
 }
-\value{
-
-}
 \description{
 Calculates the radii of circular transducer elements based on -3 dB beam angles.
 }

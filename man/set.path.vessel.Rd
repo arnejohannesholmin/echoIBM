@@ -34,9 +34,6 @@ set.path.vessel(
 
 \item{smooth}{has one possible value "spline", smooths the x-values and the y-values of the path separately using the spline function.}
 }
-\value{
-
-}
 \description{
 Interactive function for selecting the path and speed of an object based on reference points 'x', intended for use in echoIBM().
 }

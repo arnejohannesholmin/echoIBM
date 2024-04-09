@@ -35,13 +35,6 @@ echoIBM.fishInside2(
 
 \item{data}{is a list holding the variables 'esnm', and vessel spesifications.}
 }
-\value{
-
-
-
-
-
-}
 \description{
 Discards fish outside of the sampling region of the sonar/echosounder.
 

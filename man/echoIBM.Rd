@@ -138,11 +138,6 @@ echoIBM.add.noise.event(
 
 \item{noisetypes}{See echoIBM.add.noise().}
 }
-\value{
-
-
-
-}
 \description{
 This R package provides utilities for simulating multibeam sonar data (echosounder, fishery sonar, 3D-sonar). Writes simulated data in the TSD format
 }

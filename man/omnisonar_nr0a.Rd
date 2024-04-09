@@ -29,9 +29,6 @@ omnisonar_nr0a(
 
 \item{TVG.exp}{the TVG exponent. Set this only if the final data should have another TVG than 2.}
 }
-\value{
-
-}
 \description{
 Generates close range noise in active mode to be used for fishery sonar. The noise is generated in non-TVG-amplified mode such that when TVG-amplified, the noise follows a pure log r-relationship, i.e., m * log(r). The term "close range noise" is here used somewhat misleading, since it is merely used to mimic the background level of a fishery sonar, which includes surface reverberation and possibly other backscattering which does not fall into the definition of noise in this system (all energy not backscattered from objects).
 }

@@ -21,9 +21,6 @@ echoIBM.getFileTypes(
 
 \item{recursive}{Used in list.files() when files is a single directory.}
 }
-\value{
-
-}
 \description{
 Reads the header of all files in an event and classifies into the following file types: beams (beam configuration), ctd, vessel, pings, school, tsd, other.
 }

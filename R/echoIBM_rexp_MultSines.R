@@ -109,7 +109,7 @@ echoIBM_rexp_MultSines<-function(parlist=list(), data=list(), Npre=1000, shape=1
 				}
 			
 			# If several files are matched, select the one closest in time to the reference time point:
-			if(sum(parlist$parmatch)>1){
+			if(sum(parlist$parmatch, na.rm = TRUE)>1){
 				parlist$utim <- ftim2utim(parlist$ftim)
 				# Read the time points of the files:
 				utim <- sapply(utim.TSD(read.TSDs(rexp_MultSinesFiles[parlist$parmatch], var="utim", merge=TRUE)), "[[",1)
@@ -162,8 +162,9 @@ echoIBM_rexp_MultSines<-function(parlist=list(), data=list(), Npre=1000, shape=1
 			warning(paste0("There are ", length(parlist$parmatch), " files containing pre-generated noise data for the specified parameter settings. The first chosen"))
 			}
 		# Read the pre-generated noise at the time step given by 'parlist$seed' translated into indices 1, ..., Npre:
-		noise <- read.TSD(parlist$parmatch[1], var="vbsc", t=(round(parlist$currentseed-1) %% Npre) + 1)$vbsc
-		if(parlist$J>nrow(noise)){
+	    
+	    noise <- read.TSD(parlist$parmatch[1], var="vbsc", t=(round(parlist$currentseed-1) %% Npre) + 1)$vbsc
+		if(parlist$J > NROW(noise)){
 			warning("The pre-generated noise values are too short for the specified range of the sonar. Maximum range is 900 m")
 			}
 		noise <- noise[seq_len(parlist$J),]

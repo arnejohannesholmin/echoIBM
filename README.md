@@ -3,15 +3,15 @@ echoIBM R package
 
 This R package provides utilities for simulating multibeam sonar data (echosounder, fishery sonar, 3D-sonar). Writes simulated data in the TSD format
 
-Version: 1.1
-Required R version: 3.5
+Version: 1.2
+Required R version: 4.2
 
 Installation
 =====
 
 ``` r
 # Install the packages that echoIBM depends on. Note that this updates all the specified packages to the latest (binary) version. To skip installing already installed packages, run install.packages(setdiff(dep.pck, installed.packages()[,"Package"]), repos="http://cran.us.r-project.org") instead:
-dep.pck <- c("devtools", "akima", "ccaPP", "data.table", "fBasics", "fields", "fpc", "gdata", "gsl", "ncdf4", "pbapply", "SoDA", "XML")
+dep.pck <- c("devtools", "akima", "ccaPP", "data.table", "expint", "fBasics", "fields", "fpc", "gdata", "gsl", "ncdf4", "pbapply", "sf", "XML")
 install.packages(dep.pck, repos="http://cran.us.r-project.org", type="binary")
 
 # Install echoIBM and also the packages that echoIBM depends on which are on GitHub (by Holmin):

@@ -11,9 +11,6 @@ etaCompression(data = list(), type = c("area", "obln"))
 
 \item{type}{is a character string representing the type of the compression factor, where "area" denotes compression of the cross sectional area of the swin bladder and "obln" corresponds to changes in the oblongness of the swin bladder (see DESCRIPTION).}
 }
-\value{
-
-}
 \description{
 The hydrostatic compression factor of a swim bladder. Two cases are supported, combining the compression of length and width, given by L(z) = L(0)(1-(rho*g*z)/p0)^gammaL and W(z) = W(0)(1-(rho*g*z)/p0)^gammaW: (1) Area: The hydrostatic compression factor of the cross sectional area of the swim bladder is found by multiplication of L and W, resulting in (1-(rho*g*z)/p0)^(gammaL+gammaW). (2) The hydrostatic compression factor of the oblongness is found by the ratio L/W, giving (1-(rho*g*z)/p0)^(gammaL-gammaW)
 }

@@ -53,9 +53,6 @@ echoIBM.interpolate.event(
 
 \item{TOV}{is the time offset of the vessel information, discovered by Holmin and Korneliussen in 2013. The default is found in "/Applications/echoIBM/Documentation/Error in yaw MS70/Error in yaw MS70.R".}
 }
-\value{
-
-}
 \description{
 Runs through segmentation data and interpolates between pings, calculating the probability that voxels in neighboring pings, corresponding to each voxel included in the segmentation mask at a time step, are occupied by the school as well.
 }
